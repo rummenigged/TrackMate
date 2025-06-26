@@ -19,6 +19,7 @@ jobs:
         uses: Ant0wan/openai-pr@v1
         with:
           api-key: ${{ secrets.OPENAI_API_KEY }}
+          model: "gpt-3.5-turbo-instruct"
           template-filepath: ".github/PULL_REQUEST_TEMPLATE.md"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
