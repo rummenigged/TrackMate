@@ -23,3 +23,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Track Mate"
 include(":app")
+include(":core:testing")
