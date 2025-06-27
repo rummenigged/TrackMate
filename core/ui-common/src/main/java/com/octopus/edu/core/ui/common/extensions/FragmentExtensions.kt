@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import com.octopus.edu.core.design.theme.TrackMateTheme
 
 @Composable
-fun Fragment.TrackMateThemeWithCompositionsLocals(
+private fun TrackMateThemeWithCompositionsLocals(
     isSystemInDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
@@ -26,8 +26,8 @@ fun Fragment.setContent(content: @Composable (View) -> Unit) =
     ComposeView(context = requireContext()).apply {
         setViewCompositionStrategy(DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            TrackMateThemeWithCompositionsLocals {
+            TrackMateThemeWithCompositionsLocals(content = {
                 content(this)
-            }
+            })
         }
     }
