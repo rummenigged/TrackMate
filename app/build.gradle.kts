@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    namespace = "com.octopus.edu.trackmate"
-    compileSdk = 35
+    namespace = rootProject.extra["applicationId"].toString()
+    compileSdk = rootProject.extra["compileSdkVersion"].toString().toInt()
 
     defaultConfig {
-        applicationId = "com.octopus.edu.trackmate"
-        minSdk = 28
-        targetSdk = 35
+        applicationId = rootProject.extra["applicationId"].toString()
+        minSdk = rootProject.extra["minSdkVersion"].toString().toInt()
+        targetSdk = rootProject.extra["targetSdkVersion"].toString().toInt()
         versionCode = 1
         versionName = "1.0"
 
@@ -23,20 +23,34 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = rootProject.ext["sourceCompatibility"] as JavaVersion
+        targetCompatibility = rootProject.ext["targetCompatibility"] as JavaVersion
     }
-    kotlinOptions {
-        jvmTarget = "11"
+
+    kotlin {
+        jvmToolchain(rootProject.ext["kotlinOptionsJVMTarget"].toString().toInt())
     }
+
+    lint {
+        warningsAsErrors = true
+        checkDependencies = true
+        disable += "AndroidGradlePluginVersion"
+        disable += "GradleDependency"
+    }
+
     buildFeatures {
         compose = true
     }
+}
+
+tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask> {
+    workerMaxHeapSize.set("512m")
 }
 
 dependencies {

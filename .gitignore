@@ -1,15 +1,162 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# ===========================
+# Build & Intermediate Files
+# ===========================
+.gradle/
+build/
+**/build/
+.cxx/
+.externalNativeBuild/
+captures/
+output.json
+*.ap_
+*.apk
+*.apks
+*.aab
+*.dex
+*.so
+*.o
+*.obj
+*.bin
+*.class
+
+# ===========================
+# Android SDK & Local Config
+# ===========================
 local.properties
+gradle-app.setting
+gradle.properties.local
+gradle.properties.localhost
+
+# ===========================
+# IDE & Environment Settings
+# ===========================
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Allow useful project settings to be tracked
+!.idea/codeStyles
+!.idea/runConfigurations
+!.idea/inspectionProfiles
+!.idea/gradle.xml
+!.idea/vcs.xml
+
+# Exclude auto-generated caches
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# VS Code
+.vscode/
+
+# ===========================
+# Logs & Crash Dumps
+# ===========================
+*.log
+*.hprof
+*.stacktrace
+logs/
+log/
+
+# ===========================
+# Secrets / Credentials
+# ===========================
+*.jks
+*.keystore
+*.pem
+*.key
+*.crt
+google-services.json
+firebase-debug.log
+
+# ===========================
+# Tests & Coverage
+# ===========================
+test-results/
+test-output/
+coverage/
+coverage.ec
+*.ec
+*.exec
+
+# ===========================
+# Temp / System Files
+# ===========================
+*.tmp
+*.temp
+*.lock
+*.swp
+*.orig
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ===========================
+# Lint / Code Quality Tools
+# ===========================
+lint-results-*
+lint/
+ktlint-debug.log
+detekt-report.*
+reports/
+*.sarif
+
+# ===========================
+# Kotlin / Compilation
+# ===========================
+*.kotlin_module
+
+# ===========================
+# JNI / NDK (Optional)
+# ===========================
+*.c
+*.cpp
+*.h
+
+# ===========================
+# Proguard / R8
+# ===========================
+*.mapping
+mapping.txt
+proguard/
+
+# ===========================
+# Fastlane
+# ===========================
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# ===========================
+# Jetpack Compose
+# ===========================
+composeCompiler/
+
+# ===========================
+# GitHub Actions
+# ===========================
+# Ignore workflow logs and generated files (but keep .github/workflows/*.yml)
+.github/*.log
+.github/*-temp/
+.github/actions/cache/
+.github/actions/output/
+.github/workflows/*.log
+
+# Keep workflow definitions
+!.github/workflows/
+!.github/workflows/*.yml
+
+# ===========================
+# Misc
+# ===========================
+.metadata/
+.idea_modules/
+releases/
