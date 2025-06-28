@@ -12,5 +12,5 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? = setContent { HomeScreen() }
+    ): View = setContent { HomeScreen() }
 }

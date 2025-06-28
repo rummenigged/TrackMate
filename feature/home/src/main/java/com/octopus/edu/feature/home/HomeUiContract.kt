@@ -6,6 +6,7 @@ import com.octopus.edu.core.ui.common.base.ViewState
 
 internal class HomeUiContract {
     data class UiState(
+        val screenName: String = "",
         val isLoading: Boolean = false,
     ) : ViewState
 
