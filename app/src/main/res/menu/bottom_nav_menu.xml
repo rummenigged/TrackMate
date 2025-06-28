@@ -5,11 +5,11 @@
         android:title="@string/nav_home_item"
         android:icon="@drawable/ic_home" />
     <item
-        android:id="@+id/searchFragment"
+        android:id="@+id/historyFragment"
         android:title="@string/nav_history_item"
         android:icon="@drawable/ic_history" />
     <item
-        android:id="@+id/profileFragment"
+        android:id="@+id/analyticsFragment"
         android:title="@string/nav_analytics_item"
         android:icon="@drawable/ic_bar_chart" />
 </menu>
