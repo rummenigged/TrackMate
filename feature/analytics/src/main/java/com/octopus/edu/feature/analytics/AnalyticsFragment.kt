@@ -11,6 +11,6 @@ class AnalyticsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View = setContent { AnalyticsScreen() }
 }
