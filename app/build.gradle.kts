@@ -49,6 +49,7 @@ android {
 
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 }
 
@@ -59,8 +60,12 @@ tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask> {
 dependencies {
 
     implementation(project(":core:design"))
+    implementation(project(":feature:home"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.navigation.fragmentKtx)
+    implementation(libs.navigation.ui)
+    implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))

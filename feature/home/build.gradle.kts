@@ -46,6 +46,7 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.compose.ui.tooling)
 
     testImplementation(project(":core:testing"))
     androidTestImplementation(project(":core:testing"))
