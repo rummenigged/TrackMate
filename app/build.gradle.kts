@@ -61,6 +61,8 @@ dependencies {
 
     implementation(project(":core:design"))
     implementation(project(":feature:home"))
+    implementation(project(":feature:history"))
+    implementation(project(":feature:analytics"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.navigation.fragmentKtx)

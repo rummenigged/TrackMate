@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.octopus.edu.feature.home"
+    namespace = "com.octopus.edu.feature.history"
     compileSdk = rootProject.extra["compileSdkVersion"].toString().toInt()
 
     defaultConfig {
