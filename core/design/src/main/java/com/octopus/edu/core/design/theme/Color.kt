@@ -1,4 +1,4 @@
-package com.octopus.edu.trackmate.ui.theme
+package com.octopus.edu.core.design.theme
 
 import androidx.compose.ui.graphics.Color
 
