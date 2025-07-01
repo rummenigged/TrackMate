@@ -17,7 +17,7 @@ private fun TrackMateThemeWithCompositionsLocals(
     CompositionLocalProvider {
         TrackMateTheme(
             darkTheme = isSystemInDarkTheme,
-            dynamicColor = true,
+            dynamicColor = false,
         ) { content() }
     }
 }
