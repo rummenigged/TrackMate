@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_screen_title">Home</string>
+    <string name="welcome">Welcome</string>
+    <string name="all_caught_up">You\'re all caught up!</string>
+    <string name="add_new_entries_to_get_started">Add new %s to get started</string>
+    <string name="completed_date">Completed: %s</string>
+    <string name="created_at">Created at: %s</string>
+    <string name="due_date">Due Date: %s</string>
+</resources>
