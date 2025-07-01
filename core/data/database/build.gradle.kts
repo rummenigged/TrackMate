@@ -47,5 +47,6 @@ dependencies {
     implementation(libs.dataStore)
 
     testImplementation(project(":core:testing"))
+    androidTestImplementation(project(":core:testing"))
     testImplementation(libs.test.room)
 }

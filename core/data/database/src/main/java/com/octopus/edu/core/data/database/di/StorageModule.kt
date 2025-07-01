@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.database.di
 
 import android.content.Context
 import com.octopus.edu.core.data.database.TrackMateDatabase
+import com.octopus.edu.core.data.database.dao.EntryDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,4 +18,8 @@ class StorageModule {
     fun database(
         @ApplicationContext context: Context,
     ) = TrackMateDatabase.create(context)
+
+    @Provides
+    @Singleton
+    fun entryDao(database: TrackMateDatabase): EntryDao = database.entryDao()
 }
