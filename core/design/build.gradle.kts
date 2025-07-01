@@ -47,5 +47,6 @@ dependencies {
 
     api(libs.compose.ui)
     api(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.ui.tooling)
     api(libs.compose.material3)
 }
