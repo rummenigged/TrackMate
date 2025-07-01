@@ -60,6 +60,7 @@ tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask> {
 dependencies {
 
     implementation(project(":core:design"))
+    implementation(project(":core:data:data-entry"))
     implementation(project(":feature:home"))
     implementation(project(":feature:history"))
     implementation(project(":feature:analytics"))
