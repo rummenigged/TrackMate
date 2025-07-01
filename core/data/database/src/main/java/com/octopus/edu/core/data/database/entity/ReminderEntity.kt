@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
     tableName = "reminders",
     foreignKeys = [
         ForeignKey(
-            entity = TaskEntity::class,
+            entity = EntryEntity::class,
             parentColumns = ["id"],
             childColumns = ["taskId"],
             onDelete = ForeignKey.CASCADE,

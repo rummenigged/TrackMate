@@ -44,10 +44,13 @@ dependencies {
 
     implementation(project(":core:ui-common"))
     implementation(project(":core:design"))
+    implementation(project(":core:domain"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.compose.ui.tooling)
+
+    implementation(libs.kotlinx.collections.immutable)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

@@ -6,20 +6,20 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "task_sessions",
-    indices = [Index("taskId")],
+    tableName = "entry_sessions",
+    indices = [Index("entryId")],
     foreignKeys = [
         ForeignKey(
-            entity = TaskEntity::class,
+            entity = EntryEntity::class,
             parentColumns = ["id"],
-            childColumns = ["taskId"],
+            childColumns = ["entryId"],
             onDelete = ForeignKey.CASCADE,
         ),
     ],
 )
-data class TaskSessionEntity(
+data class EntrySessionEntity(
     @PrimaryKey val id: String,
-    val taskId: String,
+    val entryId: String,
     val startedAt: Long,
     val endedAt: Long?,
     val notes: String?,
