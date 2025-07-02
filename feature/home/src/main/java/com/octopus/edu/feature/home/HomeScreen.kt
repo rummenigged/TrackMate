@@ -8,28 +8,27 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Checkbox
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,7 +45,6 @@ import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.EntryCard
 import com.octopus.edu.core.design.theme.components.FullScreenCircularProgress
 import com.octopus.edu.core.design.theme.components.TabContainer
-import com.octopus.edu.core.design.theme.components.TrackMateTopBar
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Task
@@ -59,37 +57,42 @@ import com.octopus.edu.feature.home.HomeUiContract.UiState
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable
+fun HomeScreen(modifier: Modifier = Modifier) {
+    HomeScreen(
+        modifier = modifier,
+        viewModel = hiltViewModel(),
+    )
+}
+
+@Composable
 internal fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel,
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
-    Scaffold(
-        modifier =
-            modifier.padding(
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
-            ),
-        topBar = { TrackMateTopBar(R.string.home_screen_title) },
-        floatingActionButton = {
-            if (!uiState.isLoading) {
-                FloatingActionButton(
-                    onClick = {},
-                    containerColor = colorScheme.primaryContainer,
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = null,
-                    )
-                }
-            }
-        },
-    ) { padding ->
+    Box(modifier = modifier.fillMaxSize()) {
         HomeContent(
-            modifier = Modifier.padding(padding),
+            modifier = modifier.windowInsetsPadding(WindowInsets.statusBars),
             state = uiState,
             onEvent = viewModel::processEvent,
         )
+
+        if (!uiState.isLoading) {
+            FloatingActionButton(
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp),
+                onClick = {},
+                containerColor = colorScheme.primaryContainer,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = null,
+                )
+            }
+        }
     }
 }
 
@@ -105,8 +108,6 @@ private fun HomeContent(
     Column(
         modifier = modifier,
     ) {
-        WelcomeHeader()
-
         TabContainer(
             tabTitles = state.tabTitles,
             state = pagerState,
@@ -127,7 +128,7 @@ private fun HomeContent(
                 }
 
                 else -> {
-                    EntriesList(state)
+                    EntriesList(state = state)
                 }
             }
         }
@@ -140,8 +141,13 @@ private fun EntriesList(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier.background(colorScheme.surface),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        modifier = modifier.fillMaxSize(),
+        contentPadding =
+            PaddingValues(
+                top = 16.dp,
+                start = 16.dp,
+                end = 16.dp,
+            ),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         when (state.tabSelected) {
@@ -158,8 +164,8 @@ private fun EntriesList(
             }
         }
 
-        this.item {
-            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+        item {
+            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
         }
     }
 }
@@ -173,25 +179,38 @@ private fun EntryItem(
         Column(
             modifier =
                 modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(16.dp)
                     .fillMaxWidth(),
         ) {
             Row(
+                modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Checkbox(
-                    modifier = Modifier.offset(x = (-12).dp),
-                    checked = entry.isDone,
-                    onCheckedChange = { },
-                )
-
                 Text(
-                    modifier = Modifier.offset(x = (-12).dp),
                     text = entry.title,
                     style = typography.headlineMedium,
                     color = colorScheme.onSurface,
                 )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                if (entry.isDone) {
+                    Icon(
+                        imageVector = Icons.Outlined.Check,
+                        contentDescription = null,
+                        tint = colorScheme.primary,
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Icon(
+                    imageVector = Icons.Outlined.MoreVert,
+                    contentDescription = null,
+                )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = entry.description,
@@ -298,27 +317,6 @@ private fun EmptyEntries(
         Text(
             text = stringResource(R.string.add_new_entries_to_get_started, entry),
             style = typography.bodySmall,
-        )
-    }
-}
-
-@Composable
-private fun WelcomeHeader(modifier: Modifier = Modifier) {
-    Surface(
-        modifier =
-            modifier
-                .fillMaxWidth(),
-        color = colorScheme.primary,
-        contentColor = colorScheme.onPrimary,
-    ) {
-        Text(
-            modifier =
-                Modifier.padding(
-                    start = 16.dp,
-                    bottom = 48.dp,
-                ),
-            text = stringResource(R.string.welcome),
-            style = typography.displayLarge,
         )
     }
 }
