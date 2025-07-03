@@ -14,9 +14,17 @@ import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.feature.history.HistoryUiContract.UiState
 
 @Composable
+fun HistoryScreen(modifier: Modifier = Modifier) {
+    HistoryScreen(
+        modifier = modifier,
+        viewModel = hiltViewModel(),
+    )
+}
+
+@Composable
 internal fun HistoryScreen(
     modifier: Modifier = Modifier,
-    viewModel: HistoryViewModel = hiltViewModel(),
+    viewModel: HistoryViewModel,
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 

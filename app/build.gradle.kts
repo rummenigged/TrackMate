@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
-    alias(libs.plugins.navigation.safeargs.kotlin)
     alias(libs.plugins.ksp)
 }
 
@@ -49,7 +48,6 @@ android {
 
     buildFeatures {
         compose = true
-        viewBinding = true
     }
 }
 
@@ -61,6 +59,7 @@ dependencies {
 
     implementation(project(":core:design"))
     implementation(project(":core:data:data-entry"))
+    implementation(project(":core:ui-common"))
     implementation(project(":feature:home"))
     implementation(project(":feature:history"))
     implementation(project(":feature:analytics"))
@@ -72,10 +71,12 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
+    implementation(libs.compose.navigation)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
+    implementation(libs.navigation.suite.android)
     debugImplementation(libs.compose.ui.tooling)
 
     implementation(libs.hilt.android)

@@ -14,9 +14,17 @@ import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.feature.analytics.AnalyticsUiContract.UiState
 
 @Composable
+fun AnalyticsScreen(modifier: Modifier = Modifier) {
+    AnalyticsScreen(
+        modifier = modifier,
+        viewModel = hiltViewModel(),
+    )
+}
+
+@Composable
 internal fun AnalyticsScreen(
     modifier: Modifier = Modifier,
-    viewModel: AnalyticsViewModel = hiltViewModel(),
+    viewModel: AnalyticsViewModel,
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
