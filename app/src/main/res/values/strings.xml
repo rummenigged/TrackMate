@@ -1,6 +1,3 @@
 <resources>
     <string name="app_name">Track Mate</string>
-    <string name="nav_home_item">Home</string>
-    <string name="nav_history_item">History</string>
-    <string name="nav_analytics_item">Analytics</string>
 </resources>
