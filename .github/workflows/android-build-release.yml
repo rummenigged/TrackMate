@@ -25,5 +25,17 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Decode keystore.jks
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore.jks
+
+      - name: Write keystore.properties
+        run: |
+          cat <<EOF > keystore.properties
+          release.keyStore=keystore.jks
+          release.storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          release.keyAlias=${{ secrets.KEY_ALIAS }}
+          release.keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
       - name: Build with Gradle
         run: ./gradlew assembleRelease
