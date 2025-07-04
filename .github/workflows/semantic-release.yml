@@ -37,7 +37,7 @@ jobs:
 
       # Step 4 Decode the Keystore from the Github Secrets
       - name: Decode Keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore.jks
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
 
       # Step 5 Ensure it only exists in CI
       - name: Write keystore.properties
