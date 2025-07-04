@@ -2,7 +2,7 @@ name: Build Release
 
 on:
   pull_request:
-    branches: [ "master" ]
+    branches: [ "develop" ]
 
 jobs:
   build:
@@ -13,6 +13,7 @@ jobs:
 
       - name: Decode google-services.json
         run: |
+          mkdir -p app/src/release
           echo "${{ secrets.RELEASE_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/src/release/google-services.json
 
       - name: Setup Java JDK
