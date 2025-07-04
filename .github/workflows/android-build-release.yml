@@ -26,9 +26,3 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew assembleRelease
-
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: AndroidCICD-release.apk
-          path: app/build/outputs/apk/debug/app-release.apk
