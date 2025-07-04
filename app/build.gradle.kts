@@ -1,9 +1,13 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.firebase.appdistribution)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -20,13 +24,43 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+
+        val keyStorePropsFile = rootProject.file("keystore.properties")
+        if (keyStorePropsFile.exists()) {
+            val props =
+                Properties().apply {
+                    load(keyStorePropsFile.inputStream())
+                }
+
+            create("release") {
+                storeFile = file(props["release.keyStore"] as String)
+                storePassword = props["release.storePassword"] as String
+                keyAlias = props["release.keyAlias"] as String
+                keyPassword = props["release.keyPassword"] as String
+            }
+        } else {
+            // fallback for local dev
+            create("release") {
+                initWith(getByName("debug"))
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+        }
+
+        debug {
+            isMinifyEnabled = false
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
         }
     }
 
@@ -48,6 +82,17 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    packaging {
+        resources {
+            excludes.addAll(
+                setOf(
+                    "META-INF/LICENSE.md",
+                    "META-INF/LICENSE-notice.md",
+                ),
+            )
+        }
     }
 }
 

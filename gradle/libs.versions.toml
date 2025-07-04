@@ -9,6 +9,8 @@ coreKtx = "1.16.0"
 coroutinesTest = "1.10.2"
 dataStore = "1.1.7"
 espressoCore = "3.6.1"
+googleFirebaseAppdistribution = "5.1.1"
+googleGmsGoogleServices = "4.4.3"
 hiltNavigationVersion = "1.2.0"
 hiltVersion = "2.56.2"
 junit = "4.13.2"
@@ -98,4 +100,6 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "kspPluginVersion" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version.ref = "googleFirebaseAppdistribution" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 

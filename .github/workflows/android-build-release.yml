@@ -1,8 +1,8 @@
-name: Build
+name: Build Release
 
 on:
   pull_request:
-    branches: [ "master", "develop" ]
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -10,6 +10,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Decode google-services.json
+        run: |
+          echo "${{ secrets.RELEASE_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/src/release/google-services.json
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4.7.1
@@ -21,10 +25,4 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: AndroidCICD.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+        run: ./gradlew assembleRelease
