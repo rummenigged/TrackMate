@@ -21,5 +21,9 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Decode google-services.json
+        run: |
+          echo "${{ secrets.DEBUG_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
+
       - name: Unit Test
         run: ./gradlew testDebugUnitTest
