@@ -1,0 +1,72 @@
+name: Release Version
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  semantic-release:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # Step 1 Checkout Repository
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Step 2 Setup Ruby
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      # Step 3 Install the bundler & Fastlane (Create environment for ruby to avoid dependency hell and manage the dependencies versions)
+      - name: Install bundler
+        run: |
+          gem install bundler:2.2.27
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      # Step 4 Decode the Keystore from the Github Secrets
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
+
+      # Step 5 Ensure it only exists in CI
+      - name: Write keystore.properties
+        run: |
+          cat <<EOF > keystore.properties
+          release.keyStore=keystore.jks
+          release.storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          release.keyAlias=${{ secrets.KEY_ALIAS }}
+          release.keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
+      # Step 6 Execute Semantic Release
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          semantic_version: 17
+          extra_plugins: |
+            @semantic-release/changelog@5
+            @semantic-release/exec@5
+            @semantic-release/git@9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_AUTHOR_NAME: octopus-developers
+          GIT_AUTHOR_EMAIL: developers@octopus.com
+          GIT_COMMITTER_NAME: octopus-developers
+          GIT_COMMITTER_EMAIL: developers@octopus.com
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_TESTERS: ${{ secrets.FIREBASE_TESTERS }}
+          FIREBASE_CLI_TOKEN: ${{ secrets.FIREBASE_CLI_TOKEN }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}

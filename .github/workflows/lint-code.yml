@@ -17,6 +17,10 @@ jobs:
         with:
           ktlint_version: '0.40.0'
 
+      - name: Decode google-services.json
+        run: |
+          echo "${{ secrets.DEBUG_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
+
       - name: "Run Ktlint"
         run: ./gradlew ktlintCheck
 
