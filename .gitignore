@@ -67,6 +67,7 @@ log/
 # ===========================
 # Secrets / Credentials
 # ===========================
+keystore.properties
 *.jks
 *.keystore
 *.pem
