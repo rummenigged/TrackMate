@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.octopus.edu.trackmate.debug" />
+                  <option name="mobileSdkAppId" value="1:676253091296:android:8547392b3202b1e880d785" />
+                  <option name="projectId" value="track-mate-sandbox-1" />
+                  <option name="projectNumber" value="676253091296" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
