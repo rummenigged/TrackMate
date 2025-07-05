@@ -2,7 +2,7 @@ name: Build Release
 
 on:
   pull_request:
-    branches: [ "master" ]
+    branches: [ "develop" ]
 
 jobs:
   build:
@@ -31,7 +31,7 @@ jobs:
       - name: Write keystore.properties
         run: |
           cat <<EOF > keystore.properties
-          release.keyStore=keystore.jks
+          release.keyStore=app/keystore.jks
           release.storePassword=${{ secrets.KEYSTORE_PASSWORD }}
           release.keyAlias=${{ secrets.KEY_ALIAS }}
           release.keyPassword=${{ secrets.KEY_PASSWORD }}
