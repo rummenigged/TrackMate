@@ -21,6 +21,7 @@ internal fun EntryEntity.toTaskOrNull(): Task? {
         description = description.orEmpty(),
         dueDate = dueDate.toString(),
         isDone = isDone,
+        time = time.toString(),
         createdAt = createdAt.toString(),
         updatedAt = updatedAt.toString(),
     )
@@ -33,6 +34,7 @@ internal fun EntryEntity.toHabitOrNull(): Habit? {
         title = title,
         description = description.orEmpty(),
         isDone = isDone,
+        time = time.toString(),
         createdAt = createdAt.toString(),
         updatedAt = updatedAt.toString(),
         recurrence = recurrence?.toDomain(),

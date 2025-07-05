@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.compose.ui.tooling)
+    implementation(libs.compose.constraintlayout)
 
     implementation(libs.kotlinx.collections.immutable)
 

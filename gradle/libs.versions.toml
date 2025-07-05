@@ -4,6 +4,7 @@ agp = "8.11.0"
 androidxTestCore = "1.6.1"
 androidxTestRules = "1.6.1"
 composeBom = "2025.06.01"
+composeConstraintlayout = "1.0.1"
 composeNavigation = "2.9.0"
 coreKtx = "1.16.0"
 coroutinesTest = "1.10.2"
@@ -45,6 +46,7 @@ compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "composeConstraintlayout" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 navigation-fragmentKtx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
 navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }

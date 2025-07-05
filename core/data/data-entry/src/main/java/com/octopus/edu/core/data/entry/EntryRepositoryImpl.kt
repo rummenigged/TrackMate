@@ -1,8 +1,10 @@
 package com.octopus.edu.core.data.entry
 
 import com.octopus.edu.core.data.entry.store.EntryStore
+import com.octopus.edu.core.data.entry.utils.toDomain
 import com.octopus.edu.core.data.entry.utils.toHabitOrNull
 import com.octopus.edu.core.data.entry.utils.toTaskOrNull
+import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.common.ResultOperation
@@ -30,5 +32,13 @@ class EntryRepositoryImpl
                 onErrorReturn = { emptyList() },
             ) {
                 entryStore.getHabits().mapNotNull { task -> task.toHabitOrNull() }
+            }
+
+        override suspend fun getEntries(): ResultOperation<List<Entry>> =
+            safeCall(
+                dispatcher = Dispatchers.IO,
+                onErrorReturn = { emptyList() },
+            ) {
+                entryStore.getAllEntries().mapNotNull { entry -> entry.toDomain() }
             }
     }

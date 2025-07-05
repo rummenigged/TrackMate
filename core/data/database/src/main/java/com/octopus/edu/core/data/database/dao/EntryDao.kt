@@ -16,4 +16,7 @@ interface EntryDao {
 
     @Query("SELECT * FROM entries WHERE type = 'TASK'")
     suspend fun getTasks(): List<EntryEntity>
+
+    @Query("SELECT * FROM entries")
+    suspend fun getAllEntries(): List<EntryEntity>
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,26 +13,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,19 +38,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.EntryCard
 import com.octopus.edu.core.design.theme.components.FullScreenCircularProgress
-import com.octopus.edu.core.design.theme.components.TabContainer
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.mock
-import com.octopus.edu.core.domain.model.mockList
-import com.octopus.edu.feature.home.HomeUiContract.Tab.Habits
-import com.octopus.edu.feature.home.HomeUiContract.Tab.Tasks
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiState
 import kotlinx.collections.immutable.toImmutableList
@@ -88,8 +85,9 @@ internal fun HomeScreen(
                 containerColor = colorScheme.primaryContainer,
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Add,
+                    imageVector = Icons.Rounded.Add,
                     contentDescription = null,
+                    modifier = Modifier.size(32.dp),
                 )
             }
         }
@@ -102,34 +100,16 @@ private fun HomeContent(
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val selectedIndex = state.tabs.indexOfFirst { it == state.tabSelected }
-    val pagerState = rememberPagerState(initialPage = selectedIndex) { state.tabs.size }
-
     Column(
         modifier = modifier,
     ) {
-        TabContainer(
-            tabTitles = state.tabTitles,
-            state = pagerState,
-        ) { tabIndex ->
-            LaunchedEffect(tabIndex) {
-                onEvent(UiEvent.OnTabSelected(state.getTab(tabIndex)))
-            }
+        when {
+            state.isLoading -> FullScreenCircularProgress()
 
-            when {
-                state.isLoading -> FullScreenCircularProgress()
+            state.entries.isEmpty() -> EmptyEntries()
 
-                state.tabSelected is Habits && state.habits.isEmpty() -> {
-                    EmptyEntries(state.tabSelected)
-                }
-
-                state.tabSelected is Tasks && state.tasks.isEmpty() -> {
-                    EmptyEntries(state.tabSelected)
-                }
-
-                else -> {
-                    EntriesList(state = state)
-                }
+            else -> {
+                EntriesList(state = state)
             }
         }
     }
@@ -148,20 +128,13 @@ private fun EntriesList(
                 start = 16.dp,
                 end = 16.dp,
             ),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        when (state.tabSelected) {
-            is Habits -> {
-                items(state.habits) { habit ->
-                    EntryItem(habit)
-                }
-            }
-
-            is Tasks -> {
-                items(state.tasks) { task ->
-                    EntryItem(task)
-                }
-            }
+        itemsIndexed(state.entries) { index, habit ->
+            EntryItem(
+                entry = habit,
+                isFirstItem = index == 0,
+                isLastItem = index == state.entries.lastIndex,
+            )
         }
 
         item {
@@ -174,103 +147,107 @@ private fun EntriesList(
 private fun EntryItem(
     entry: Entry,
     modifier: Modifier = Modifier,
+    isFirstItem: Boolean = false,
+    isLastItem: Boolean = false,
 ) {
-    EntryCard {
-        Column(
+    ConstraintLayout(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+    ) {
+        val (time, icon, topLine, bottomLine, card) = createRefs()
+
+        Text(
+            text = entry.time,
+            style = typography.labelMedium,
             modifier =
-                modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
+                Modifier.constrainAs(time) {
+                    start.linkTo(parent.start)
+                    top.linkTo(card.top)
+                    bottom.linkTo(card.bottom)
+                },
+        )
+
+        if (!isFirstItem) {
+            Box(
+                modifier =
+                    Modifier
+                        .width(1.dp)
+                        .height(24.dp)
+                        .background(colorScheme.onSurface.copy(alpha = 0.2f))
+                        .constrainAs(topLine) {
+                            start.linkTo(icon.start)
+                            top.linkTo(parent.top)
+                            end.linkTo(icon.end)
+                            bottom.linkTo(icon.top, margin = 2.dp)
+                        },
+            )
+        }
+
+        val iconsResource =
+            when (entry) {
+                is Habit -> R.drawable.ic_autorenew_habit
+                is Task -> R.drawable.ic_task_circle
+            }
+
+        Icon(
+            painter = painterResource(iconsResource),
+            contentDescription = null,
+            tint = colorScheme.primary,
+            modifier =
+                Modifier
+                    .size(16.dp)
+                    .constrainAs(icon) {
+                        start.linkTo(time.end, margin = 8.dp)
+                        top.linkTo(time.top)
+                        bottom.linkTo(time.bottom)
+                    },
+        )
+
+        if (!isLastItem) {
+            Box(
+                modifier =
+                    Modifier
+                        .width(1.dp)
+                        .height(24.dp)
+                        .background(colorScheme.onSurface.copy(alpha = 0.2f))
+                        .constrainAs(bottomLine) {
+                            start.linkTo(icon.start)
+                            top.linkTo(icon.bottom, margin = 2.dp)
+                            end.linkTo(icon.end)
+                            bottom.linkTo(parent.bottom)
+                        },
+            )
+        }
+
+        EntryCard(
+            modifier =
+                Modifier
+                    .height(IntrinsicSize.Min)
+                    .constrainAs(card) {
+                        start.linkTo(icon.end, margin = 4.dp)
+                        top.linkTo(parent.top)
+                        end.linkTo(parent.end)
+                        bottom.linkTo(parent.bottom)
+                        width = Dimension.fillToConstraints
+                    },
         ) {
             Row(
-                modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
             ) {
                 Text(
                     text = entry.title,
-                    style = typography.headlineMedium,
-                    color = colorScheme.onSurface,
+                    style = typography.bodyMedium,
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                if (entry is Habit && entry.getRecurrenceAsText() != null) {
+                    Spacer(modifier = Modifier.weight(1F))
 
-                if (entry.isDone) {
-                    Icon(
-                        imageVector = Icons.Outlined.Check,
-                        contentDescription = null,
-                        tint = colorScheme.primary,
+                    Text(
+                        text = entry.getRecurrenceAsText().orEmpty(),
+                        style = typography.labelSmall,
                     )
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Icon(
-                    imageVector = Icons.Outlined.MoreVert,
-                    contentDescription = null,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = entry.description,
-                style = typography.bodyLarge,
-                color = colorScheme.onSurface,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                when (entry) {
-                    is Habit -> {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_watch),
-                            tint = colorScheme.onSurface,
-                            contentDescription = null,
-                        )
-
-                        entry.getRecurrenceAsText()?.let { recurrence ->
-                            Spacer(modifier = Modifier.width(4.dp))
-
-                            Text(
-                                text = recurrence,
-                                style = typography.labelLarge,
-                                color = colorScheme.onSurface,
-                            )
-                        }
-
-                        if (entry.isDone) {
-                            entry.lastCompletedDate?.let { completedDate ->
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                Text(
-                                    text = stringResource(R.string.completed_date, completedDate),
-                                    style = typography.labelLarge,
-                                    color = colorScheme.onSurface,
-                                )
-                            }
-                        }
-                    }
-
-                    is Task -> {
-                        Text(
-                            text = stringResource(R.string.created_at, entry.createdAt),
-                            style = typography.labelLarge,
-                            color = colorScheme.onSurface,
-                        )
-
-                        entry.dueDate?.let { dueDate ->
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            Text(
-                                text = stringResource(R.string.due_date, dueDate),
-                                style = typography.labelLarge,
-                                color = colorScheme.onSurface,
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -278,10 +255,7 @@ private fun EntryItem(
 }
 
 @Composable
-private fun EmptyEntries(
-    currentTab: HomeUiContract.Tab,
-    modifier: Modifier = Modifier,
-) {
+private fun EmptyEntries(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -308,14 +282,8 @@ private fun EmptyEntries(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        val entry =
-            when (currentTab) {
-                is Habits -> "Habit"
-                is Tasks -> "Task"
-            }
-
         Text(
-            text = stringResource(R.string.add_new_entries_to_get_started, entry),
+            text = stringResource(R.string.add_new_entries_to_get_started),
             style = typography.bodySmall,
         )
     }
@@ -323,21 +291,10 @@ private fun EmptyEntries(
 
 @PreviewLightDark
 @Composable
-private fun HomeHabitPreview() {
+private fun HomePreview() {
     TrackMateTheme {
         HomeContent(
-            state = UiState(habits = Habit.mockList(7).toImmutableList()),
-            onEvent = {},
-        )
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun HomeTaskPreview() {
-    TrackMateTheme {
-        HomeContent(
-            state = UiState(tasks = Task.mockList(7).toImmutableList()),
+            state = UiState(entries = mockEntryList(8).toImmutableList()),
             onEvent = {},
         )
     }
@@ -347,7 +304,7 @@ private fun HomeTaskPreview() {
 @Composable
 private fun EmptyEntryPreview() {
     TrackMateTheme {
-        EmptyEntries(currentTab = Habits())
+        EmptyEntries()
     }
 }
 

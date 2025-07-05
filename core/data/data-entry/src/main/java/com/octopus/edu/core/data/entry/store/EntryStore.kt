@@ -8,6 +8,8 @@ interface EntryStore {
     suspend fun getHabits(): List<EntryEntity>
 
     suspend fun getTasks(): List<EntryEntity>
+
+    suspend fun getAllEntries(): List<EntryEntity>
 }
 
 class EntryStoreImpl
@@ -18,4 +20,6 @@ class EntryStoreImpl
         override suspend fun getHabits(): List<EntryEntity> = entryDao.getHabits()
 
         override suspend fun getTasks(): List<EntryEntity> = entryDao.getTasks()
+
+        override suspend fun getAllEntries(): List<EntryEntity> = entryDao.getAllEntries()
     }
