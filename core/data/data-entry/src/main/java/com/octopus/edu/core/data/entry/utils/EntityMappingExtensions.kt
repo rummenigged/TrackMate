@@ -37,15 +37,16 @@ internal fun EntryEntity.toHabitOrNull(): Habit? {
         time = time.toString(),
         createdAt = createdAt.toString(),
         updatedAt = updatedAt.toString(),
-        recurrence = recurrence?.toDomain(),
+        recurrence = recurrence.toDomain(),
         streakCount = streakCount,
         lastCompletedDate = lastCompletedDate.toString(),
     )
 }
 
-internal fun EntryEntity.Recurrence.toDomain(): Recurrence =
+internal fun EntryEntity.Recurrence?.toDomain(): Recurrence =
     when (this) {
         EntryEntity.Recurrence.DAILY -> Recurrence.Daily
         EntryEntity.Recurrence.WEEKLY -> Recurrence.Weekly
         EntryEntity.Recurrence.CUSTOM -> Recurrence.Custom
+        else -> Recurrence.None
     }

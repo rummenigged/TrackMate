@@ -29,6 +29,8 @@ sealed class Recurrence {
     object Weekly : Recurrence()
 
     object Custom : Recurrence()
+
+    object None : Recurrence()
 }
 
 data class Habit(
@@ -57,6 +59,8 @@ fun Task.Companion.mock(id: String) =
         updatedAt = "2022-01-01T00:00:00.000Z",
         dueDate = "2022-01-01T00:00:00.000Z",
     )
+
+fun Task.Companion.mockList(count: Int) = (1..count).map { mock(it.toString()) }
 
 fun Habit.Companion.mock(id: String) =
     Habit(
