@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
@@ -47,9 +48,12 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.feature.home.HomeUiContract
+import com.octopus.edu.feature.home.HomeUiContract.EntryCreationState.EntryDateState.DaysBefore
+import com.octopus.edu.feature.home.HomeUiContract.EntryCreationState.EntryDateState.DaysLater
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.R
 import kotlinx.coroutines.delay
+import java.time.LocalDate
 
 @Composable
 internal fun EntryCreationBottomBar(
@@ -172,38 +176,94 @@ private fun BottomInputBar(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        EntryCreationActions(
+            state = state,
+            onEvent = onEvent,
+        )
+    }
+}
+
+@Composable
+private fun EntryCreationActions(
+    state: HomeUiContract.EntryCreationState,
+    onEvent: (UiEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier =
+            modifier
+                .padding(4.dp)
+                .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
+            modifier =
+                Modifier
+                    .clip(shapes.small)
+                    .padding(4.dp)
+                    .clickable { onEvent(UiEvent.AddEntry.ShowSettingsPicker) },
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = {
-                onEvent(UiEvent.AddEntry.ShowSettingsPicker)
-            }) {
-                Icon(
-                    imageVector = Icons.Outlined.DateRange,
-                    contentDescription = stringResource(R.string.today),
-                    modifier = Modifier.size(16.dp),
-                    tint = colorScheme.onSurface,
-                )
-            }
+            Icon(
+                imageVector = Icons.Outlined.DateRange,
+                contentDescription = stringResource(R.string.entry_date_and_time),
+                tint = if (state.entryDateState is DaysBefore) colorScheme.error else colorScheme.primary,
+            )
 
-            Spacer(modifier = Modifier.weight(1f))
+            val dateState =
+                when (state.entryDateState) {
+                    is DaysBefore -> {
+                        stringResource(
+                            id = state.entryDateState.value,
+                            state.entryDateState.month,
+                            state.entryDateState.day,
+                            state.entryDateState.daysOverdue,
+                        )
+                    }
 
-            if (!state.currentEntryTitle.isNullOrEmpty()) {
-                IconButton(
-                    modifier =
-                        Modifier
-                            .clip(shapes.medium)
-                            .background(colorScheme.primary),
-                    onClick = { onEvent(UiEvent.Entry.Save) },
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Send",
-                        tint = colorScheme.onPrimary,
-                    )
+                    is DaysLater -> {
+                        stringResource(
+                            id = state.entryDateState.value,
+                            state.entryDateState.month,
+                            state.entryDateState.day,
+                            state.entryDateState.daysLeft,
+                        )
+                    }
+
+                    else -> stringResource(state.entryDateState.value)
                 }
-            }
+
+            Text(
+                text = dateState,
+                style = typography.bodyLarge,
+                color = if (state.entryDateState is DaysBefore) colorScheme.error else colorScheme.primary,
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        IconButton(
+            modifier =
+                Modifier
+                    .clip(shapes.medium)
+                    .height(28.dp),
+            onClick = { onEvent(UiEvent.Entry.Save) },
+            colors =
+                IconButtonDefaults.iconButtonColors(
+                    containerColor = colorScheme.primary,
+                    contentColor = colorScheme.onPrimary,
+                    disabledContainerColor = colorScheme.surfaceContainerHighest,
+                    disabledContentColor = colorScheme.onPrimary.copy(alpha = 0.5f),
+                ),
+            enabled = !state.currentEntryTitle.isNullOrEmpty(),
+        ) {
+            Icon(
+                modifier = Modifier.size(16.dp),
+                imageVector = Icons.AutoMirrored.Filled.Send,
+                contentDescription = "Send",
+            )
         }
     }
 }
@@ -213,7 +273,10 @@ private fun BottomInputBar(
 private fun BottomPreview() {
     TrackMateTheme {
         EntryCreationBottomBar(
-            state = HomeUiContract.EntryCreationState(),
+            state =
+                HomeUiContract.EntryCreationState(
+                    currentEntryDate = LocalDate.now(),
+                ),
             onEvent = {},
         )
     }

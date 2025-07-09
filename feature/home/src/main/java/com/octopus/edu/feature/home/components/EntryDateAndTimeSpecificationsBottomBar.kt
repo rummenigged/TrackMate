@@ -50,15 +50,15 @@ internal fun EntryDateAndTimeSpecificationsBottomBar(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             EntryTimePickerActionButtons(
-                onConfirm = { onEvent(UiEvent.AddEntry.HideSettingsPicker) },
-                onDismiss = { onEvent(UiEvent.AddEntry.HideSettingsPicker) },
+                onConfirm = { onEvent(UiEvent.AddEntry.ConfirmDateAndTimeSettings) },
+                onDismiss = { onEvent(UiEvent.AddEntry.CancelDateAndTimeSettings) },
             )
 
             Spacer(Modifier.height(8.dp))
 
             TrackMateDatePicker(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                selectedDate = state.currentEntryDate,
+                selectedDate = state.currentEntryDateOrToday,
                 onDateSelected = { date -> onEvent(UiEvent.UpdateEntryDate(date)) },
             )
 
@@ -85,7 +85,7 @@ private fun EntryTimePickerActionButtons(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(onClick = { onConfirm() }) {
+        IconButton(onClick = { onDismiss() }) {
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Close",
@@ -95,7 +95,7 @@ private fun EntryTimePickerActionButtons(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        IconButton(onClick = { onDismiss() }) {
+        IconButton(onClick = { onConfirm() }) {
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = "Done",

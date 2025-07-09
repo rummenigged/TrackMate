@@ -2,6 +2,7 @@ package com.octopus.edu.feature.home.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.octopus.edu.core.design.theme.TrackMateTheme
@@ -15,7 +16,7 @@ internal fun EntryCreationBottomLayout(
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.BottomCenter) {
         if (uiState.isEntryCreationModeEnabled) {
             EntryCreationBottomBar(
                 state = uiState,

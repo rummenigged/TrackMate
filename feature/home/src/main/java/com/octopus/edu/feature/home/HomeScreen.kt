@@ -80,8 +80,7 @@ internal fun HomeScreen(
         EntryCreationBottomLayout(
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
+                    .fillMaxWidth(),
             uiState = uiState.entryCreationState,
             onEvent = viewModel::processEvent,
         )

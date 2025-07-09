@@ -30,6 +30,7 @@ import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.mock
+import com.octopus.edu.core.ui.common.extensions.rememberMaxTextWidthDp
 import com.octopus.edu.feature.home.R
 import com.octopus.edu.feature.home.getRecurrenceAsStringRes
 
@@ -40,6 +41,12 @@ internal fun EntryItem(
     isFirstItem: Boolean = false,
     isLastItem: Boolean = false,
 ) {
+    val timeMaxWidth =
+        rememberMaxTextWidthDp(
+            entry.time?.toString() ?: stringResource(R.string.all_day),
+            stringResource(R.string.all_day),
+        )
+
     ConstraintLayout(
         modifier =
             modifier
@@ -49,15 +56,17 @@ internal fun EntryItem(
         val (time, icon, topLine, bottomLine, card) = createRefs()
 
         Text(
-            text = entry.time,
+            text = entry.time?.toString() ?: stringResource(R.string.all_day),
             style = typography.labelMedium,
             color = colorScheme.onSurface,
             modifier =
-                Modifier.constrainAs(time) {
-                    start.linkTo(parent.start)
-                    top.linkTo(card.top)
-                    bottom.linkTo(card.bottom)
-                },
+                Modifier
+                    .width(timeMaxWidth)
+                    .constrainAs(time) {
+                        start.linkTo(parent.start)
+                        top.linkTo(card.top)
+                        bottom.linkTo(card.bottom)
+                    },
         )
 
         if (!isFirstItem) {
@@ -141,6 +150,7 @@ internal fun EntryItem(
                         Text(
                             text = stringResource(getRecurrenceAsStringRes(recurrence)),
                             style = typography.labelSmall,
+                            color = colorScheme.onSurface.copy(alpha = 0.5f),
                         )
                     }
                 }
@@ -154,7 +164,7 @@ internal fun EntryItem(
 private fun TaskItemPreview() {
     TrackMateTheme {
         Box(modifier = Modifier.background(color = colorScheme.surface)) {
-            EntryItem(Task.mock("1"))
+            EntryItem(Task.mock("2"))
         }
     }
 }

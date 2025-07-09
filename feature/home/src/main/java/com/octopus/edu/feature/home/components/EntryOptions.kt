@@ -52,7 +52,7 @@ internal fun EntryOptions(
                     .clickable { onEvent(UiEvent.AddEntry.ShowTimePicker) },
             icon = painterResource(R.drawable.ic_watch),
             title = stringResource(R.string.time),
-            trailingText = state.currentEntryTime.toString(),
+            trailingText = state.currentEntryTime?.toString() ?: stringResource(R.string.none),
             isFilled = state.currentEntryTime != null,
         )
 
@@ -69,7 +69,7 @@ internal fun EntryOptions(
                     .padding(horizontal = 16.dp, vertical = 12.dp)
                     .clickable { onEvent(UiEvent.AddEntry.ShowRecurrencePicker) },
             icon = painterResource(R.drawable.ic_autorenew_habit),
-            title = stringResource(R.string.repeate),
+            title = stringResource(R.string.repeat),
             trailingText =
                 stringResource(
                     getRecurrenceAsStringRes(state.currentEntryRecurrence ?: Recurrence.None),
