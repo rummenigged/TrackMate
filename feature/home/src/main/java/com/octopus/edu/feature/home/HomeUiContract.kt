@@ -33,7 +33,7 @@ internal fun getRecurrenceAsStringRes(recurrence: Recurrence): Int =
     }
 
 @OptIn(ExperimentalTime::class)
-internal fun HomeUiContract.EntryCreationState.toDomain(): Entry =
+internal fun EntryCreationState.toDomain(): Entry =
     if (currentEntryRecurrence != null && currentEntryRecurrence !is Recurrence.None) {
         Habit(
             id = UUID.randomUUID().toString(),
@@ -133,13 +133,6 @@ internal object HomeUiContract {
     ) {
         val currentEntryDateOrToday: LocalDate
             get() = currentEntryDate ?: LocalDate.now()
-
-        val isEntrySettingsEdited: Boolean
-            get() =
-                currentEntryDate != null ||
-                    currentEntryTime != null ||
-                    currentEntryReminder != null ||
-                    currentEntryRecurrence != null
 
         val entryDateState: EntryDateState = getEntryDateAsFormattedText()
 
