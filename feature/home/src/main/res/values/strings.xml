@@ -2,12 +2,11 @@
 <resources>
     <string name="all_caught_up">You\'re all caught up!</string>
     <string name="add_new_entries_to_get_started">Add new Tasks to get started</string>
-    <string name="completed_date">Completed: %s</string>
     <string name="created_at">Created at: %s</string>
     <string name="due_date">Due Date: %s</string>
     <string name="time">Time</string>
     <string name="reminder">Reminder</string>
-    <string name="repeate">Repeat</string>
+    <string name="repeat">Repeat</string>
     <string name="clear">Close</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -17,5 +16,11 @@
     <string name="daily">Daily</string>
     <string name="weekly">Weekly</string>
     <string name="task_creation_title_placeholder">What would you like to do?</string>
+    <string name="entry_date_and_time">Entry Date and Time</string>
+    <string name="all_day">All Day</string>
     <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="days_later">%s %s, %sd left</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="days_before">%s %s, %sd overdue</string>
 </resources>

@@ -1,7 +1,6 @@
 package com.octopus.edu.core.ui.common.base
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.Flow
@@ -16,13 +15,6 @@ interface ViewEffect
 interface ViewEvent
 
 abstract class BaseViewModel<UiState : ViewState, Effect : ViewEffect, Event : ViewEvent> : ViewModel() {
-    private val initialState: UiState by lazy { getInitialState() }
-
-    private var _viewState = mutableStateOf(initialState)
-
-    var viewState by _viewState
-        private set
-
     private val _uiStateFlow by lazy { MutableStateFlow(getInitialState()) }
 
     val uiStateFlow
