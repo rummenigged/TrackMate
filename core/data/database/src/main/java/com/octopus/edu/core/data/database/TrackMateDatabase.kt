@@ -12,7 +12,7 @@ import com.octopus.edu.core.data.database.entity.ReminderEntity
 import com.octopus.edu.core.data.database.entity.TagEntity
 import com.octopus.edu.core.data.database.utils.Converters
 
-private const val NAME = "trackmatedb"
+private const val NAME = "trackmate.db"
 
 @Database(
     entities = [

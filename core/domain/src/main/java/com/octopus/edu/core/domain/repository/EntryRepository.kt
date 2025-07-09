@@ -4,11 +4,14 @@ import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.common.ResultOperation
+import kotlinx.coroutines.flow.Flow
 
 interface EntryRepository {
     suspend fun getTasks(): ResultOperation<List<Task>>
 
     suspend fun getHabits(): ResultOperation<List<Habit>>
 
-    suspend fun getEntries(): ResultOperation<List<Entry>>
+    fun getEntriesOrderedByTime(): Flow<ResultOperation<List<Entry>>>
+
+    suspend fun saveEntry(entry: Entry): ResultOperation<Unit>
 }

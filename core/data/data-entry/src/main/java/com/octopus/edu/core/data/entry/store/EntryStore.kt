@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.entry.store
 
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.entity.EntryEntity
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 interface EntryStore {
@@ -9,7 +10,9 @@ interface EntryStore {
 
     suspend fun getTasks(): List<EntryEntity>
 
-    suspend fun getAllEntries(): List<EntryEntity>
+    fun getAllEntriesOrderedByTime(): Flow<List<EntryEntity>>
+
+    suspend fun saveEntry(entry: EntryEntity)
 }
 
 class EntryStoreImpl
@@ -21,5 +24,7 @@ class EntryStoreImpl
 
         override suspend fun getTasks(): List<EntryEntity> = entryDao.getTasks()
 
-        override suspend fun getAllEntries(): List<EntryEntity> = entryDao.getAllEntries()
+        override fun getAllEntriesOrderedByTime(): Flow<List<EntryEntity>> = entryDao.getAllEntriesOrderedByTimeAsc()
+
+        override suspend fun saveEntry(entry: EntryEntity) = entryDao.insert(entry)
     }

@@ -1,7 +1,9 @@
 package com.octopus.edu.core.data.entry
 
+import android.database.sqlite.SQLiteException
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.utils.toDomain
+import com.octopus.edu.core.data.entry.utils.toEntity
 import com.octopus.edu.core.data.entry.utils.toHabitOrNull
 import com.octopus.edu.core.data.entry.utils.toTaskOrNull
 import com.octopus.edu.core.domain.model.Entry
@@ -12,11 +14,16 @@ import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.domain.utils.safeCall
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import java.io.IOException
 
 class EntryRepositoryImpl
     @Inject
     constructor(
-        private val entryStore: EntryStore,
+        private val entryStore: EntryStore
     ) : EntryRepository {
         override suspend fun getTasks(): ResultOperation<List<Task>> =
             safeCall(
@@ -34,11 +41,25 @@ class EntryRepositoryImpl
                 entryStore.getHabits().mapNotNull { task -> task.toHabitOrNull() }
             }
 
-        override suspend fun getEntries(): ResultOperation<List<Entry>> =
+        override fun getEntriesOrderedByTime(): Flow<ResultOperation<List<Entry>>> =
+            entryStore
+                .getAllEntriesOrderedByTime()
+                .map { entries ->
+                    ResultOperation.Success(entries.mapNotNull { entry -> entry.toDomain() }) as ResultOperation<List<Entry>>
+                }.catch { exception ->
+                    val errorResult =
+                        ResultOperation.Error(
+                            throwable = exception,
+                            isRetriable = exception is IOException || exception is SQLiteException,
+                        )
+                    this.emit(errorResult)
+                }.flowOn(Dispatchers.IO)
+
+        override suspend fun saveEntry(entry: Entry): ResultOperation<Unit> =
             safeCall(
                 dispatcher = Dispatchers.IO,
-                onErrorReturn = { emptyList() },
+                onErrorReturn = { ResultOperation.Error(RuntimeException("Error saving entry")) },
             ) {
-                entryStore.getAllEntries().mapNotNull { entry -> entry.toDomain() }
+                entryStore.saveEntry(entry.toEntity())
             }
     }
