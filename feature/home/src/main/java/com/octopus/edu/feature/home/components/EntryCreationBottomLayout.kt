@@ -42,7 +42,7 @@ internal fun EntryCreationBottomLayout(
 
         if (uiState.isSetEntryRecurrenceModeEnabled) {
             RecurrencePicker(
-                currentEntryRecurrency = uiState.currentEntryRecurrence,
+                currentEntryRecurrency = uiState.dataDraftSnapshot.currentEntryRecurrence,
                 onEvent = onEvent,
             )
         }

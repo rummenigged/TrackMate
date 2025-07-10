@@ -52,15 +52,18 @@ internal fun EntryOptions(
                     .clickable { onEvent(UiEvent.AddEntry.ShowTimePicker) },
             icon = painterResource(R.drawable.ic_watch),
             title = stringResource(R.string.time),
-            trailingText = state.currentEntryTime?.toString() ?: stringResource(R.string.none),
-            isFilled = state.currentEntryTime != null,
+            trailingText =
+                state.dataDraftSnapshot.currentEntryTime?.toString()
+                    ?: state.data.currentEntryTime?.toString()
+                    ?: stringResource(R.string.none),
+            isFilled = state.dataDraftSnapshot.currentEntryTime != null || state.data.currentEntryTime != null,
         )
 
         SettingsRow(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             icon = painterResource(R.drawable.ic_alarm),
             title = stringResource(R.string.reminder),
-            trailingText = state.currentEntryReminder.orEmpty(),
+            trailingText = state.dataDraftSnapshot.currentEntryReminder.orEmpty(),
         )
 
         SettingsRow(
@@ -72,9 +75,13 @@ internal fun EntryOptions(
             title = stringResource(R.string.repeat),
             trailingText =
                 stringResource(
-                    getRecurrenceAsStringRes(state.currentEntryRecurrence ?: Recurrence.None),
+                    getRecurrenceAsStringRes(
+                        state.dataDraftSnapshot.currentEntryRecurrence
+                            ?: state.data.currentEntryRecurrence
+                            ?: Recurrence.None,
+                    ),
                 ),
-            isFilled = state.currentEntryRecurrence != null,
+            isFilled = state.dataDraftSnapshot.currentEntryRecurrence != null || state.data.currentEntryRecurrence != null,
         )
     }
 }

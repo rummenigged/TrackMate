@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateDatePicker
+import com.octopus.edu.core.ui.common.extensions.noClickableOverlay
 import com.octopus.edu.feature.home.HomeUiContract
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 
@@ -45,11 +46,12 @@ internal fun EntryDateAndTimeSpecificationsBottomBar(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .noClickableOverlay()
                     .clip(shapes.medium)
                     .background(colorScheme.surface),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            EntryTimePickerActionButtons(
+            EntryDatePickerActionButtons(
                 onConfirm = { onEvent(UiEvent.AddEntry.ConfirmDateAndTimeSettings) },
                 onDismiss = { onEvent(UiEvent.AddEntry.CancelDateAndTimeSettings) },
             )
@@ -58,7 +60,7 @@ internal fun EntryDateAndTimeSpecificationsBottomBar(
 
             TrackMateDatePicker(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                selectedDate = state.currentEntryDateOrToday,
+                selectedDate = state.dataDraftSnapshot.currentEntryDate ?: state.data.currentEntryDateOrToday,
                 onDateSelected = { date -> onEvent(UiEvent.UpdateEntryDate(date)) },
             )
 
@@ -76,7 +78,7 @@ internal fun EntryDateAndTimeSpecificationsBottomBar(
 }
 
 @Composable
-private fun EntryTimePickerActionButtons(
+private fun EntryDatePickerActionButtons(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,

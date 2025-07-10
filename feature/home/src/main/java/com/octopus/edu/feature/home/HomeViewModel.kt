@@ -6,6 +6,7 @@ import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.model.common.retryOnResultError
 import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.ui.common.base.BaseViewModel
+import com.octopus.edu.feature.home.HomeUiContract.EntryCreationState.EntryCreationData
 import com.octopus.edu.feature.home.HomeUiContract.UiEffect
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiState
@@ -45,7 +46,12 @@ constructor(
             UiEvent.AddEntry.Cancel ->
                 setState {
                     copy(
-                        entryCreationState = entryCreationState.copy(isEntryCreationModeEnabled = false),
+                        entryCreationState =
+                            entryCreationState.copy(
+                                isEntryCreationModeEnabled = false,
+                                isSetEntryDateModeEnabled = false,
+                                dataDraftSnapshot = EntryCreationData(),
+                            ),
                     )
                 }
 
@@ -54,16 +60,18 @@ constructor(
                     copy(entryCreationState = entryCreationState.copy(isSetEntryDateModeEnabled = true))
                 }
 
-            UiEvent.AddEntry.ConfirmDateAndTimeSettings ->
-                setState {
-                    copy(entryCreationState = entryCreationState.copy(isSetEntryDateModeEnabled = false))
-                }
+            UiEvent.AddEntry.ConfirmDateAndTimeSettings -> saveDateAndTimeSettings()
 
-            UiEvent.AddEntry.CancelDateAndTimeSettings -> {
+            UiEvent.AddEntry.CancelDateAndTimeSettings ->
                 setState {
-                    copy(entryCreationState = entryCreationState.copy(isSetEntryDateModeEnabled = false))
+                    copy(
+                        entryCreationState =
+                            entryCreationState.copy(
+                                isSetEntryDateModeEnabled = false,
+                                dataDraftSnapshot = EntryCreationData(),
+                            ),
+                    )
                 }
-            }
 
             UiEvent.AddEntry.ShowTimePicker ->
                 setState {
@@ -85,24 +93,43 @@ constructor(
                     copy(entryCreationState = entryCreationState.copy(isSetEntryRecurrenceModeEnabled = false))
                 }
 
-            is UiEvent.UpdateEntryRecurrence ->
+            is UiEvent.UpdateEntryTitle ->
                 setState {
-                    copy(entryCreationState = entryCreationState.copy(currentEntryRecurrence = event.recurrence))
+                    copy(
+                        entryCreationState =
+                            entryCreationState.copy(
+                                data =
+                                    entryCreationState.data.copy(
+                                        currentEntryTitle = event.title,
+                                    ),
+                            ),
+                    )
                 }
 
             is UiEvent.UpdateEntryDescription ->
                 setState {
-                    copy(entryCreationState = entryCreationState.copy(currentEntryDescription = event.description))
-                }
-
-            is UiEvent.UpdateEntryTitle ->
-                setState {
-                    copy(entryCreationState = entryCreationState.copy(currentEntryTitle = event.title))
+                    copy(
+                        entryCreationState =
+                            entryCreationState.copy(
+                                data =
+                                    entryCreationState.data.copy(
+                                        currentEntryDescription = event.description,
+                                    ),
+                            ),
+                    )
                 }
 
             is UiEvent.UpdateEntryDate ->
                 setState {
-                    copy(entryCreationState = entryCreationState.copy(currentEntryDate = event.date))
+                    copy(
+                        entryCreationState =
+                            entryCreationState.copy(
+                                dataDraftSnapshot =
+                                    entryCreationState.dataDraftSnapshot.copy(
+                                        currentEntryDate = event.date,
+                                    ),
+                            ),
+                    )
                 }
 
             is UiEvent.UpdateEntryTime ->
@@ -111,10 +138,45 @@ constructor(
                         entryCreationState =
                             entryCreationState.copy(
                                 isSetEntryTimeModeEnabled = false,
-                                currentEntryTime = LocalTime.of(event.hour, event.minute),
+                                dataDraftSnapshot =
+                                    entryCreationState.dataDraftSnapshot.copy(
+                                        currentEntryTime = LocalTime.of(event.hour, event.minute),
+                                    ),
                             ),
                     )
                 }
+
+            is UiEvent.UpdateEntryRecurrence ->
+                setState {
+                    copy(
+                        entryCreationState =
+                            entryCreationState.copy(
+                                dataDraftSnapshot =
+                                    entryCreationState.dataDraftSnapshot.copy(
+                                        currentEntryRecurrence = event.recurrence,
+                                    ),
+                            ),
+                    )
+                }
+        }
+    }
+
+    private fun saveDateAndTimeSettings() {
+        setState {
+            copy(
+                entryCreationState =
+                    entryCreationState.copy(
+                        isSetEntryDateModeEnabled = false,
+                        data =
+                            entryCreationState.data.copy(
+                                currentEntryDate =
+                                    entryCreationState.dataDraftSnapshot.currentEntryDate
+                                    ?: entryCreationState.data.currentEntryDate,
+                                    currentEntryTime = entryCreationState.dataDraftSnapshot.currentEntryTime,
+                                currentEntryRecurrence = entryCreationState.dataDraftSnapshot.currentEntryRecurrence,
+                            ),
+                    ),
+            )
         }
     }
 

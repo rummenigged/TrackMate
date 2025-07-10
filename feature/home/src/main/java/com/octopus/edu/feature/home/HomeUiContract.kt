@@ -34,23 +34,23 @@ internal fun getRecurrenceAsStringRes(recurrence: Recurrence): Int =
 
 @OptIn(ExperimentalTime::class)
 internal fun EntryCreationState.toDomain(): Entry =
-    if (currentEntryRecurrence != null && currentEntryRecurrence !is Recurrence.None) {
+    if (data.currentEntryRecurrence != null && data.currentEntryRecurrence !is Recurrence.None) {
         Habit(
             id = UUID.randomUUID().toString(),
-            title = currentEntryTitle ?: "",
-            description = currentEntryDescription ?: "",
+            title = data.currentEntryTitle ?: "",
+            description = data.currentEntryDescription ?: "",
             isDone = false,
-            time = currentEntryTime,
+            time = data.currentEntryTime,
             createdAt = Instant.now(),
-            recurrence = currentEntryRecurrence,
+            recurrence = data.currentEntryRecurrence,
         )
     } else {
         Task(
             id = UUID.randomUUID().toString(),
-            title = currentEntryTitle ?: "",
-            description = currentEntryDescription ?: "",
+            title = data.currentEntryTitle ?: "",
+            description = data.currentEntryDescription ?: "",
             isDone = false,
-            time = currentEntryTime,
+            time = data.currentEntryTime,
             createdAt = Instant.now(),
         )
     }
@@ -124,39 +124,43 @@ internal object HomeUiContract {
         val isSetEntryDateModeEnabled: Boolean = false,
         val isSetEntryTimeModeEnabled: Boolean = false,
         val isSetEntryRecurrenceModeEnabled: Boolean = false,
-        val currentEntryTitle: String? = null,
-        val currentEntryDescription: String? = null,
-        val currentEntryDate: LocalDate? = null,
-        val currentEntryTime: LocalTime? = null,
-        val currentEntryReminder: String? = null,
-        val currentEntryRecurrence: Recurrence? = null,
+        val data: EntryCreationData = EntryCreationData(),
+        val dataDraftSnapshot: EntryCreationData = EntryCreationData(),
     ) {
-        val currentEntryDateOrToday: LocalDate
-            get() = currentEntryDate ?: LocalDate.now()
-
         val entryDateState: EntryDateState = getEntryDateAsFormattedText()
+
+        val isDateBeforeToday: Boolean
+            get() = data.currentEntryDate?.isBefore(LocalDate.now()) == true
+
+        val isTimeBeforeNow: Boolean
+            get() = data.currentEntryTime?.isBefore(LocalTime.now().minusMinutes(1)) == true
 
         private fun getEntryDateAsFormattedText(): EntryDateState =
             when {
-                currentEntryDateOrToday.isToday() -> EntryDateState.Today(value = R.string.today)
+                data.currentEntryDateOrToday.isToday() -> EntryDateState.Today(value = R.string.today)
 
-                currentEntryDateOrToday.isTomorrow() -> EntryDateState.Tomorrow(value = R.string.tomorrow)
+                data.currentEntryDateOrToday.isTomorrow() -> EntryDateState.Tomorrow(value = R.string.tomorrow)
 
-                currentEntryDateOrToday.isYesterday() -> EntryDateState.Yesterday(value = R.string.yesterday)
+                this@EntryCreationState.data.currentEntryDateOrToday.isYesterday() -> EntryDateState.Yesterday(value = R.string.yesterday)
 
-                currentEntryDateOrToday.isAfter(LocalDate.now()) -> {
-                    val daysLeft = (currentEntryDateOrToday.toEpochDay() - LocalDate.now().toEpochDay()).toInt()
-                    val month = currentEntryDateOrToday.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-                    val day = currentEntryDateOrToday.dayOfMonth.toString()
-                    EntryDateState.DaysLater(value = R.string.days_later, daysLeft = daysLeft, month = month, day = day)
+                data.currentEntryDateOrToday.isAfter(LocalDate.now()) -> {
+                    val daysLeft = (data.currentEntryDateOrToday.toEpochDay() - LocalDate.now().toEpochDay()).toInt()
+                    val month = data.currentEntryDateOrToday.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                    val day = data.currentEntryDateOrToday.dayOfMonth.toString()
+                    EntryDateState.DateLaterToday(
+                        value = R.string.date,
+                        daysLeft = daysLeft,
+                        month = month,
+                        day = day,
+                    )
                 }
 
                 else -> {
-                    val daysOverdue = (LocalDate.now().toEpochDay() - currentEntryDateOrToday.toEpochDay()).toInt()
-                    val month = currentEntryDateOrToday.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-                    val day = currentEntryDateOrToday.dayOfMonth.toString()
-                    EntryDateState.DaysBefore(
-                        value = R.string.days_before,
+                    val daysOverdue = (LocalDate.now().toEpochDay() - data.currentEntryDateOrToday.toEpochDay()).toInt()
+                    val month = data.currentEntryDateOrToday.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                    val day = data.currentEntryDateOrToday.dayOfMonth.toString()
+                    EntryDateState.DateBeforeToday(
+                        value = R.string.date,
                         daysOverdue = daysOverdue,
                         month = month,
                         day = day,
@@ -175,34 +179,58 @@ internal object HomeUiContract {
                     ).toImmutableList()
         }
 
+        data class EntryCreationData(
+            val currentEntryTitle: String? = null,
+            val currentEntryDescription: String? = null,
+            val currentEntryDate: LocalDate? = null,
+            val currentEntryTime: LocalTime? = null,
+            val currentEntryReminder: String? = null,
+            val currentEntryRecurrence: Recurrence? = null,
+        ) {
+            val currentEntryDateOrToday: LocalDate
+                get() = currentEntryDate ?: LocalDate.now()
+        }
+
         internal sealed class EntryDateState(
-            @param:StringRes open val value: Int
+            @param:StringRes open val value: Int,
+            open val time: LocalTime?,
+            open val recurrence: Recurrence?,
         ) {
             data class Today(
-                @param:StringRes override val value: Int
-            ) : EntryDateState(value)
+                @param:StringRes override val value: Int,
+                override val time: LocalTime? = null,
+                override val recurrence: Recurrence? = null,
+            ) : EntryDateState(value, time, recurrence)
 
             data class Tomorrow(
-                @param:StringRes override val value: Int
-            ) : EntryDateState(value)
+                @param:StringRes override val value: Int,
+                override val time: LocalTime? = null,
+                override val recurrence: Recurrence? = null,
+            ) : EntryDateState(value, time, recurrence)
 
             data class Yesterday(
-                @param:StringRes override val value: Int
-            ) : EntryDateState(value)
-
-            data class DaysLater(
                 @param:StringRes override val value: Int,
+                override val time: LocalTime? = null,
+                override val recurrence: Recurrence? = null,
+            ) : EntryDateState(value, time, recurrence)
+
+            data class DateLaterToday(
+                @param:StringRes override val value: Int,
+                override val time: LocalTime? = null,
+                override val recurrence: Recurrence? = null,
                 val daysLeft: Int,
                 val month: String,
                 val day: String
-            ) : EntryDateState(value)
+            ) : EntryDateState(value, time, recurrence)
 
-            data class DaysBefore(
+            data class DateBeforeToday(
                 @param:StringRes override val value: Int,
+                override val time: LocalTime? = null,
+                override val recurrence: Recurrence? = null,
                 val daysOverdue: Int,
                 val month: String,
                 val day: String
-            ) : EntryDateState(value)
+            ) : EntryDateState(value, time, recurrence)
         }
     }
 }
