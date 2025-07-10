@@ -27,15 +27,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
-import com.octopus.edu.core.domain.model.Recurrence
-import com.octopus.edu.feature.home.HomeUiContract
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.getRecurrenceAsStringRes
+import com.octopus.edu.feature.home.models.EntryCreationState
 
 @Composable
 internal fun EntryOptions(
-    state: HomeUiContract.EntryCreationState,
+    state: EntryCreationState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -52,11 +50,8 @@ internal fun EntryOptions(
                     .clickable { onEvent(UiEvent.AddEntry.ShowTimePicker) },
             icon = painterResource(R.drawable.ic_watch),
             title = stringResource(R.string.time),
-            trailingText =
-                state.dataDraftSnapshot.currentEntryTime?.toString()
-                    ?: state.data.currentEntryTime?.toString()
-                    ?: stringResource(R.string.none),
-            isFilled = state.dataDraftSnapshot.currentEntryTime != null || state.data.currentEntryTime != null,
+            trailingText = state.currentTimeResolvedAsText ?: stringResource(R.string.none),
+            isFilled = state.isTimeFilled,
         )
 
         SettingsRow(
@@ -73,14 +68,7 @@ internal fun EntryOptions(
                     .clickable { onEvent(UiEvent.AddEntry.ShowRecurrencePicker) },
             icon = painterResource(R.drawable.ic_autorenew_habit),
             title = stringResource(R.string.repeat),
-            trailingText =
-                stringResource(
-                    getRecurrenceAsStringRes(
-                        state.dataDraftSnapshot.currentEntryRecurrence
-                            ?: state.data.currentEntryRecurrence
-                            ?: Recurrence.None,
-                    ),
-                ),
+            trailingText = stringResource(state.currentRecurrenceResolvedAsRes),
             isFilled = state.dataDraftSnapshot.currentEntryRecurrence != null || state.data.currentEntryRecurrence != null,
         )
     }
@@ -167,7 +155,7 @@ fun SettingsRow(
 private fun EntryOptionsPreview() {
     TrackMateTheme {
         EntryOptions(
-            state = HomeUiContract.EntryCreationState(),
+            state = EntryCreationState(),
             onEvent = {},
         )
     }

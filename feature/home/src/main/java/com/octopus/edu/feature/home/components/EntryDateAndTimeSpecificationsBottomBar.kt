@@ -26,13 +26,13 @@ import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateDatePicker
 import com.octopus.edu.core.ui.common.extensions.noClickableOverlay
-import com.octopus.edu.feature.home.HomeUiContract
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
+import com.octopus.edu.feature.home.models.EntryCreationState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun EntryDateAndTimeSpecificationsBottomBar(
-    state: HomeUiContract.EntryCreationState,
+    state: EntryCreationState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -112,7 +112,7 @@ private fun EntryDatePickerActionButtons(
 private fun EntryTimeSpecificationsBottomBarPreview() {
     TrackMateTheme {
         EntryDateAndTimeSpecificationsBottomBar(
-            state = HomeUiContract.EntryCreationState(isSetEntryDateModeEnabled = true),
+            state = EntryCreationState(isSetEntryDateModeEnabled = true),
             onEvent = {},
         )
     }

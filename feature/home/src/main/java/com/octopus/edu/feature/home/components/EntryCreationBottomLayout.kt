@@ -7,12 +7,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateTimePicker
-import com.octopus.edu.feature.home.HomeUiContract
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
+import com.octopus.edu.feature.home.models.EntryCreationState
 
 @Composable
 internal fun EntryCreationBottomLayout(
-    uiState: HomeUiContract.EntryCreationState,
+    uiState: EntryCreationState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -54,7 +54,7 @@ internal fun EntryCreationBottomLayout(
 private fun EntryCreationBottomLayoutPreview() {
     TrackMateTheme {
         EntryCreationBottomLayout(
-            uiState = HomeUiContract.EntryCreationState(),
+            uiState = EntryCreationState(),
             onEvent = {},
         )
     }

@@ -50,18 +50,17 @@ import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.core.ui.common.extensions.noClickableOverlay
-import com.octopus.edu.feature.home.HomeUiContract
-import com.octopus.edu.feature.home.HomeUiContract.EntryCreationState.EntryDateState.DateBeforeToday
-import com.octopus.edu.feature.home.HomeUiContract.EntryCreationState.EntryDateState.DateLaterToday
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.R
+import com.octopus.edu.feature.home.models.EntryCreationData
+import com.octopus.edu.feature.home.models.EntryCreationState
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
 
 @Composable
 internal fun EntryCreationBottomBar(
-    state: HomeUiContract.EntryCreationState,
+    state: EntryCreationState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -102,7 +101,7 @@ internal fun EntryCreationBottomBar(
 
 @Composable
 private fun BottomInputBar(
-    state: HomeUiContract.EntryCreationState,
+    state: EntryCreationState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -185,7 +184,7 @@ private fun BottomInputBar(
 
 @Composable
 private fun EntryCreationActions(
-    state: HomeUiContract.EntryCreationState,
+    state: EntryCreationState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -207,7 +206,7 @@ private fun EntryCreationActions(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             val dateColor =
-                if (state.isDateBeforeToday || state.isTimeBeforeNow) {
+                if (state.isOverdue) {
                     colorScheme.error
                 } else {
                     colorScheme.primary
@@ -219,49 +218,16 @@ private fun EntryCreationActions(
                 tint = dateColor,
             )
 
-            val dateState =
-                when (val date = state.entryDateState) {
-                    is DateBeforeToday ->
-                        stringResource(
-                            id = date.value,
-                            date.month,
-                            date.day,
-                        )
-
-                    is DateLaterToday -> {
-                        stringResource(
-                            id = date.value,
-                            date.month,
-                            date.day,
-                        )
-                    }
-
-                    else -> stringResource(date.value)
+            val dateText =
+                with(state.entryDateState.resolveStringResArgs()) {
+                    stringResource(resId, *formatArgs.toTypedArray())
                 }
 
             Text(
-                text = dateState,
+                text = dateText,
                 style = typography.bodyLarge,
                 color = dateColor,
             )
-
-            when (val date = state.entryDateState) {
-                is DateBeforeToday ->
-                    Text(
-                        text = ", ${stringResource(R.string.days_before, date.daysOverdue)}",
-                        style = typography.bodyLarge,
-                        color = colorScheme.error,
-                    )
-
-                is DateLaterToday ->
-                    Text(
-                        text = ", ${stringResource(R.string.days_later, date.daysLeft)}",
-                        style = typography.bodyLarge,
-                        color = colorScheme.primary,
-                    )
-
-                else -> {}
-            }
 
             state.data.currentEntryTime?.let { time ->
                 Text(
@@ -314,9 +280,9 @@ private fun BottomPreview() {
     TrackMateTheme {
         EntryCreationBottomBar(
             state =
-                HomeUiContract.EntryCreationState(
+                EntryCreationState(
                     data =
-                        HomeUiContract.EntryCreationState.EntryCreationData(
+                        EntryCreationData(
                             currentEntryDate = LocalDate.of(2025, 6, 6),
                             currentEntryTime = LocalTime.of(11, 25),
                             currentEntryRecurrence = Recurrence.Daily,

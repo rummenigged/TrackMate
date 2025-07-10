@@ -22,10 +22,10 @@ import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateDialog
 import com.octopus.edu.core.domain.model.Recurrence
-import com.octopus.edu.feature.home.HomeUiContract
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.getRecurrenceAsStringRes
+import com.octopus.edu.feature.home.models.EntryCreationState
+import com.octopus.edu.feature.home.models.getRecurrenceAsStringRes
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -43,7 +43,7 @@ internal fun RecurrencePicker(
         onConfirm = { onEvent(UiEvent.AddEntry.HideRecurrencePicker) },
     ) {
         RecurrenceOptions(
-            recurrences = HomeUiContract.EntryCreationState.recurrenceOptions,
+            recurrences = EntryCreationState.recurrenceOptions,
             selectedRecurrence = currentEntryRecurrency,
             onEvent = onEvent,
         )

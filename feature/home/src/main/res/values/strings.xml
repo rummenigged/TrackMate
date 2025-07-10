@@ -18,7 +18,6 @@
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="yesterday">Yesterday</string>
-    <string name="date">%s %s</string>
-    <string name="days_later">%sd left</string>
-    <string name="days_before">%sd overdue</string>
+    <string name="days_later">%s %s, %sd left</string>
+    <string name="days_before">%s %s, %sd overdue</string>
 </resources>
