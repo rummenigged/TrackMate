@@ -43,17 +43,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
+import com.octopus.edu.core.domain.model.Recurrence
+import com.octopus.edu.core.ui.common.extensions.noClickableOverlay
 import com.octopus.edu.feature.home.HomeUiContract
-import com.octopus.edu.feature.home.HomeUiContract.EntryCreationState.EntryDateState.DaysBefore
-import com.octopus.edu.feature.home.HomeUiContract.EntryCreationState.EntryDateState.DaysLater
+import com.octopus.edu.feature.home.HomeUiContract.EntryCreationState.EntryDateState.DateBeforeToday
+import com.octopus.edu.feature.home.HomeUiContract.EntryCreationState.EntryDateState.DateLaterToday
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.R
 import kotlinx.coroutines.delay
 import java.time.LocalDate
+import java.time.LocalTime
 
 @Composable
 internal fun EntryCreationBottomBar(
@@ -86,11 +90,7 @@ internal fun EntryCreationBottomBar(
                 Modifier
                     .fillMaxWidth()
                     .padding(imePadding)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                        onClick = {},
-                    ),
+                    .noClickableOverlay(),
         ) {
             BottomInputBar(
                 state = state,
@@ -136,7 +136,7 @@ private fun BottomInputBar(
                 ),
     ) {
         TextField(
-            value = state.currentEntryTitle.orEmpty(),
+            value = state.data.currentEntryTitle.orEmpty(),
             colors = textInputColors,
             onValueChange = { onEvent(UiEvent.UpdateEntryTitle(it)) },
             modifier =
@@ -156,14 +156,14 @@ private fun BottomInputBar(
 
         TextField(
             colors = textInputColors,
-            value = state.currentEntryDescription.orEmpty(),
+            value = state.data.currentEntryDescription.orEmpty(),
             onValueChange = {
                 onEvent(UiEvent.UpdateEntryDescription(it))
             },
             modifier = Modifier.fillMaxWidth(),
             shape = shapes.medium,
             placeholder = {
-                if (!state.currentEntryTitle.isNullOrEmpty()) {
+                if (!state.data.currentEntryTitle.isNullOrEmpty()) {
                     Text(
                         text = "Description",
                         style = typography.bodyMedium,
@@ -206,40 +206,81 @@ private fun EntryCreationActions(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val dateColor =
+                if (state.isDateBeforeToday || state.isTimeBeforeNow) {
+                    colorScheme.error
+                } else {
+                    colorScheme.primary
+                }
+
             Icon(
                 imageVector = Icons.Outlined.DateRange,
                 contentDescription = stringResource(R.string.entry_date_and_time),
-                tint = if (state.entryDateState is DaysBefore) colorScheme.error else colorScheme.primary,
+                tint = dateColor,
             )
 
             val dateState =
-                when (state.entryDateState) {
-                    is DaysBefore -> {
+                when (val date = state.entryDateState) {
+                    is DateBeforeToday ->
                         stringResource(
-                            id = state.entryDateState.value,
-                            state.entryDateState.month,
-                            state.entryDateState.day,
-                            state.entryDateState.daysOverdue,
+                            id = date.value,
+                            date.month,
+                            date.day,
+                        )
+
+                    is DateLaterToday -> {
+                        stringResource(
+                            id = date.value,
+                            date.month,
+                            date.day,
                         )
                     }
 
-                    is DaysLater -> {
-                        stringResource(
-                            id = state.entryDateState.value,
-                            state.entryDateState.month,
-                            state.entryDateState.day,
-                            state.entryDateState.daysLeft,
-                        )
-                    }
-
-                    else -> stringResource(state.entryDateState.value)
+                    else -> stringResource(date.value)
                 }
 
             Text(
                 text = dateState,
                 style = typography.bodyLarge,
-                color = if (state.entryDateState is DaysBefore) colorScheme.error else colorScheme.primary,
+                color = dateColor,
             )
+
+            when (val date = state.entryDateState) {
+                is DateBeforeToday ->
+                    Text(
+                        text = ", ${stringResource(R.string.days_before, date.daysOverdue)}",
+                        style = typography.bodyLarge,
+                        color = colorScheme.error,
+                    )
+
+                is DateLaterToday ->
+                    Text(
+                        text = ", ${stringResource(R.string.days_later, date.daysLeft)}",
+                        style = typography.bodyLarge,
+                        color = colorScheme.primary,
+                    )
+
+                else -> {}
+            }
+
+            state.data.currentEntryTime?.let { time ->
+                Text(
+                    text = ", $time",
+                    style = typography.bodyLarge,
+                    color = dateColor,
+                )
+            }
+
+            state.data.currentEntryRecurrence?.let { recurrence ->
+                if (recurrence != Recurrence.None)
+                    {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_autorenew_habit),
+                            contentDescription = stringResource(R.string.recurrence),
+                            tint = dateColor,
+                        )
+                    }
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -257,7 +298,7 @@ private fun EntryCreationActions(
                     disabledContainerColor = colorScheme.surfaceContainerHighest,
                     disabledContentColor = colorScheme.onPrimary.copy(alpha = 0.5f),
                 ),
-            enabled = !state.currentEntryTitle.isNullOrEmpty(),
+            enabled = !state.data.currentEntryTitle.isNullOrEmpty(),
         ) {
             Icon(
                 modifier = Modifier.size(16.dp),
@@ -275,7 +316,12 @@ private fun BottomPreview() {
         EntryCreationBottomBar(
             state =
                 HomeUiContract.EntryCreationState(
-                    currentEntryDate = LocalDate.now(),
+                    data =
+                        HomeUiContract.EntryCreationState.EntryCreationData(
+                            currentEntryDate = LocalDate.of(2025, 6, 6),
+                            currentEntryTime = LocalTime.of(11, 25),
+                            currentEntryRecurrence = Recurrence.Daily,
+                        ),
                 ),
             onEvent = {},
         )
