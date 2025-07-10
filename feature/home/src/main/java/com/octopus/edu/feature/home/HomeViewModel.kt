@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 
-@Suppress("ktlint:standard:indent")
 @HiltViewModel
 internal class HomeViewModel
 @Inject
@@ -171,8 +170,8 @@ constructor(
                             entryCreationState.data.copy(
                                 currentEntryDate =
                                     entryCreationState.dataDraftSnapshot.currentEntryDate
-                                    ?: entryCreationState.data.currentEntryDate,
-                                    currentEntryTime = entryCreationState.dataDraftSnapshot.currentEntryTime,
+                                        ?: entryCreationState.data.currentEntryDate,
+                                currentEntryTime = entryCreationState.dataDraftSnapshot.currentEntryTime,
                                 currentEntryRecurrence = entryCreationState.dataDraftSnapshot.currentEntryRecurrence,
                             ),
                     ),

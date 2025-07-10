@@ -272,14 +272,13 @@ private fun EntryCreationActions(
             }
 
             state.data.currentEntryRecurrence?.let { recurrence ->
-                if (recurrence != Recurrence.None)
-                    {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_autorenew_habit),
-                            contentDescription = stringResource(R.string.recurrence),
-                            tint = dateColor,
-                        )
-                    }
+                if (recurrence != Recurrence.None) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_autorenew_habit),
+                        contentDescription = stringResource(R.string.recurrence),
+                        tint = dateColor,
+                    )
+                }
             }
         }
 
