@@ -17,7 +17,7 @@ class StorageModule {
     @Singleton
     fun database(
         @ApplicationContext context: Context,
-    ) = TrackMateDatabase.create(context)
+    ): TrackMateDatabase = TrackMateDatabase.create(context)
 
     @Provides
     @Singleton

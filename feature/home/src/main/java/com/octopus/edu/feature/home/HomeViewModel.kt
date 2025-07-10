@@ -1,22 +1,27 @@
 package com.octopus.edu.feature.home
 
 import androidx.lifecycle.viewModelScope
-import com.octopus.edu.core.domain.model.Habit
-import com.octopus.edu.core.domain.model.Task
+import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.common.ResultOperation
-import com.octopus.edu.core.domain.model.mockList
+import com.octopus.edu.core.domain.model.common.retryOnResultError
 import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.ui.common.base.BaseViewModel
-import com.octopus.edu.feature.home.HomeUiContract.Tab.Habits
-import com.octopus.edu.feature.home.HomeUiContract.Tab.Tasks
 import com.octopus.edu.feature.home.HomeUiContract.UiEffect
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiState
+import com.octopus.edu.feature.home.models.EntryCreationData
+import com.octopus.edu.feature.home.models.EntryCreationState
+import com.octopus.edu.feature.home.models.empty
+import com.octopus.edu.feature.home.models.emptyState
+import com.octopus.edu.feature.home.models.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 
 @HiltViewModel
 internal class HomeViewModel
@@ -24,52 +29,198 @@ internal class HomeViewModel
     constructor(
         private val entryRepository: EntryRepository,
     ) : BaseViewModel<UiState, UiEffect, UiEvent>() {
+        init {
+            observeEntries()
+        }
+
         override fun getInitialState(): UiState = UiState()
 
         override fun processEvent(event: UiEvent) {
             when (event) {
-                is UiEvent.OnTabSelected -> {
-                    when (event.tab) {
-                        is Habits -> getHabits()
-                        is Tasks -> getTasks()
+                UiEvent.Entry.Add ->
+                    setState {
+                        copy(entryCreationState = entryCreationState.copy(isEntryCreationModeEnabled = true))
                     }
+
+                UiEvent.Entry.Save -> {
+                    saveCurrentEntry(entry = uiStateFlow.value.entryCreationState.toDomain())
                 }
+
+                UiEvent.AddEntry.Cancel ->
+                    setState {
+                        copy(
+                            entryCreationState =
+                                entryCreationState.copy(
+                                    isEntryCreationModeEnabled = false,
+                                    isSetEntryDateModeEnabled = false,
+                                    dataDraftSnapshot = EntryCreationData.empty(),
+                                ),
+                        )
+                    }
+
+                UiEvent.AddEntry.ShowSettingsPicker ->
+                    setState {
+                        copy(entryCreationState = entryCreationState.copy(isSetEntryDateModeEnabled = true))
+                    }
+
+                UiEvent.AddEntry.ConfirmDateAndTimeSettings -> saveDateAndTimeSettings()
+
+                UiEvent.AddEntry.CancelDateAndTimeSettings ->
+                    setState {
+                        copy(
+                            entryCreationState =
+                                entryCreationState.copy(
+                                    isSetEntryDateModeEnabled = false,
+                                    dataDraftSnapshot = EntryCreationData.empty(),
+                                ),
+                        )
+                    }
+
+                UiEvent.AddEntry.ShowTimePicker ->
+                    setState {
+                        copy(entryCreationState = entryCreationState.copy(isSetEntryTimeModeEnabled = true))
+                    }
+
+                UiEvent.AddEntry.HideTimePicker ->
+                    setState {
+                        copy(entryCreationState = entryCreationState.copy(isSetEntryTimeModeEnabled = false))
+                    }
+
+                UiEvent.AddEntry.ShowRecurrencePicker ->
+                    setState {
+                        copy(entryCreationState = entryCreationState.copy(isSetEntryRecurrenceModeEnabled = true))
+                    }
+
+                UiEvent.AddEntry.HideRecurrencePicker ->
+                    setState {
+                        copy(entryCreationState = entryCreationState.copy(isSetEntryRecurrenceModeEnabled = false))
+                    }
+
+                is UiEvent.UpdateEntryTitle ->
+                    setState {
+                        copy(
+                            entryCreationState =
+                                entryCreationState.copy(
+                                    data =
+                                        entryCreationState.data.copy(
+                                            currentEntryTitle = event.title,
+                                        ),
+                                ),
+                        )
+                    }
+
+                is UiEvent.UpdateEntryDescription ->
+                    setState {
+                        copy(
+                            entryCreationState =
+                                entryCreationState.copy(
+                                    data =
+                                        entryCreationState.data.copy(
+                                            currentEntryDescription = event.description,
+                                        ),
+                                ),
+                        )
+                    }
+
+                is UiEvent.UpdateEntryDate ->
+                    setState {
+                        copy(
+                            entryCreationState =
+                                entryCreationState.copy(
+                                    dataDraftSnapshot =
+                                        entryCreationState.dataDraftSnapshot.copy(
+                                            currentEntryDate = event.date,
+                                        ),
+                                ),
+                        )
+                    }
+
+                is UiEvent.UpdateEntryTime ->
+                    setState {
+                        copy(
+                            entryCreationState =
+                                entryCreationState.copy(
+                                    isSetEntryTimeModeEnabled = false,
+                                    dataDraftSnapshot =
+                                        entryCreationState.dataDraftSnapshot.copy(
+                                            currentEntryTime = LocalTime.of(event.hour, event.minute),
+                                        ),
+                                ),
+                        )
+                    }
+
+                is UiEvent.UpdateEntryRecurrence ->
+                    setState {
+                        copy(
+                            entryCreationState =
+                                entryCreationState.copy(
+                                    dataDraftSnapshot =
+                                        entryCreationState.dataDraftSnapshot.copy(
+                                            currentEntryRecurrence = event.recurrence,
+                                        ),
+                                ),
+                        )
+                    }
             }
         }
 
-        private fun getHabits() =
-            viewModelScope.launch {
-                setState { copy(isLoading = true, tabSelected = Habits()) }
-                delay(3000)
-                when (val result = entryRepository.getHabits()) {
-                    is ResultOperation.Error -> {
-                        setEffect(UiEffect.ShowError(result.exception.toString()))
-                    }
+        private fun saveDateAndTimeSettings() {
+            setState {
+                copy(
+                    entryCreationState =
+                        entryCreationState.copy(
+                            isSetEntryDateModeEnabled = false,
+                            data =
+                                entryCreationState.data.copy(
+                                    currentEntryDate =
+                                        entryCreationState.dataDraftSnapshot.currentEntryDate
+                                            ?: entryCreationState.data.currentEntryDate,
+                                    currentEntryTime = entryCreationState.dataDraftSnapshot.currentEntryTime,
+                                    currentEntryRecurrence = entryCreationState.dataDraftSnapshot.currentEntryRecurrence,
+                                ),
+                        ),
+                )
+            }
+        }
 
-                    is ResultOperation.Success -> {
-                        setState {
-                            copy(
-                                habits = Habit.mockList(5).toImmutableList(),
-                                isLoading = false,
-                            )
+        private fun observeEntries() =
+            viewModelScope.launch {
+                entryRepository
+                    .getEntriesOrderedByTime()
+                    .retryOnResultError(maxRetries = 2)
+                    .onStart { setState { copy(isLoading = true) } }
+                    .onEach { result ->
+                        when (result) {
+                            is ResultOperation.Error -> {
+                                setEffect(UiEffect.ShowError(result.throwable.message ?: "Unknown Error"))
+                            }
+
+                            is ResultOperation.Success -> {
+                                setState {
+                                    copy(
+                                        isLoading = false,
+                                        entries = result.data.toImmutableList(),
+                                    )
+                                }
+                            }
                         }
-                    }
-                }
+                    }.collect()
             }
 
-        private fun getTasks() =
+        private fun saveCurrentEntry(entry: Entry) =
             viewModelScope.launch {
-                setState { copy(isLoading = true, tabSelected = Tasks()) }
-                delay(3000)
-                when (val result = entryRepository.getTasks()) {
-                    is ResultOperation.Error -> setEffect(UiEffect.ShowError(result.exception.toString()))
+                when (val result = entryRepository.saveEntry(entry = entry)) {
+                    is ResultOperation.Error -> {
+                        setEffect(UiEffect.ShowError(result.throwable.toString()))
+                    }
+
                     is ResultOperation.Success -> {
                         setState {
                             copy(
-                                tasks = Task.mockList(5).toImmutableList(),
-                                isLoading = false,
+                                entryCreationState = EntryCreationState.emptyState(),
                             )
                         }
+                        setEffect(UiEffect.ShowEntrySuccessfullyCreated)
                     }
                 }
             }

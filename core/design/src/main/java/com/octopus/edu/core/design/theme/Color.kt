@@ -1,6 +1,21 @@
 package com.octopus.edu.core.design.theme
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Devices.TV_1080p
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 
 val primaryLight = Color(0xFF186B52)
 val onPrimaryLight = Color(0xFFFFFFFF)
@@ -247,3 +262,846 @@ val customColorDarkHighContrast = Color(0xFFE9F0FF)
 val onCustomColorDarkHighContrast = Color(0xFF000000)
 val customColorContainerDarkHighContrast = Color(0xFFA0C5FA)
 val onCustomColorContainerDarkHighContrast = Color(0xFF000B1D)
+
+@Preview(name = "Full Light Color Set", device = TV_1080p)
+@Composable
+private fun MaterialColorSystemFullLightPreview() {
+    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary",
+                listOf(
+                    Triple("Primary", primaryLight, onPrimaryLight),
+                    Triple("On Primary", onPrimaryLight, primaryLight),
+                    Triple("Primary Container", primaryContainerLight, onPrimaryContainerLight),
+                    Triple("On Primary Container", onPrimaryContainerLight, primaryContainerLight),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary",
+                listOf(
+                    Triple("Secondary", secondaryLight, onSecondaryLight),
+                    Triple("On Secondary", onSecondaryLight, secondaryLight),
+                    Triple("Secondary Container", secondaryContainerLight, onSecondaryContainerLight),
+                    Triple("On Secondary Container", onSecondaryContainerLight, secondaryContainerLight),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary",
+                listOf(
+                    Triple("Tertiary", tertiaryLight, onTertiaryLight),
+                    Triple("On Tertiary", onTertiaryLight, tertiaryLight),
+                    Triple("Tertiary Container", tertiaryContainerLight, onTertiaryContainerLight),
+                    Triple("On Tertiary Container", onTertiaryContainerLight, tertiaryContainerLight),
+                ),
+            )
+            ColorGroupSection(
+                "Error",
+                listOf(
+                    Triple("Error", errorLight, onErrorLight),
+                    Triple("On Error", onErrorLight, errorLight),
+                    Triple("Error Container", errorContainerLight, onErrorContainerLight),
+                    Triple("On Error Container", onErrorContainerLight, errorContainerLight),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary Fixed",
+                listOf(
+                    Triple("Primary Fixed", primaryContainerLight, onPrimaryContainerLight),
+                    Triple("Primary Fixed Dim", primaryLight, onPrimaryLight),
+                    Triple("On Primary Fixed", onPrimaryContainerLight, primaryContainerLight),
+                    Triple("On Primary Fixed Variant", onPrimaryLight, primaryLight),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary Fixed",
+                listOf(
+                    Triple("Secondary Fixed", secondaryContainerLight, onSecondaryContainerLight),
+                    Triple("Secondary Fixed Dim", secondaryLight, onSecondaryLight),
+                    Triple("On Secondary Fixed", onSecondaryContainerLight, secondaryContainerLight),
+                    Triple("On Secondary Fixed Variant", onSecondaryLight, secondaryLight),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary Fixed",
+                listOf(
+                    Triple("Tertiary Fixed", tertiaryContainerLight, onTertiaryContainerLight),
+                    Triple("Tertiary Fixed Dim", tertiaryLight, onTertiaryLight),
+                    Triple("On Tertiary Fixed", onTertiaryContainerLight, tertiaryContainerLight),
+                    Triple("On Tertiary Fixed Variant", onTertiaryLight, tertiaryLight),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Surfaces",
+                listOf(
+                    Triple("Surface Dim", surfaceDimLight, onSurfaceLight),
+                    Triple("Surface", surfaceLight, onSurfaceLight),
+                    Triple("Surface Bright", surfaceBrightLight, onSurfaceLight),
+                ),
+            )
+
+            ColorGroupSection(
+                "Surface Containers",
+                listOf(
+                    Triple("Lowest", surfaceContainerLowestLight, onSurfaceLight),
+                    Triple("Low", surfaceContainerLowLight, onSurfaceLight),
+                    Triple("Container", surfaceContainerLight, onSurfaceLight),
+                    Triple("High", surfaceContainerHighLight, onSurfaceLight),
+                    Triple("Highest", surfaceContainerHighestLight, onSurfaceLight),
+                ),
+            )
+
+            ColorGroupSection(
+                "On Surface & Outline",
+                listOf(
+                    Triple("On Surface", onSurfaceLight, surfaceLight),
+                    Triple("On Surface Variant", onSurfaceVariantLight, surfaceVariantLight),
+                    Triple("Outline", outlineLight, onSurfaceLight),
+                    Triple("Outline Variant", outlineVariantLight, onSurfaceLight),
+                ),
+            )
+
+            ColorGroupSection(
+                "Misc",
+                listOf(
+                    Triple("Inverse Surface", inverseSurfaceLight, inverseOnSurfaceLight),
+                    Triple("Inverse On Surface", inverseOnSurfaceLight, inverseSurfaceLight),
+                    Triple("Inverse Primary", inversePrimaryLight, onPrimaryLight),
+                    Triple("Scrim", scrimLight, onPrimaryLight),
+                ),
+            )
+        }
+    }
+}
+
+@Preview(name = "Full Dark Color Set", device = TV_1080p)
+@Composable
+private fun MaterialColorSystemFullDarkPreview() {
+    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary",
+                listOf(
+                    Triple("Primary", primaryDark, onPrimaryDark),
+                    Triple("On Primary", onPrimaryDark, primaryDark),
+                    Triple("Primary Container", primaryContainerDark, onPrimaryContainerDark),
+                    Triple("On Primary Container", onPrimaryContainerDark, primaryContainerDark),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary",
+                listOf(
+                    Triple("Secondary", secondaryDark, onSecondaryDark),
+                    Triple("On Secondary", onSecondaryDark, secondaryDark),
+                    Triple("Secondary Container", secondaryContainerDark, onSecondaryContainerDark),
+                    Triple("On Secondary Container", onSecondaryContainerDark, secondaryContainerDark),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary",
+                listOf(
+                    Triple("Tertiary", tertiaryDark, onTertiaryDark),
+                    Triple("On Tertiary", onTertiaryDark, tertiaryDark),
+                    Triple("Tertiary Container", tertiaryContainerDark, onTertiaryContainerDark),
+                    Triple("On Tertiary Container", onTertiaryContainerDark, tertiaryContainerDark),
+                ),
+            )
+            ColorGroupSection(
+                "Error",
+                listOf(
+                    Triple("Error", errorDark, onErrorDark),
+                    Triple("On Error", onErrorDark, errorDark),
+                    Triple("Error Container", errorContainerDark, onErrorContainerDark),
+                    Triple("On Error Container", onErrorContainerDark, errorContainerDark),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary Fixed",
+                listOf(
+                    Triple("Primary Fixed", primaryContainerDark, onPrimaryContainerDark),
+                    Triple("Primary Fixed Dim", primaryDark, onPrimaryDark),
+                    Triple("On Primary Fixed", onPrimaryContainerDark, primaryContainerDark),
+                    Triple("On Primary Fixed Variant", onPrimaryDark, primaryDark),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary Fixed",
+                listOf(
+                    Triple("Secondary Fixed", secondaryContainerDark, onSecondaryContainerDark),
+                    Triple("Secondary Fixed Dim", secondaryDark, onSecondaryDark),
+                    Triple("On Secondary Fixed", onSecondaryContainerDark, secondaryContainerDark),
+                    Triple("On Secondary Fixed Variant", onSecondaryDark, secondaryDark),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary Fixed",
+                listOf(
+                    Triple("Tertiary Fixed", tertiaryContainerDark, onTertiaryContainerDark),
+                    Triple("Tertiary Fixed Dim", tertiaryDark, onTertiaryDark),
+                    Triple("On Tertiary Fixed", onTertiaryContainerDark, tertiaryContainerDark),
+                    Triple("On Tertiary Fixed Variant", onTertiaryDark, tertiaryDark),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Surfaces",
+                listOf(
+                    Triple("Surface Dim", surfaceDimDark, onSurfaceDark),
+                    Triple("Surface", surfaceDark, onSurfaceDark),
+                    Triple("Surface Bright", surfaceBrightDark, onSurfaceDark),
+                ),
+            )
+
+            ColorGroupSection(
+                "Surface Containers",
+                listOf(
+                    Triple("Lowest", surfaceContainerLowestDark, onSurfaceDark),
+                    Triple("Low", surfaceContainerLowDark, onSurfaceDark),
+                    Triple("Container", surfaceContainerDark, onSurfaceDark),
+                    Triple("High", surfaceContainerHighDark, onSurfaceDark),
+                    Triple("Highest", surfaceContainerHighestDark, onSurfaceDark),
+                ),
+            )
+
+            ColorGroupSection(
+                "On Surface & Outline",
+                listOf(
+                    Triple("On Surface", onSurfaceDark, surfaceDark),
+                    Triple("On Surface Variant", onSurfaceVariantDark, surfaceVariantDark),
+                    Triple("Outline", outlineDark, onSurfaceDark),
+                    Triple("Outline Variant", outlineVariantDark, onSurfaceDark),
+                ),
+            )
+
+            ColorGroupSection(
+                "Misc",
+                listOf(
+                    Triple("Inverse Surface", inverseSurfaceDark, inverseOnSurfaceDark),
+                    Triple("Inverse On Surface", inverseOnSurfaceDark, inverseSurfaceDark),
+                    Triple("Inverse Primary", inversePrimaryDark, onPrimaryDark),
+                    Triple("Scrim", scrimDark, onPrimaryDark),
+                ),
+            )
+        }
+    }
+}
+
+@Preview(name = "Full Light Medium Contrast Color Set", device = TV_1080p)
+@Composable
+private fun MaterialColorSystemMediumContrastLightPreview() {
+    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary",
+                listOf(
+                    Triple("Primary", primaryLightMediumContrast, onPrimaryLightMediumContrast),
+                    Triple("On Primary", onPrimaryLightMediumContrast, primaryLightMediumContrast),
+                    Triple("Primary Container", primaryContainerLightMediumContrast, onPrimaryContainerLightMediumContrast),
+                    Triple("On Primary Container", onPrimaryContainerLightMediumContrast, primaryContainerLightMediumContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary",
+                listOf(
+                    Triple("Secondary", secondaryLightMediumContrast, onSecondaryLightMediumContrast),
+                    Triple("On Secondary", onSecondaryLightMediumContrast, secondaryLightMediumContrast),
+                    Triple("Secondary Container", secondaryContainerLightMediumContrast, onSecondaryContainerLightMediumContrast),
+                    Triple("On Secondary Container", onSecondaryContainerLightMediumContrast, secondaryContainerLightMediumContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary",
+                listOf(
+                    Triple("Tertiary", tertiaryLightMediumContrast, onTertiaryLightMediumContrast),
+                    Triple("On Tertiary", onTertiaryLightMediumContrast, tertiaryLightMediumContrast),
+                    Triple("Tertiary Container", tertiaryContainerLightMediumContrast, onTertiaryContainerLightMediumContrast),
+                    Triple("On Tertiary Container", onTertiaryContainerLightMediumContrast, tertiaryContainerLightMediumContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Error",
+                listOf(
+                    Triple("Error", errorLightMediumContrast, onErrorLightMediumContrast),
+                    Triple("On Error", onErrorLightMediumContrast, errorLightMediumContrast),
+                    Triple("Error Container", errorContainerLightMediumContrast, onErrorContainerLightMediumContrast),
+                    Triple("On Error Container", onErrorContainerLightMediumContrast, errorContainerLightMediumContrast),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary Fixed",
+                listOf(
+                    Triple("Primary Fixed", primaryContainerLightMediumContrast, onPrimaryContainerLightMediumContrast),
+                    Triple("Primary Fixed Dim", primaryLightMediumContrast, onPrimaryLightMediumContrast),
+                    Triple("On Primary Fixed", onPrimaryContainerLightMediumContrast, primaryContainerLightMediumContrast),
+                    Triple("On Primary Fixed Variant", onPrimaryLightMediumContrast, primaryLightMediumContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary Fixed",
+                listOf(
+                    Triple("Secondary Fixed", secondaryContainerLightMediumContrast, onSecondaryContainerLightMediumContrast),
+                    Triple("Secondary Fixed Dim", secondaryLightMediumContrast, onSecondaryLightMediumContrast),
+                    Triple("On Secondary Fixed", onSecondaryContainerLightMediumContrast, secondaryContainerLightMediumContrast),
+                    Triple("On Secondary Fixed Variant", onSecondaryLightMediumContrast, secondaryLightMediumContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary Fixed",
+                listOf(
+                    Triple("Tertiary Fixed", tertiaryContainerLightMediumContrast, onTertiaryContainerLightMediumContrast),
+                    Triple("Tertiary Fixed Dim", tertiaryLightMediumContrast, onTertiaryLightMediumContrast),
+                    Triple("On Tertiary Fixed", onTertiaryContainerLightMediumContrast, tertiaryContainerLightMediumContrast),
+                    Triple("On Tertiary Fixed Variant", onTertiaryLightMediumContrast, tertiaryLightMediumContrast),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Surfaces",
+                listOf(
+                    Triple("Surface Dim", surfaceDimLightMediumContrast, onSurfaceLightMediumContrast),
+                    Triple("Surface", surfaceLightMediumContrast, onSurfaceLightMediumContrast),
+                    Triple("Surface Bright", surfaceBrightLightMediumContrast, onSurfaceLightMediumContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "Surface Containers",
+                listOf(
+                    Triple("Lowest", surfaceContainerLowestLightMediumContrast, onSurfaceLightMediumContrast),
+                    Triple("Low", surfaceContainerLowLightMediumContrast, onSurfaceLightMediumContrast),
+                    Triple("Container", surfaceContainerLightMediumContrast, onSurfaceLightMediumContrast),
+                    Triple("High", surfaceContainerHighLightMediumContrast, onSurfaceLightMediumContrast),
+                    Triple("Highest", surfaceContainerHighestLightMediumContrast, onSurfaceLightMediumContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "On Surface & Outline",
+                listOf(
+                    Triple("On Surface", onSurfaceLightMediumContrast, surfaceLightMediumContrast),
+                    Triple("On Surface Variant", onSurfaceVariantLightMediumContrast, surfaceVariantLightMediumContrast),
+                    Triple("Outline", outlineLightMediumContrast, onSurfaceLightMediumContrast),
+                    Triple("Outline Variant", outlineVariantLightMediumContrast, onSurfaceLightMediumContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "Misc",
+                listOf(
+                    Triple("Inverse Surface", inverseSurfaceLightMediumContrast, inverseOnSurfaceLightMediumContrast),
+                    Triple("Inverse On Surface", inverseOnSurfaceLightMediumContrast, inverseSurfaceLightMediumContrast),
+                    Triple("Inverse Primary", inversePrimaryLightMediumContrast, onPrimaryLightMediumContrast),
+                    Triple("Scrim", scrimLightMediumContrast, onPrimaryLightMediumContrast),
+                ),
+            )
+        }
+    }
+}
+
+@Preview(name = "Full Dark Medium Contrast Color Set", device = TV_1080p)
+@Composable
+private fun MaterialColorSystemMediumContrastDarkPreview() {
+    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary",
+                listOf(
+                    Triple("Primary", primaryDarkMediumContrast, onPrimaryDarkMediumContrast),
+                    Triple("On Primary", onPrimaryDarkMediumContrast, primaryDarkMediumContrast),
+                    Triple("Primary Container", primaryContainerDarkMediumContrast, onPrimaryContainerDarkMediumContrast),
+                    Triple("On Primary Container", onPrimaryContainerDarkMediumContrast, primaryContainerDarkMediumContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary",
+                listOf(
+                    Triple("Secondary", secondaryDarkMediumContrast, onSecondaryDarkMediumContrast),
+                    Triple("On Secondary", onSecondaryDarkMediumContrast, secondaryDarkMediumContrast),
+                    Triple("Secondary Container", secondaryContainerDarkMediumContrast, onSecondaryContainerDarkMediumContrast),
+                    Triple("On Secondary Container", onSecondaryContainerDarkMediumContrast, secondaryContainerDarkMediumContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary",
+                listOf(
+                    Triple("Tertiary", tertiaryDarkMediumContrast, onTertiaryDarkMediumContrast),
+                    Triple("On Tertiary", onTertiaryDarkMediumContrast, tertiaryDarkMediumContrast),
+                    Triple("Tertiary Container", tertiaryContainerDarkMediumContrast, onTertiaryContainerDarkMediumContrast),
+                    Triple("On Tertiary Container", onTertiaryContainerDarkMediumContrast, tertiaryContainerDarkMediumContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Error",
+                listOf(
+                    Triple("Error", errorDarkMediumContrast, onErrorDarkMediumContrast),
+                    Triple("On Error", onErrorDarkMediumContrast, errorDarkMediumContrast),
+                    Triple("Error Container", errorContainerDarkMediumContrast, onErrorContainerDarkMediumContrast),
+                    Triple("On Error Container", onErrorContainerDarkMediumContrast, errorContainerDarkMediumContrast),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary Fixed",
+                listOf(
+                    Triple("Primary Fixed", primaryContainerDarkMediumContrast, onPrimaryContainerDarkMediumContrast),
+                    Triple("Primary Fixed Dim", primaryDarkMediumContrast, onPrimaryDarkMediumContrast),
+                    Triple("On Primary Fixed", onPrimaryContainerDarkMediumContrast, primaryContainerDarkMediumContrast),
+                    Triple("On Primary Fixed Variant", onPrimaryDarkMediumContrast, primaryDarkMediumContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary Fixed",
+                listOf(
+                    Triple("Secondary Fixed", secondaryContainerDarkMediumContrast, onSecondaryContainerDarkMediumContrast),
+                    Triple("Secondary Fixed Dim", secondaryDarkMediumContrast, onSecondaryDarkMediumContrast),
+                    Triple("On Secondary Fixed", onSecondaryContainerDarkMediumContrast, secondaryContainerDarkMediumContrast),
+                    Triple("On Secondary Fixed Variant", onSecondaryDarkMediumContrast, secondaryDarkMediumContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary Fixed",
+                listOf(
+                    Triple("Tertiary Fixed", tertiaryContainerDarkMediumContrast, onTertiaryContainerDarkMediumContrast),
+                    Triple("Tertiary Fixed Dim", tertiaryDarkMediumContrast, onTertiaryDarkMediumContrast),
+                    Triple("On Tertiary Fixed", onTertiaryContainerDarkMediumContrast, tertiaryContainerDarkMediumContrast),
+                    Triple("On Tertiary Fixed Variant", onTertiaryDarkMediumContrast, tertiaryDarkMediumContrast),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Surfaces",
+                listOf(
+                    Triple("Surface Dim", surfaceDimDarkMediumContrast, onSurfaceDarkMediumContrast),
+                    Triple("Surface", surfaceDarkMediumContrast, onSurfaceDarkMediumContrast),
+                    Triple("Surface Bright", surfaceBrightDarkMediumContrast, onSurfaceDarkMediumContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "Surface Containers",
+                listOf(
+                    Triple("Lowest", surfaceContainerLowestDarkMediumContrast, onSurfaceDarkMediumContrast),
+                    Triple("Low", surfaceContainerLowDarkMediumContrast, onSurfaceDarkMediumContrast),
+                    Triple("Container", surfaceContainerDarkMediumContrast, onSurfaceDarkMediumContrast),
+                    Triple("High", surfaceContainerHighDarkMediumContrast, onSurfaceDarkMediumContrast),
+                    Triple("Highest", surfaceContainerHighestDarkMediumContrast, onSurfaceDarkMediumContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "On Surface & Outline",
+                listOf(
+                    Triple("On Surface", onSurfaceDarkMediumContrast, surfaceDarkMediumContrast),
+                    Triple("On Surface Variant", onSurfaceVariantDarkMediumContrast, surfaceVariantDarkMediumContrast),
+                    Triple("Outline", outlineDarkMediumContrast, onSurfaceDarkMediumContrast),
+                    Triple("Outline Variant", outlineVariantDarkMediumContrast, onSurfaceDarkMediumContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "Misc",
+                listOf(
+                    Triple("Inverse Surface", inverseSurfaceDarkMediumContrast, inverseOnSurfaceDarkMediumContrast),
+                    Triple("Inverse On Surface", inverseOnSurfaceDarkMediumContrast, inverseSurfaceDarkMediumContrast),
+                    Triple("Inverse Primary", inversePrimaryDarkMediumContrast, onPrimaryDarkMediumContrast),
+                    Triple("Scrim", scrimDarkMediumContrast, onPrimaryDarkMediumContrast),
+                ),
+            )
+        }
+    }
+}
+
+@Preview(name = "Full Light High Contrast Color Set", device = TV_1080p)
+@Composable
+private fun MaterialColorSystemHighContrastLightPreview() {
+    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary",
+                listOf(
+                    Triple("Primary", primaryLightHighContrast, onPrimaryLightHighContrast),
+                    Triple("On Primary", onPrimaryLightHighContrast, primaryLightHighContrast),
+                    Triple("Primary Container", primaryContainerLightHighContrast, onPrimaryContainerLightHighContrast),
+                    Triple("On Primary Container", onPrimaryContainerLightHighContrast, primaryContainerLightHighContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary",
+                listOf(
+                    Triple("Secondary", secondaryLightHighContrast, onSecondaryLightHighContrast),
+                    Triple("On Secondary", onSecondaryLightHighContrast, secondaryLightHighContrast),
+                    Triple("Secondary Container", secondaryContainerLightHighContrast, onSecondaryContainerLightHighContrast),
+                    Triple("On Secondary Container", onSecondaryContainerLightHighContrast, secondaryContainerLightHighContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary",
+                listOf(
+                    Triple("Tertiary", tertiaryLightHighContrast, onTertiaryLightHighContrast),
+                    Triple("On Tertiary", onTertiaryLightHighContrast, tertiaryLightHighContrast),
+                    Triple("Tertiary Container", tertiaryContainerLightHighContrast, onTertiaryContainerLightHighContrast),
+                    Triple("On Tertiary Container", onTertiaryContainerLightHighContrast, tertiaryContainerLightHighContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Error",
+                listOf(
+                    Triple("Error", errorLightHighContrast, onErrorLightHighContrast),
+                    Triple("On Error", onErrorLightHighContrast, errorLightHighContrast),
+                    Triple("Error Container", errorContainerLightHighContrast, onErrorContainerLightHighContrast),
+                    Triple("On Error Container", onErrorContainerLightHighContrast, errorContainerLightHighContrast),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary Fixed",
+                listOf(
+                    Triple("Primary Fixed", primaryContainerLightHighContrast, onPrimaryContainerLightHighContrast),
+                    Triple("Primary Fixed Dim", primaryLightHighContrast, onPrimaryLightHighContrast),
+                    Triple("On Primary Fixed", onPrimaryContainerLightHighContrast, primaryContainerLightHighContrast),
+                    Triple("On Primary Fixed Variant", onPrimaryLightHighContrast, primaryLightHighContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary Fixed",
+                listOf(
+                    Triple("Secondary Fixed", secondaryContainerLightHighContrast, onSecondaryContainerLightHighContrast),
+                    Triple("Secondary Fixed Dim", secondaryLightHighContrast, onSecondaryLightHighContrast),
+                    Triple("On Secondary Fixed", onSecondaryContainerLightHighContrast, secondaryContainerLightHighContrast),
+                    Triple("On Secondary Fixed Variant", onSecondaryLightHighContrast, secondaryLightHighContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary Fixed",
+                listOf(
+                    Triple("Tertiary Fixed", tertiaryContainerLightHighContrast, onTertiaryContainerLightHighContrast),
+                    Triple("Tertiary Fixed Dim", tertiaryLightHighContrast, onTertiaryLightHighContrast),
+                    Triple("On Tertiary Fixed", onTertiaryContainerLightHighContrast, tertiaryContainerLightHighContrast),
+                    Triple("On Tertiary Fixed Variant", onTertiaryLightHighContrast, tertiaryLightHighContrast),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Surfaces",
+                listOf(
+                    Triple("Surface Dim", surfaceDimLightHighContrast, onSurfaceLightHighContrast),
+                    Triple("Surface", surfaceLightHighContrast, onSurfaceLightHighContrast),
+                    Triple("Surface Bright", surfaceBrightLightHighContrast, onSurfaceLightHighContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "Surface Containers",
+                listOf(
+                    Triple("Lowest", surfaceContainerLowestLightHighContrast, onSurfaceLightHighContrast),
+                    Triple("Low", surfaceContainerLowLightHighContrast, onSurfaceLightHighContrast),
+                    Triple("Container", surfaceContainerLightHighContrast, onSurfaceLightHighContrast),
+                    Triple("High", surfaceContainerHighLightHighContrast, onSurfaceLightHighContrast),
+                    Triple("Highest", surfaceContainerHighestLightHighContrast, onSurfaceLightHighContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "On Surface & Outline",
+                listOf(
+                    Triple("On Surface", onSurfaceLightHighContrast, surfaceLightHighContrast),
+                    Triple("On Surface Variant", onSurfaceVariantLightHighContrast, surfaceVariantLightHighContrast),
+                    Triple("Outline", outlineLightHighContrast, onSurfaceLightHighContrast),
+                    Triple("Outline Variant", outlineVariantLightHighContrast, onSurfaceLightHighContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "Misc",
+                listOf(
+                    Triple("Inverse Surface", inverseSurfaceLightHighContrast, inverseOnSurfaceLightHighContrast),
+                    Triple("Inverse On Surface", inverseOnSurfaceLightHighContrast, inverseSurfaceLightHighContrast),
+                    Triple("Inverse Primary", inversePrimaryLightHighContrast, onPrimaryLightHighContrast),
+                    Triple("Scrim", scrimLightHighContrast, onPrimaryLightHighContrast),
+                ),
+            )
+        }
+    }
+}
+
+@Preview(name = "Full Dark High Contrast Set", device = TV_1080p)
+@Composable
+private fun MaterialColorSystemHighContrastDarkPreview() {
+    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary",
+                listOf(
+                    Triple("Primary", primaryDarkHighContrast, onPrimaryDarkHighContrast),
+                    Triple("On Primary", onPrimaryDarkHighContrast, primaryDarkHighContrast),
+                    Triple("Primary Container", primaryContainerDarkHighContrast, onPrimaryContainerDarkHighContrast),
+                    Triple("On Primary Container", onPrimaryContainerDarkHighContrast, primaryContainerDarkHighContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary",
+                listOf(
+                    Triple("Secondary", secondaryDarkHighContrast, onSecondaryDarkHighContrast),
+                    Triple("On Secondary", onSecondaryDarkHighContrast, secondaryDarkHighContrast),
+                    Triple("Secondary Container", secondaryContainerDarkHighContrast, onSecondaryContainerDarkHighContrast),
+                    Triple("On Secondary Container", onSecondaryContainerDarkHighContrast, secondaryContainerDarkHighContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary",
+                listOf(
+                    Triple("Tertiary", tertiaryDarkHighContrast, onTertiaryDarkHighContrast),
+                    Triple("On Tertiary", onTertiaryDarkHighContrast, tertiaryDarkHighContrast),
+                    Triple("Tertiary Container", tertiaryContainerDarkHighContrast, onTertiaryContainerDarkHighContrast),
+                    Triple("On Tertiary Container", onTertiaryContainerDarkHighContrast, tertiaryContainerDarkHighContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Error",
+                listOf(
+                    Triple("Error", errorDarkHighContrast, onErrorDarkHighContrast),
+                    Triple("On Error", onErrorDarkHighContrast, errorDarkHighContrast),
+                    Triple("Error Container", errorContainerDarkHighContrast, onErrorContainerDarkHighContrast),
+                    Triple("On Error Container", onErrorContainerDarkHighContrast, errorContainerDarkHighContrast),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Primary Fixed",
+                listOf(
+                    Triple("Primary Fixed", primaryContainerDarkHighContrast, onPrimaryContainerDarkHighContrast),
+                    Triple("Primary Fixed Dim", primaryDarkHighContrast, onPrimaryDarkHighContrast),
+                    Triple("On Primary Fixed", onPrimaryContainerDarkHighContrast, primaryContainerDarkHighContrast),
+                    Triple("On Primary Fixed Variant", onPrimaryDarkHighContrast, primaryDarkHighContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Secondary Fixed",
+                listOf(
+                    Triple("Secondary Fixed", secondaryContainerDarkHighContrast, onSecondaryContainerDarkHighContrast),
+                    Triple("Secondary Fixed Dim", secondaryDarkHighContrast, onSecondaryDarkHighContrast),
+                    Triple("On Secondary Fixed", onSecondaryContainerDarkHighContrast, secondaryContainerDarkHighContrast),
+                    Triple("On Secondary Fixed Variant", onSecondaryDarkHighContrast, secondaryDarkHighContrast),
+                ),
+            )
+            ColorGroupSection(
+                "Tertiary Fixed",
+                listOf(
+                    Triple("Tertiary Fixed", tertiaryContainerDarkHighContrast, onTertiaryContainerDarkHighContrast),
+                    Triple("Tertiary Fixed Dim", tertiaryDarkHighContrast, onTertiaryDarkHighContrast),
+                    Triple("On Tertiary Fixed", onTertiaryContainerDarkHighContrast, tertiaryContainerDarkHighContrast),
+                    Triple("On Tertiary Fixed Variant", onTertiaryDarkHighContrast, tertiaryDarkHighContrast),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Surfaces",
+                listOf(
+                    Triple("Surface Dim", surfaceDimDarkHighContrast, onSurfaceDarkHighContrast),
+                    Triple("Surface", surfaceDarkHighContrast, onSurfaceDarkHighContrast),
+                    Triple("Surface Bright", surfaceBrightDarkHighContrast, onSurfaceDarkHighContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "Surface Containers",
+                listOf(
+                    Triple("Lowest", surfaceContainerLowestDarkHighContrast, onSurfaceDarkHighContrast),
+                    Triple("Low", surfaceContainerLowDarkHighContrast, onSurfaceDarkHighContrast),
+                    Triple("Container", surfaceContainerDarkHighContrast, onSurfaceDarkHighContrast),
+                    Triple("High", surfaceContainerHighDarkHighContrast, onSurfaceDarkHighContrast),
+                    Triple("Highest", surfaceContainerHighestDarkHighContrast, onSurfaceDarkHighContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "On Surface & Outline",
+                listOf(
+                    Triple("On Surface", onSurfaceDarkHighContrast, surfaceDarkHighContrast),
+                    Triple("On Surface Variant", onSurfaceVariantDarkHighContrast, surfaceVariantDarkHighContrast),
+                    Triple("Outline", outlineDarkHighContrast, onSurfaceDarkHighContrast),
+                    Triple("Outline Variant", outlineVariantDarkHighContrast, onSurfaceDarkHighContrast),
+                ),
+            )
+
+            ColorGroupSection(
+                "Misc",
+                listOf(
+                    Triple("Inverse Surface", inverseSurfaceDarkHighContrast, inverseOnSurfaceDarkHighContrast),
+                    Triple("Inverse On Surface", inverseOnSurfaceDarkHighContrast, inverseSurfaceDarkHighContrast),
+                    Triple("Inverse Primary", inversePrimaryDarkHighContrast, onPrimaryDarkHighContrast),
+                    Triple("Scrim", scrimDarkHighContrast, primaryDarkHighContrast),
+                ),
+            )
+        }
+    }
+}
+
+@Preview(name = "Full Custom Color Set", device = TV_1080p)
+@Composable
+private fun MaterialColorSystemFullCustomLightPreview() {
+    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Custom Light",
+                listOf(
+                    Triple("Custom", customColorLight, onCustomColorLight),
+                    Triple("On Custom", onCustomColorLight, customColorLight),
+                    Triple("Custom Container", customColorContainerLight, onCustomColorContainerLight),
+                    Triple("On Custom Container", onCustomColorContainerLight, customColorContainerLight),
+                ),
+            )
+
+            ColorGroupSection(
+                "Custom Dark",
+                listOf(
+                    Triple("Custom", customColorDark, onCustomColorDark),
+                    Triple("On Custom", onCustomColorDark, customColorDark),
+                    Triple("Custom Container", customColorContainerDark, onCustomColorContainerDark),
+                    Triple("On Custom Container", onCustomColorContainerDark, customColorContainerLight),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Custom Light Medium Contrast",
+                listOf(
+                    Triple("Custom", customColorLightMediumContrast, onCustomColorLightMediumContrast),
+                    Triple("On Custom", onCustomColorLightMediumContrast, customColorLightMediumContrast),
+                    Triple(
+                        "Custom Container",
+                        customColorContainerLightMediumContrast,
+                        onCustomColorContainerLightMediumContrast,
+                    ),
+                    Triple(
+                        "On Custom Container",
+                        onCustomColorContainerLightMediumContrast,
+                        customColorContainerLightMediumContrast,
+                    ),
+                ),
+            )
+
+            ColorGroupSection(
+                "Custom Dark Medium Contrast",
+                listOf(
+                    Triple("Custom", customColorDarkMediumContrast, onCustomColorDarkMediumContrast),
+                    Triple("On Custom", onCustomColorDarkMediumContrast, customColorDarkMediumContrast),
+                    Triple(
+                        "Custom Container",
+                        customColorContainerDarkMediumContrast,
+                        onCustomColorContainerDarkMediumContrast,
+                    ),
+                    Triple(
+                        "On Custom Container",
+                        onCustomColorContainerDarkMediumContrast,
+                        customColorContainerDarkMediumContrast,
+                    ),
+                ),
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ColorGroupSection(
+                "Custom Light High Contrast",
+                listOf(
+                    Triple("Custom", customColorLightHighContrast, onCustomColorLightHighContrast),
+                    Triple("On Custom", onCustomColorLightHighContrast, customColorLightHighContrast),
+                    Triple(
+                        "Custom Container",
+                        customColorContainerLightHighContrast,
+                        onCustomColorContainerLightHighContrast,
+                    ),
+                    Triple(
+                        "On Custom Container",
+                        onCustomColorContainerLightHighContrast,
+                        customColorContainerLightHighContrast,
+                    ),
+                ),
+            )
+
+            ColorGroupSection(
+                "Custom Dark High Contrast",
+                listOf(
+                    Triple("Custom", customColorDarkHighContrast, onCustomColorDarkHighContrast),
+                    Triple("On Custom", onCustomColorDarkHighContrast, customColorDarkHighContrast),
+                    Triple(
+                        "Custom Container",
+                        customColorContainerDarkHighContrast,
+                        onCustomColorContainerDarkHighContrast,
+                    ),
+                    Triple(
+                        "On Custom Container",
+                        onCustomColorContainerDarkHighContrast,
+                        customColorContainerDarkHighContrast,
+                    ),
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColorGroupSection(
+    title: String,
+    swatches: List<Triple<String, Color, Color>>,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.padding(vertical = 12.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+        Column {
+            swatches.chunked(2).forEach { column ->
+                Column {
+                    column.forEach { (label, bg, fg) ->
+                        Box(
+                            modifier =
+                                Modifier
+                                    .height(60.dp)
+                                    .width(240.dp)
+                                    .background(bg),
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(start = 8.dp, top = 8.dp),
+                                text = label,
+                                color = fg,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

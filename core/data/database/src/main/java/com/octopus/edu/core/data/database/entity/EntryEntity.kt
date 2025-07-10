@@ -13,6 +13,7 @@ data class EntryEntity(
     val description: String?,
     val isDone: Boolean = false,
     val dueDate: Long? = null,
+    val time: Long? = null,
     val recurrence: Recurrence? = null,
     val streakCount: Int? = null,
     val lastCompletedDate: Long? = null,

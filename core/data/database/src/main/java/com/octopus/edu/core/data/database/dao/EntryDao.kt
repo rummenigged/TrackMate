@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
 import com.octopus.edu.core.data.database.entity.EntryEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EntryDao {
@@ -16,4 +17,7 @@ interface EntryDao {
 
     @Query("SELECT * FROM entries WHERE type = 'TASK'")
     suspend fun getTasks(): List<EntryEntity>
+
+    @Query("SELECT * FROM entries ORDER BY time IS NOT NULL, time")
+    fun getAllEntriesOrderedByTimeAsc(): Flow<List<EntryEntity>>
 }

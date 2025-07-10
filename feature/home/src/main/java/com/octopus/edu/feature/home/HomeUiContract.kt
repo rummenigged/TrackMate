@@ -1,60 +1,76 @@
 package com.octopus.edu.feature.home
 
-import com.octopus.edu.core.domain.model.Habit
+import androidx.compose.runtime.Stable
+import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Recurrence
-import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.ui.common.base.ViewEffect
 import com.octopus.edu.core.ui.common.base.ViewEvent
 import com.octopus.edu.core.ui.common.base.ViewState
-import com.octopus.edu.feature.home.HomeUiContract.Tab.Habits
-import com.octopus.edu.feature.home.HomeUiContract.Tab.Tasks
+import com.octopus.edu.feature.home.models.EntryCreationState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-
-internal fun Habit.getRecurrenceAsText(): String? =
-    when (recurrence) {
-        Recurrence.Custom -> null
-        Recurrence.Daily -> "Daily"
-        Recurrence.Weekly -> "Weekly"
-        null -> null
-    }
+import java.time.LocalDate
 
 internal object HomeUiContract {
+    @Stable
     data class UiState(
-        val tasks: ImmutableList<Task> = persistentListOf(),
-        val habits: ImmutableList<Habit> = persistentListOf(),
-        val tabSelected: Tab = Habits(),
+        val entries: ImmutableList<Entry> = persistentListOf(),
         val isLoading: Boolean = false,
-    ) : ViewState {
-        val tabs: List<Tab> = listOf(Habits(), Tasks())
-
-        val tabTitles: List<String>
-            get() = tabs.map { it.title }
-
-        fun getTab(position: Int): Tab = tabs[position]
-    }
-
-    sealed class Tab(
-        open val title: String,
-    ) {
-        data class Habits(
-            override val title: String = "Habit",
-        ) : Tab(title)
-
-        data class Tasks(
-            override val title: String = "Tasks",
-        ) : Tab(title)
-    }
+        val entryCreationState: EntryCreationState = EntryCreationState(),
+    ) : ViewState
 
     sealed interface UiEffect : ViewEffect {
         data class ShowError(
             val message: String,
         ) : UiEffect
+
+        data object ShowEntrySuccessfullyCreated : UiEffect
     }
 
     sealed interface UiEvent : ViewEvent {
-        data class OnTabSelected(
-            val tab: Tab,
+        sealed interface Entry {
+            data object Add : UiEvent
+
+            data object Save : UiEvent
+        }
+
+        sealed interface AddEntry {
+            data object Cancel : UiEvent
+
+            data object ShowSettingsPicker : UiEvent
+
+            data object ConfirmDateAndTimeSettings : UiEvent
+
+            data object CancelDateAndTimeSettings : UiEvent
+
+            data object ShowTimePicker : UiEvent
+
+            data object HideTimePicker : UiEvent
+
+            data object ShowRecurrencePicker : UiEvent
+
+            data object HideRecurrencePicker : UiEvent
+        }
+
+        data class UpdateEntryTitle(
+            val title: String,
+        ) : UiEvent
+
+        data class UpdateEntryDescription(
+            val description: String,
+        ) : UiEvent
+
+        data class UpdateEntryDate(
+            val date: LocalDate,
+        ) : UiEvent
+
+        data class UpdateEntryTime(
+            val hour: Int,
+            val minute: Int,
+        ) : UiEvent
+
+        data class UpdateEntryRecurrence(
+            val recurrence: Recurrence
         ) : UiEvent
     }
 }

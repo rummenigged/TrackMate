@@ -14,6 +14,7 @@ interface ViewEvent
 
 abstract class BaseViewModel<UiState : ViewState, Effect : ViewEffect, Event : ViewEvent> : ViewModel() {
     private val _uiStateFlow by lazy { MutableStateFlow(getInitialState()) }
+
     val uiStateFlow
         get() = _uiStateFlow.asStateFlow()
 
