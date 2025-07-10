@@ -2,6 +2,8 @@ package com.octopus.edu.core.data.entry
 
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.entry.utils.toHabitOrNull
+import com.octopus.edu.core.data.entry.utils.toInstant
+import com.octopus.edu.core.data.entry.utils.toLocalDate
 import com.octopus.edu.core.data.entry.utils.toTaskOrNull
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Recurrence
@@ -14,7 +16,7 @@ import java.time.LocalDate
 
 class EntryMapperTest {
     @Test
-    fun toTask_mapsEntryEntityToTaskCorrectly() {
+    fun toTaskMapsEntryEntityToTaskCorrectly() {
         val entity =
             EntryEntity(
                 id = "task-1",
@@ -26,8 +28,8 @@ class EntryMapperTest {
                 recurrence = null,
                 streakCount = null,
                 lastCompletedDate = null,
-                createdAt = 1L,
-                updatedAt = 2L,
+                createdAt = LocalDate.of(2025, 6, 30).toEpochDay(),
+                updatedAt = LocalDate.of(2025, 7, 20).toEpochDay(),
             )
 
         val task = entity.toTaskOrNull()
@@ -36,14 +38,14 @@ class EntryMapperTest {
         assertEquals("task-1", task?.id)
         assertEquals("Finish report", task?.title)
         assertEquals("Due tomorrow", task?.description)
-        assertEquals("20269", task?.dueDate)
+        assertEquals(entity.dueDate?.toLocalDate(), task?.dueDate)
         assertFalse(task?.isDone == true)
-        assertEquals("1", task?.createdAt)
-        assertEquals("2", task?.updatedAt)
+        assertEquals(entity.createdAt.toInstant(), task?.createdAt)
+        assertEquals(entity.updatedAt?.toInstant(), task?.updatedAt)
     }
 
     @Test
-    fun toHabit_mapsEntryEntityToHabitCorrectly() {
+    fun toHabitMapsEntryEntityToHabitCorrectly() {
         val entity =
             EntryEntity(
                 id = "habit-1",
@@ -68,13 +70,13 @@ class EntryMapperTest {
         assertTrue(habit?.isDone == true)
         assertEquals(Recurrence.Daily, habit?.recurrence)
         assertEquals(5, habit?.streakCount)
-        assertEquals("20266", habit?.lastCompletedDate)
-        assertEquals("100", habit?.createdAt)
-        assertEquals("200", habit?.updatedAt)
+        assertEquals(entity.lastCompletedDate?.toInstant(), habit?.lastCompletedDate)
+        assertEquals(entity.createdAt.toInstant(), habit?.createdAt)
+        assertEquals(entity.updatedAt?.toInstant(), habit?.updatedAt)
     }
 
     @Test
-    fun toTask_returnsNullIfTypeIsNotTask() {
+    fun toTaskReturnsNullIfTypeIsNotTask() {
         val invalid =
             EntryEntity(
                 id = "wrong",

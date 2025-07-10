@@ -11,11 +11,11 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 
-private fun Long.toLocalDate() = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+fun Long.toLocalDate() = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
 
-private fun Long.toLocalTime() = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalTime()
+fun Long.toLocalTime() = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalTime()
 
-private fun Long.toInstant() = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toInstant()
+fun Long.toInstant() = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toInstant()
 
 private fun LocalTime.toEpochMilli(): Long =
     this
