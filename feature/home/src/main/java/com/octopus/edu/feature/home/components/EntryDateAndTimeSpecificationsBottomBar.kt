@@ -60,7 +60,7 @@ internal fun EntryDateAndTimeSpecificationsBottomBar(
 
             TrackMateDatePicker(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                selectedDate = state.dataDraftSnapshot.currentEntryDate ?: state.data.currentEntryDateOrToday,
+                selectedDate = state.dataDraftSnapshot.date ?: state.data.currentEntryDateOrToday,
                 onDateSelected = { date -> onEvent(UiEvent.UpdateEntryDate(date)) },
             )
 
