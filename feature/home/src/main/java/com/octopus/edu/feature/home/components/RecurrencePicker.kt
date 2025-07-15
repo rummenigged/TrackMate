@@ -15,6 +15,10 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -22,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateDialog
 import com.octopus.edu.core.domain.model.Recurrence
-import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.R
 import com.octopus.edu.feature.home.models.EntryCreationState
 import com.octopus.edu.feature.home.models.getRecurrenceAsStringRes
@@ -30,49 +33,53 @@ import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 internal fun RecurrencePicker(
-    onEvent: (UiEvent) -> Unit,
-    currentEntryRecurrency: Recurrence?,
+    currentRecurrence: Recurrence?,
+    onDismiss: () -> Unit,
+    onConfirm: (Recurrence) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var internalRecurrence by remember(currentRecurrence) {
+        mutableStateOf(currentRecurrence ?: Recurrence.None)
+    }
     TrackMateDialog(
         modifier = modifier,
         title = R.string.recurrence,
         confirmText = R.string.ok,
         dismissText = R.string.cancel,
-        onDismiss = { onEvent(UiEvent.AddEntry.HideRecurrencePicker) },
-        onConfirm = { onEvent(UiEvent.AddEntry.HideRecurrencePicker) },
+        onDismiss = { onDismiss() },
+        onConfirm = { onConfirm(internalRecurrence) },
     ) {
-        RecurrenceOptions(
+        ReminderOptions(
             recurrences = EntryCreationState.recurrenceOptions,
-            selectedRecurrence = currentEntryRecurrency,
-            onEvent = onEvent,
+            selectedRecurrence = internalRecurrence,
+            onOptionSelected = { recurrence -> internalRecurrence = recurrence },
         )
     }
 }
 
 @Composable
-private fun RecurrenceOptions(
+private fun ReminderOptions(
     recurrences: ImmutableList<Recurrence>,
-    onEvent: (UiEvent) -> Unit,
+    selectedRecurrence: Recurrence,
+    onOptionSelected: (Recurrence) -> Unit,
     modifier: Modifier = Modifier,
-    selectedRecurrence: Recurrence?,
 ) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items(recurrences) { recurrence ->
-            RecurrenceItem(
+            ReminderItem(
                 recurrence,
-                isSelected = if (selectedRecurrence == null) recurrence == Recurrence.None else recurrence == selectedRecurrence,
-                onItemClicked = { recurrence -> onEvent(UiEvent.UpdateEntryRecurrence(recurrence)) },
+                isSelected = recurrence == selectedRecurrence,
+                onItemClicked = { recurrence -> onOptionSelected(recurrence) },
             )
         }
     }
 }
 
 @Composable
-private fun RecurrenceItem(
+private fun ReminderItem(
     recurrence: Recurrence,
     isSelected: Boolean,
     onItemClicked: (Recurrence) -> Unit,
@@ -109,8 +116,9 @@ private fun RecurrenceItem(
 private fun RecurrenceDialogPreview() {
     TrackMateTheme {
         RecurrencePicker(
-            currentEntryRecurrency = Recurrence.None,
-            onEvent = {},
+            currentRecurrence = Recurrence.None,
+            onDismiss = {},
+            onConfirm = {},
         )
     }
 }
