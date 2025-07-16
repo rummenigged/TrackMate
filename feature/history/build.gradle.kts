@@ -38,6 +38,17 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packaging {
+        resources {
+            excludes.addAll(
+                setOf(
+                    "META-INF/LICENSE.md",
+                    "META-INF/LICENSE-notice.md",
+                ),
+            )
+        }
+    }
 }
 
 dependencies {
