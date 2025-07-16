@@ -62,4 +62,12 @@ class EntryRepositoryImpl
             ) {
                 entryStore.saveEntry(entry.toEntity())
             }
+
+        override suspend fun getEntryById(id: String): ResultOperation<Entry> =
+            safeCall(dispatcher = Dispatchers.IO) {
+                entryStore
+                    .getEntryById(id)
+                    ?.toDomain()
+                    ?: throw NoSuchElementException("Invalid or missing entry with id $id")
+            }
     }
