@@ -33,6 +33,23 @@ data class Task(
     companion object
 }
 
+@OptIn(ExperimentalTime::class)
+data class Habit(
+    override val id: String,
+    override val title: String,
+    override val description: String,
+    override val isDone: Boolean,
+    override val time: LocalTime?,
+    override val createdAt: Instant,
+    override val updatedAt: Instant? = null,
+    override val reminder: Reminder? = null,
+    val recurrence: Recurrence?,
+    val streakCount: Int? = null,
+    val lastCompletedDate: Instant? = null,
+) : Entry() {
+    companion object
+}
+
 sealed class Recurrence {
     object Daily : Recurrence()
 
@@ -81,23 +98,6 @@ sealed class Reminder {
     data object ThreeDaysEarly : Reminder() {
         override val offset: Duration = Duration.ofDays(3)
     }
-}
-
-@OptIn(ExperimentalTime::class)
-data class Habit(
-    override val id: String,
-    override val title: String,
-    override val description: String,
-    override val isDone: Boolean,
-    override val time: LocalTime?,
-    override val createdAt: Instant,
-    override val updatedAt: Instant? = null,
-    override val reminder: Reminder? = null,
-    val recurrence: Recurrence?,
-    val streakCount: Int? = null,
-    val lastCompletedDate: Instant? = null,
-) : Entry() {
-    companion object
 }
 
 @OptIn(ExperimentalTime::class)

@@ -54,6 +54,7 @@ internal fun EntryCreationState.toDomain(): Entry =
             time = data.time,
             createdAt = Instant.now(),
             recurrence = data.recurrence,
+            reminder = data.reminder,
         )
     } else {
         Task(
@@ -62,6 +63,8 @@ internal fun EntryCreationState.toDomain(): Entry =
             description = data.description ?: "",
             isDone = false,
             time = data.time,
+            dueDate = data.currentEntryDateOrToday,
+            reminder = data.reminder,
             createdAt = Instant.now(),
         )
     }

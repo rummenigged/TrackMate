@@ -105,6 +105,7 @@ dependencies {
     implementation(project(":core:design"))
     implementation(project(":core:data:data-entry"))
     implementation(project(":core:ui-common"))
+    implementation(project(":core:domain"))
     implementation(project(":feature:home"))
     implementation(project(":feature:history"))
     implementation(project(":feature:analytics"))
@@ -124,8 +125,12 @@ dependencies {
     implementation(libs.navigation.suite.android)
     debugImplementation(libs.compose.ui.tooling)
 
+    implementation(libs.work.runtime)
+
     implementation(libs.hilt.android)
+    implementation(libs.hilt.work)
     ksp(libs.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
 
     testImplementation(project(":core:testing"))
     androidTestImplementation(project(":core:testing"))

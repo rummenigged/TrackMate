@@ -97,6 +97,7 @@ internal fun Entry.toEntity() =
                 title = title,
                 description = description,
                 isDone = isDone,
+                dueDate = dueDate?.toEpochDay(),
                 time = time?.toEpochMilli(),
                 createdAt = createdAt.toEpochMilli(),
                 updatedAt = updatedAt?.toEpochMilli(),
