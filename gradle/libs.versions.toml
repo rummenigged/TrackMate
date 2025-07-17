@@ -5,6 +5,7 @@ androidxHiltCompiler = "1.2.0"
 androidxTestCore = "1.6.1"
 androidxTestRules = "1.6.1"
 androidxWorkManager = "2.10.2"
+autoValue = "1.10.4"
 composeBom = "2025.06.01"
 composeConstraintlayout = "1.0.1"
 composeNavigation = "2.9.1"
@@ -56,6 +57,9 @@ navigation-fragmentKtx = { group = "androidx.navigation", name = "navigation-fra
 navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
 compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 navigation-suite-android = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite-android", version.ref = "navigationSuiteAndroid" }
+
+auto-value-annotations = { module = "com.google.auto.value:auto-value-annotations", version.ref = "autoValue" }
+auto-value = { module = "com.google.auto.value:auto-value", version.ref = "autoValue" }
 
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }

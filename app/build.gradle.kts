@@ -1,6 +1,7 @@
 import java.util.Properties
 
 plugins {
+    id("kotlin-kapt")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -131,6 +132,10 @@ dependencies {
     implementation(libs.hilt.work)
     ksp(libs.hilt.compiler)
     ksp(libs.androidx.hilt.compiler)
+
+    implementation(libs.auto.value.annotations)
+    // TODO: Migrate to KSP when the com.google.auto.value:auto-value becomes compatible with it
+    kapt(libs.auto.value)
 
     testImplementation(project(":core:testing"))
     androidTestImplementation(project(":core:testing"))
