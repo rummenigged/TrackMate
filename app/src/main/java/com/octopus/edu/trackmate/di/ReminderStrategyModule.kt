@@ -17,7 +17,7 @@ import javax.inject.Named
 
 @Module
 @InstallIn(SingletonComponent::class)
-class ReminderStrategyModule {
+object ReminderStrategyModule {
     @Suppress("ktlint:standard:max-line-length")
     @Provides
     @IntoMap
