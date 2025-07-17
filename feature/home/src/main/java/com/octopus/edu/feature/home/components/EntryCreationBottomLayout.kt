@@ -34,7 +34,7 @@ internal fun EntryCreationBottomLayout(
         if (uiState.isSetEntryTimeModeEnabled) {
             TrackMateTimePicker(
                 onDismiss = { onEvent(UiEvent.AddEntry.HideTimePicker) },
-                onTimeSelected = { hour, minute ->
+                onConfirm = { hour, minute ->
                     onEvent(UiEvent.UpdateEntryTime(hour, minute))
                 },
             )
@@ -42,8 +42,27 @@ internal fun EntryCreationBottomLayout(
 
         if (uiState.isSetEntryRecurrenceModeEnabled) {
             RecurrencePicker(
-                currentEntryRecurrency = uiState.dataDraftSnapshot.currentEntryRecurrence,
-                onEvent = onEvent,
+                currentRecurrence = uiState.dataDraftSnapshot.recurrence,
+                onConfirm = { recurrence -> onEvent(UiEvent.UpdateEntryRecurrence(recurrence)) },
+                onDismiss = { onEvent(UiEvent.AddEntry.HideRecurrencePicker) },
+            )
+        }
+
+        if (uiState.isSetEntryReminderModeEnabled) {
+            val reminders =
+                if (uiState.dataDraftSnapshot.time != null ||
+                    uiState.data.time != null
+                ) {
+                    EntryCreationState.reminderByTimeOptions
+                } else {
+                    EntryCreationState.reminderByDayOptions
+                }
+
+            ReminderPicker(
+                reminders = reminders,
+                currentReminder = uiState.dataDraftSnapshot.reminder,
+                onDismiss = { onEvent(UiEvent.AddEntry.HideReminderPicker) },
+                onConfirm = { reminder -> onEvent(UiEvent.UpdateEntryReminder(reminder)) },
             )
         }
     }

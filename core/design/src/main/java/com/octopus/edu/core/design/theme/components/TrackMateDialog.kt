@@ -28,7 +28,7 @@ fun TrackMateDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = { onConfirm() }) {
+            TextButton(onClick = { onDismiss() }) {
                 Text(stringResource(dismissText))
             }
         },

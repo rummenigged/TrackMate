@@ -1,8 +1,11 @@
 [versions]
 activityCompose = "1.10.1"
 agp = "8.11.0"
+androidxHiltCompiler = "1.2.0"
 androidxTestCore = "1.6.1"
 androidxTestRules = "1.6.1"
+androidxWorkManager = "2.10.2"
+autoValue = "1.10.4"
 composeBom = "2025.06.01"
 composeConstraintlayout = "1.0.1"
 composeNavigation = "2.9.1"
@@ -14,6 +17,7 @@ googleFirebaseAppdistribution = "5.1.1"
 googleGmsGoogleServices = "4.4.3"
 hiltNavigationVersion = "1.2.0"
 hiltVersion = "2.56.2"
+hiltWorkManager = "1.2.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 konsist = "0.17.3"
@@ -37,7 +41,8 @@ appcompat = "1.7.1"
 material = "1.12.0"
 
 [libraries]
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-coreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -53,8 +58,11 @@ navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref 
 compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 navigation-suite-android = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite-android", version.ref = "navigationSuiteAndroid" }
 
+auto-value-annotations = { module = "com.google.auto.value:auto-value-annotations", version.ref = "autoValue" }
+auto-value = { module = "com.google.auto.value:auto-value", version.ref = "autoValue" }
+
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
-kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 room = { module = "androidx.room:room-runtime", version.ref = "room" }
@@ -72,7 +80,11 @@ okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.
 
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltVersion" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltVersion" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHiltCompiler" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationVersion" }
+
+work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "androidxWorkManager" }
+hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWorkManager" }
 
 # classpath dependencies
 ktlint-gradlePlugin = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint" }
@@ -91,7 +103,7 @@ test-hilt = { group = "com.google.dagger", name = "hilt-android-testing", versio
 test-konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "konsist"}
 test-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 test-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+test-androidx-work = { module = "androidx.work:work-testing", version.ref = "androidxWorkManager" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

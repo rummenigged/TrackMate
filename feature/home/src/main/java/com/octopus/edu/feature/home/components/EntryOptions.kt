@@ -55,10 +55,14 @@ internal fun EntryOptions(
         )
 
         SettingsRow(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier =
+                Modifier
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .clickable { onEvent(UiEvent.AddEntry.ShowReminderPicker) },
             icon = painterResource(R.drawable.ic_alarm),
             title = stringResource(R.string.reminder),
-            trailingText = state.dataDraftSnapshot.currentEntryReminder.orEmpty(),
+            trailingText = stringResource(state.currentReminderResolvedAsRes),
+            isFilled = state.dataDraftSnapshot.reminder != null || state.data.reminder != null,
         )
 
         SettingsRow(
@@ -69,7 +73,7 @@ internal fun EntryOptions(
             icon = painterResource(R.drawable.ic_autorenew_habit),
             title = stringResource(R.string.repeat),
             trailingText = stringResource(state.currentRecurrenceResolvedAsRes),
-            isFilled = state.dataDraftSnapshot.currentEntryRecurrence != null || state.data.currentEntryRecurrence != null,
+            isFilled = state.dataDraftSnapshot.recurrence != null || state.data.recurrence != null,
         )
     }
 }

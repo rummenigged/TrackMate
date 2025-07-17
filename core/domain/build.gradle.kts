@@ -36,6 +36,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines)
+    implementation(libs.coroutines.core)
     testImplementation(project(":core:testing"))
 }
