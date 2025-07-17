@@ -1,21 +1,22 @@
 package com.octopus.edu.feature.home.models
 
 import com.octopus.edu.core.domain.model.Recurrence
+import com.octopus.edu.core.domain.model.Reminder
 import java.time.LocalDate
 import java.time.LocalTime
 
 internal data class EntryCreationData(
-    val currentEntryTitle: String? = null,
-    val currentEntryDescription: String? = null,
-    val currentEntryDate: LocalDate? = null,
-    val currentEntryTime: LocalTime? = null,
-    val currentEntryReminder: String? = null,
-    val currentEntryRecurrence: Recurrence? = null,
+    val title: String? = null,
+    val description: String? = null,
+    val date: LocalDate? = null,
+    val time: LocalTime? = null,
+    val reminder: Reminder? = null,
+    val recurrence: Recurrence? = null,
 ) {
     companion object
 
     val currentEntryDateOrToday: LocalDate
-        get() = currentEntryDate ?: LocalDate.now()
+        get() = date ?: LocalDate.now()
 }
 
 internal fun EntryCreationData.Companion.empty(): EntryCreationData = EntryCreationData()

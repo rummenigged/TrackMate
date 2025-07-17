@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Recurrence
+import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.feature.home.R
 import com.octopus.edu.feature.home.utils.isToday
@@ -29,25 +30,42 @@ internal fun getRecurrenceAsStringRes(recurrence: Recurrence): Int =
         Recurrence.None -> R.string.none
     }
 
+internal fun getReminderAsStringRes(reminder: Reminder): Int =
+    when (reminder) {
+        Reminder.DayEarly -> R.string.day_early
+        Reminder.FiveMinutesEarly -> R.string.five_minutes_early
+        Reminder.OnDay -> R.string.on_day
+        Reminder.OnTime -> R.string.on_time
+        Reminder.OneHourEarly -> R.string.one_hour_early
+        Reminder.ThirtyMinutesEarly -> R.string.thirty_minutes_early
+        Reminder.ThreeDaysEarly -> R.string.three_days_early
+        Reminder.TwoDaysEarly -> R.string.two_days_early
+        Reminder.None -> R.string.none
+    }
+
 @OptIn(ExperimentalTime::class)
 internal fun EntryCreationState.toDomain(): Entry =
-    if (data.currentEntryRecurrence != null && data.currentEntryRecurrence !is Recurrence.None) {
+    if (data.recurrence != null && data.recurrence !is Recurrence.None) {
         Habit(
             id = UUID.randomUUID().toString(),
-            title = data.currentEntryTitle ?: "",
-            description = data.currentEntryDescription ?: "",
+            title = data.title ?: "",
+            description = data.description ?: "",
             isDone = false,
-            time = data.currentEntryTime,
+            time = data.time,
             createdAt = Instant.now(),
-            recurrence = data.currentEntryRecurrence,
+            recurrence = data.recurrence,
+            reminder = data.reminder,
+            startDate = data.currentEntryDateOrToday,
         )
     } else {
         Task(
             id = UUID.randomUUID().toString(),
-            title = data.currentEntryTitle ?: "",
-            description = data.currentEntryDescription ?: "",
+            title = data.title ?: "",
+            description = data.description ?: "",
             isDone = false,
-            time = data.currentEntryTime,
+            time = data.time,
+            dueDate = data.currentEntryDateOrToday,
+            reminder = data.reminder,
             createdAt = Instant.now(),
         )
     }
@@ -58,22 +76,23 @@ internal data class EntryCreationState(
     val isSetEntryDateModeEnabled: Boolean = false,
     val isSetEntryTimeModeEnabled: Boolean = false,
     val isSetEntryRecurrenceModeEnabled: Boolean = false,
+    val isSetEntryReminderModeEnabled: Boolean = false,
     val data: EntryCreationData = EntryCreationData.empty(),
     val dataDraftSnapshot: EntryCreationData = EntryCreationData.empty(),
 ) {
     val entryDateState: EntryDateState = getCurrentEntryDateState()
 
     val isDateBeforeToday: Boolean
-        get() = data.currentEntryDate?.isBefore(LocalDate.now()) == true
+        get() = data.date?.isBefore(LocalDate.now()) == true
 
     val isTimeBeforeNow: Boolean
-        get() = data.currentEntryTime?.isBefore(LocalTime.now().minusMinutes(1)) == true
+        get() = data.time?.isBefore(LocalTime.now().minusMinutes(1)) == true
 
     val currentTimeResolvedAsText: String?
-        get() = dataDraftSnapshot.currentEntryTime?.toString() ?: data.currentEntryTime?.toString()
+        get() = dataDraftSnapshot.time?.toString() ?: data.time?.toString()
 
     val isTimeFilled: Boolean
-        get() = dataDraftSnapshot.currentEntryTime != null || data.currentEntryTime != null
+        get() = dataDraftSnapshot.time != null || data.time != null
 
     val isOverdue: Boolean
         get() =
@@ -84,9 +103,18 @@ internal data class EntryCreationState(
     val currentRecurrenceResolvedAsRes: Int
         get() =
             getRecurrenceAsStringRes(
-                dataDraftSnapshot.currentEntryRecurrence
-                    ?: data.currentEntryRecurrence
+                dataDraftSnapshot.recurrence
+                    ?: data.recurrence
                     ?: Recurrence.None,
+            )
+
+    @get:StringRes
+    val currentReminderResolvedAsRes: Int
+        get() =
+            getReminderAsStringRes(
+                dataDraftSnapshot.reminder
+                    ?: data.reminder
+                    ?: Reminder.None,
             )
 
     private fun getCurrentEntryDateState(): EntryDateState =
@@ -128,6 +156,26 @@ internal data class EntryCreationState(
                     Recurrence.Daily,
                     Recurrence.Weekly,
                     Recurrence.Custom,
+                ).toImmutableList()
+
+        val reminderByDayOptions
+            get() =
+                listOf(
+                    Reminder.None,
+                    Reminder.OnDay,
+                    Reminder.DayEarly,
+                    Reminder.TwoDaysEarly,
+                    Reminder.ThreeDaysEarly,
+                ).toImmutableList()
+
+        val reminderByTimeOptions
+            get() =
+                listOf(
+                    Reminder.None,
+                    Reminder.OnTime,
+                    Reminder.FiveMinutesEarly,
+                    Reminder.ThirtyMinutesEarly,
+                    Reminder.OneHourEarly,
                 ).toImmutableList()
     }
 }

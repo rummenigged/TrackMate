@@ -1,6 +1,7 @@
 import java.util.Properties
 
 plugins {
+    id("kotlin-kapt")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -105,11 +106,13 @@ dependencies {
     implementation(project(":core:design"))
     implementation(project(":core:data:data-entry"))
     implementation(project(":core:ui-common"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:common"))
     implementation(project(":feature:home"))
     implementation(project(":feature:history"))
     implementation(project(":feature:analytics"))
 
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.coreKtx)
     implementation(libs.navigation.fragmentKtx)
     implementation(libs.navigation.ui)
     implementation(libs.material)
@@ -124,8 +127,16 @@ dependencies {
     implementation(libs.navigation.suite.android)
     debugImplementation(libs.compose.ui.tooling)
 
+    implementation(libs.work.runtime)
+
     implementation(libs.hilt.android)
+    implementation(libs.hilt.work)
     ksp(libs.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
+
+    implementation(libs.auto.value.annotations)
+    // TODO: Migrate to KSP when the com.google.auto.value:auto-value becomes compatible with it
+    kapt(libs.auto.value)
 
     testImplementation(project(":core:testing"))
     androidTestImplementation(project(":core:testing"))

@@ -15,19 +15,20 @@ import com.octopus.edu.core.design.theme.TrackMateTheme
 @Composable
 fun TrackMateTimePicker(
     onDismiss: () -> Unit,
-    onTimeSelected: (hour: Int, minute: Int) -> Unit,
+    onConfirm: (hour: Int, minute: Int) -> Unit,
     currentTime: Calendar = Calendar.getInstance(),
+    is24Hour: Boolean = true,
 ) {
     val timePickerState =
         rememberTimePickerState(
             initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
             initialMinute = currentTime.get(Calendar.MINUTE),
-            is24Hour = true,
+            is24Hour = is24Hour,
         )
 
     TimePickerDialog(
         onDismiss = onDismiss,
-        onConfirm = { onTimeSelected(timePickerState.hour, timePickerState.minute) },
+        onConfirm = { onConfirm(timePickerState.hour, timePickerState.minute) },
     ) {
         TimePicker(state = timePickerState)
     }
@@ -61,7 +62,7 @@ private fun TrackMateTimePickerPreview() {
     TrackMateTheme {
         TrackMateTimePicker(
             onDismiss = {},
-            onTimeSelected = { hour, minute -> },
+            onConfirm = { hour, minute -> },
         )
     }
 }

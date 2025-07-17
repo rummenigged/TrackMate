@@ -12,6 +12,9 @@ interface EntryDao {
     @Insert(onConflict = REPLACE)
     suspend fun insert(entry: EntryEntity)
 
+    @Query("SELECT * FROM entries WHERE id = :id")
+    fun getEntryById(id: String): EntryEntity?
+
     @Query("SELECT * FROM entries WHERE type = 'HABIT'")
     suspend fun getHabits(): List<EntryEntity>
 
