@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.FullScreenCircularProgress
+import com.octopus.edu.core.design.theme.components.WeekCalendar
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiState
@@ -70,7 +71,10 @@ internal fun HomeScreen(
                 .clip(shapes.medium)
                 .background(color = colorScheme.surface),
     ) {
-        HomeContentContainer(uiState)
+        HomeContent(
+            uiState = uiState,
+            onEvent = viewModel::processEvent,
+        )
 
         AddEntryFAB(
             modifier = Modifier.align(Alignment.BottomEnd),
@@ -106,30 +110,27 @@ private fun AddEntryFAB(
 }
 
 @Composable
-private fun HomeContentContainer(
+private fun HomeContent(
     uiState: UiState,
+    onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when {
-        uiState.isLoading -> FullScreenCircularProgress()
+    Column(modifier = modifier.statusBarsPadding()) {
+        WeekCalendar(
+            selectedDate = uiState.currentDate,
+            onDateSelected = { date ->
+                onEvent(UiEvent.SelectCurrentDate(date))
+            },
+        )
 
-        uiState.entries.isEmpty() -> EmptyEntries()
+        when {
+            uiState.isLoading -> FullScreenCircularProgress()
 
-        else -> {
-            HomeContent(
-                modifier = modifier.statusBarsPadding(),
-                state = uiState,
-            )
+            uiState.entries.isEmpty() -> EmptyEntries()
+
+            else -> EntriesList(entries = uiState.entries)
         }
     }
-}
-
-@Composable
-private fun HomeContent(
-    state: UiState,
-    modifier: Modifier = Modifier,
-) {
-    EntriesList(entries = state.entries, modifier = modifier)
 }
 
 @Composable
@@ -140,11 +141,7 @@ private fun EntriesList(
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding =
-            PaddingValues(
-                top = 16.dp,
-                start = 16.dp,
-                end = 16.dp,
-            ),
+            PaddingValues(horizontal = 16.dp),
     ) {
         itemsIndexed(entries, key = { _, entry -> entry.id }) { index, habit ->
             EntryItem(
@@ -200,7 +197,8 @@ private fun EmptyEntries(modifier: Modifier = Modifier) {
 private fun HomePreview() {
     TrackMateTheme {
         HomeContent(
-            state = UiState(entries = mockEntryList(8).toImmutableList()),
+            uiState = UiState(entries = mockEntryList(8).toImmutableList()),
+            onEvent = {},
         )
     }
 }

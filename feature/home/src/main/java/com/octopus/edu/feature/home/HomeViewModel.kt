@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalTime
 
 @HiltViewModel
@@ -34,7 +35,7 @@ internal class HomeViewModel
         private val reminderStrategyFactory: ReminderStrategyFactory
     ) : BaseViewModel<UiState, UiEffect, UiEvent>() {
         init {
-            observeEntries()
+            getEntriesVisibleOn(getInitialState().currentDate)
         }
 
         override fun getInitialState(): UiState = UiState()
@@ -190,6 +191,8 @@ internal class HomeViewModel
                                 ),
                         )
                     }
+
+                is UiEvent.SelectCurrentDate -> getEntriesVisibleOn(event.date)
             }
         }
 
@@ -213,13 +216,14 @@ internal class HomeViewModel
             }
         }
 
-        private fun observeEntries() =
+        private fun getEntriesVisibleOn(date: LocalDate) =
             viewModelScope.launch {
                 entryRepository
-                    .getEntriesOrderedByTime()
+                    .getEntriesVisibleOn(date)
                     .retryOnResultError(maxRetries = 2)
-                    .onStart { setState { copy(isLoading = true) } }
-                    .onEach { result ->
+                    .onStart {
+                        setState { copy(currentDate = date, isLoading = true) }
+                    }.onEach { result ->
                         when (result) {
                             is ResultOperation.Error -> {
                                 setEffect(

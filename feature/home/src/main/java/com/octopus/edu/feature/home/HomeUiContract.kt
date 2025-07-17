@@ -16,6 +16,7 @@ internal object HomeUiContract {
     @Stable
     data class UiState(
         val entries: ImmutableList<Entry> = persistentListOf(),
+        val currentDate: LocalDate = LocalDate.now(),
         val isLoading: Boolean = false,
         val entryCreationState: EntryCreationState = EntryCreationState(),
     ) : ViewState
@@ -29,6 +30,10 @@ internal object HomeUiContract {
     }
 
     sealed interface UiEvent : ViewEvent {
+        data class SelectCurrentDate(
+            val date: LocalDate
+        ) : UiEvent
+
         sealed interface Entry {
             data object Add : UiEvent
 
