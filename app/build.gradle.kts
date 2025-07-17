@@ -107,6 +107,7 @@ dependencies {
     implementation(project(":core:data:data-entry"))
     implementation(project(":core:ui-common"))
     implementation(project(":core:domain"))
+    implementation(project(":core:common"))
     implementation(project(":feature:home"))
     implementation(project(":feature:history"))
     implementation(project(":feature:analytics"))

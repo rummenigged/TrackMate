@@ -1,15 +1,14 @@
 package com.octopus.edu.trackmate.reminder
 
+import com.octopus.edu.core.common.ReminderTimeCalculator.calculateReminderDelay
+import com.octopus.edu.core.common.ReminderTimeCalculator.defaultTimeIfNull
+import com.octopus.edu.core.common.ReminderTimeCalculator.getHabitInterval
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
-import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.scheduler.ReminderScheduler
 import com.octopus.edu.core.domain.scheduler.ReminderStrategy
-import java.time.Duration
-import java.time.LocalDateTime
-import java.time.LocalTime
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -25,27 +24,24 @@ class HabitNotificationReminderStrategy
                     is Task -> null
                 } ?: return
 
-            val time = entry.time ?: LocalTime.of(8, 0)
-            val reminderOffset = entry.reminder?.offset ?: Reminder.None.offset
-            val reminderDateTime = date.atTime(time).minus(reminderOffset)
-            val now = LocalDateTime.now()
-            val delay = Duration.between(now, reminderDateTime)
+            val offset = entry.reminder?.offset ?: Reminder.None.offset
 
-            val interval =
-                when (entry) {
-                    is Habit ->
-                        when (entry.recurrence) {
-                            Recurrence.Daily -> Duration.ofDays(1)
-                            Recurrence.Weekly -> Duration.ofDays(7)
-                            else -> Duration.ofDays(1)
-                        }
-                    else -> Duration.ofDays(1)
+            val delay =
+                calculateReminderDelay(
+                    time = defaultTimeIfNull(entry.time),
+                    date = date,
+                    reminderOffset = offset,
+                )
+
+            when (entry) {
+                is Habit -> {
+                    reminderScheduler.scheduleReminder(
+                        entry.id,
+                        delay,
+                        getHabitInterval(entry.recurrence, offset),
+                    )
                 }
-
-            reminderScheduler.scheduleReminder(
-                entry.id,
-                delay,
-                interval.minus(reminderOffset),
-            )
+                else -> return
+            }
         }
     }
