@@ -5,7 +5,8 @@ import java.time.Duration
 interface ReminderScheduler {
     fun scheduleReminder(
         entryId: String,
-        delay: Duration
+        delay: Duration,
+        interval: Duration = Duration.ZERO
     )
 
     fun cancelReminder(entryId: String)
