@@ -6,6 +6,7 @@ import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.testing.TestDispatchers
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -17,6 +18,7 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntryRepositoryTest {
+    private lateinit var testDispatchers: TestDispatchers
     private lateinit var entryStore: EntryStore
     private lateinit var repository: EntryRepository
 
@@ -24,7 +26,8 @@ class EntryRepositoryTest {
     fun setUp() {
         MockKAnnotations.init(this)
         entryStore = mockk()
-        repository = EntryRepositoryImpl(entryStore)
+        testDispatchers = TestDispatchers()
+        repository = EntryRepositoryImpl(entryStore, testDispatchers)
     }
 
     @Test
