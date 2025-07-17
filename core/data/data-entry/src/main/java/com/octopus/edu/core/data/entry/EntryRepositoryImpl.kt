@@ -10,6 +10,7 @@ import com.octopus.edu.core.data.entry.utils.toTaskOrNull
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Task
+import com.octopus.edu.core.domain.model.appliesTo
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.domain.utils.safeCall
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import java.io.IOException
+import java.time.LocalDate
 
 internal class EntryRepositoryImpl
     @Inject
@@ -42,11 +44,15 @@ internal class EntryRepositoryImpl
                 entryStore.getHabits().mapNotNull { task -> task.toHabitOrNull() }
             }
 
-        override fun getEntriesOrderedByTime(): Flow<ResultOperation<List<Entry>>> =
+        override fun getEntriesVisibleOn(date: LocalDate): Flow<ResultOperation<List<Entry>>> =
             entryStore
-                .getAllEntriesOrderedByTime()
+                .getEntriesBeforeOrOn(date.toEpochDay())
                 .map { entries ->
-                    ResultOperation.Success(entries.mapNotNull { entry -> entry.toDomain() }) as ResultOperation<List<Entry>>
+                    ResultOperation.Success(
+                        entries
+                            .mapNotNull { entry -> entry.toDomain() }
+                            .filter { entry -> entry is Task || (entry as Habit).appliesTo(date) },
+                    ) as ResultOperation<List<Entry>>
                 }.catch { exception ->
                     val errorResult =
                         ResultOperation.Error(
