@@ -135,7 +135,7 @@ private fun BottomInputBar(
                 ),
     ) {
         TextField(
-            value = state.data.currentEntryTitle.orEmpty(),
+            value = state.data.title.orEmpty(),
             colors = textInputColors,
             onValueChange = { onEvent(UiEvent.UpdateEntryTitle(it)) },
             modifier =
@@ -155,14 +155,14 @@ private fun BottomInputBar(
 
         TextField(
             colors = textInputColors,
-            value = state.data.currentEntryDescription.orEmpty(),
+            value = state.data.description.orEmpty(),
             onValueChange = {
                 onEvent(UiEvent.UpdateEntryDescription(it))
             },
             modifier = Modifier.fillMaxWidth(),
             shape = shapes.medium,
             placeholder = {
-                if (!state.data.currentEntryTitle.isNullOrEmpty()) {
+                if (!state.data.title.isNullOrEmpty()) {
                     Text(
                         text = "Description",
                         style = typography.bodyMedium,
@@ -229,7 +229,7 @@ private fun EntryCreationActions(
                 color = dateColor,
             )
 
-            state.data.currentEntryTime?.let { time ->
+            state.data.time?.let { time ->
                 Text(
                     text = ", $time",
                     style = typography.bodyLarge,
@@ -237,7 +237,7 @@ private fun EntryCreationActions(
                 )
             }
 
-            state.data.currentEntryRecurrence?.let { recurrence ->
+            state.data.recurrence?.let { recurrence ->
                 if (recurrence != Recurrence.None) {
                     Icon(
                         painter = painterResource(R.drawable.ic_autorenew_habit),
@@ -263,7 +263,7 @@ private fun EntryCreationActions(
                     disabledContainerColor = colorScheme.surfaceContainerHighest,
                     disabledContentColor = colorScheme.onPrimary.copy(alpha = 0.5f),
                 ),
-            enabled = !state.data.currentEntryTitle.isNullOrEmpty(),
+            enabled = !state.data.title.isNullOrEmpty(),
         ) {
             Icon(
                 modifier = Modifier.size(16.dp),
@@ -283,9 +283,9 @@ private fun BottomPreview() {
                 EntryCreationState(
                     data =
                         EntryCreationData(
-                            currentEntryDate = LocalDate.of(2025, 6, 6),
-                            currentEntryTime = LocalTime.of(11, 25),
-                            currentEntryRecurrence = Recurrence.Daily,
+                            date = LocalDate.of(2025, 6, 6),
+                            time = LocalTime.of(11, 25),
+                            recurrence = Recurrence.Daily,
                         ),
                 ),
             onEvent = {},
