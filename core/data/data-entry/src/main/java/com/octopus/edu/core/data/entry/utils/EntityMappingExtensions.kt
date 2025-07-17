@@ -36,7 +36,7 @@ internal fun EntryEntity.toTaskOrNull(): Task? {
         id = id,
         title = title,
         description = description.orEmpty(),
-        dueDate = dueDate?.toLocalDate(),
+        dueDate = dueDate?.toLocalDate() ?: LocalDate.now(),
         isDone = isDone,
         time = time?.toLocalTime(),
         createdAt = createdAt.toInstant(),
@@ -52,6 +52,7 @@ internal fun EntryEntity.toHabitOrNull(): Habit? {
         description = description.orEmpty(),
         isDone = isDone,
         time = time?.toLocalTime(),
+        startDate = startDate?.toLocalDate() ?: LocalDate.now(),
         createdAt = createdAt.toInstant(),
         updatedAt = updatedAt?.toInstant(),
         recurrence = recurrence.toDomain(),
@@ -89,6 +90,7 @@ internal fun Entry.toEntity() =
                 updatedAt = updatedAt?.toEpochMilli(),
                 type = EntryType.HABIT,
                 recurrence = recurrence.toEntity(),
+                startDate = startDate.toEpochDay(),
             )
 
         is Task ->
@@ -97,7 +99,7 @@ internal fun Entry.toEntity() =
                 title = title,
                 description = description,
                 isDone = isDone,
-                dueDate = dueDate?.toEpochDay(),
+                dueDate = dueDate.toEpochDay(),
                 time = time?.toEpochMilli(),
                 createdAt = createdAt.toEpochMilli(),
                 updatedAt = updatedAt?.toEpochMilli(),

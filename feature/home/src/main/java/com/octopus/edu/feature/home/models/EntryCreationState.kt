@@ -55,6 +55,7 @@ internal fun EntryCreationState.toDomain(): Entry =
             createdAt = Instant.now(),
             recurrence = data.recurrence,
             reminder = data.reminder,
+            startDate = data.currentEntryDateOrToday,
         )
     } else {
         Task(

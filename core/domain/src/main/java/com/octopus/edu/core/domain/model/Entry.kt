@@ -28,7 +28,7 @@ data class Task(
     override val createdAt: Instant,
     override val updatedAt: Instant? = null,
     override val reminder: Reminder? = null,
-    val dueDate: LocalDate? = null,
+    val dueDate: LocalDate,
 ) : Entry() {
     companion object
 }
@@ -43,6 +43,7 @@ data class Habit(
     override val createdAt: Instant,
     override val updatedAt: Instant? = null,
     override val reminder: Reminder? = null,
+    val startDate: LocalDate,
     val recurrence: Recurrence?,
     val streakCount: Int? = null,
     val lastCompletedDate: Instant? = null,
@@ -126,6 +127,7 @@ fun Habit.Companion.mock(id: String) =
         lastCompletedDate = Instant.now(),
         recurrence = Recurrence.Daily,
         streakCount = 0,
+        startDate = LocalDate.now(),
     )
 
 fun Habit.Companion.mockList(count: Int) = (1..count).map { mock(it.toString()) }
