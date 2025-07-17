@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntrySessionEntity
@@ -21,18 +23,26 @@ private const val NAME = "trackmate.db"
         TagEntity::class,
         ReminderEntity::class,
     ],
-    version = 1,
+    version = 2,
 )
 @TypeConverters(Converters::class)
 abstract class TrackMateDatabase : RoomDatabase() {
     companion object {
+        private val MIGRATION_1_2: Migration =
+            object : Migration(1, 2) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE entries ADD COLUMN startDate INTEGER")
+                }
+            }
+
         fun create(context: Context): TrackMateDatabase =
             Room
                 .databaseBuilder(
                     context,
                     TrackMateDatabase::class.java,
                     NAME,
-                ).build()
+                ).addMigrations(MIGRATION_1_2)
+                .build()
     }
 
     abstract fun entryDao(): EntryDao

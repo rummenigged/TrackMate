@@ -11,7 +11,9 @@ interface EntryRepository {
 
     suspend fun getHabits(): ResultOperation<List<Habit>>
 
-    fun getEntriesOrderedByTime(): Flow<ResultOperation<List<Entry>>>
-
     suspend fun saveEntry(entry: Entry): ResultOperation<Unit>
+
+    suspend fun getEntryById(id: String): ResultOperation<Entry>
+
+    fun getEntriesOrderedByTime(): Flow<ResultOperation<List<Entry>>>
 }
