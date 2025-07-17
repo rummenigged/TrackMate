@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-class EntryRepositoryImpl
+internal class EntryRepositoryImpl
     @Inject
     constructor(
         private val entryStore: EntryStore,

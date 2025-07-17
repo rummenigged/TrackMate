@@ -17,7 +17,7 @@ interface EntryStore {
     suspend fun getEntryById(id: String): EntryEntity?
 }
 
-class EntryStoreImpl
+internal class EntryStoreImpl
     @Inject
     constructor(
         private val entryDao: EntryDao,
