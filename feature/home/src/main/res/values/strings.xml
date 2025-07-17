@@ -20,4 +20,12 @@
     <string name="yesterday">Yesterday</string>
     <string name="days_later">%s %s, %sd left</string>
     <string name="days_before">%s %s, %sd overdue</string>
+    <string name="on_day">On the day</string>
+    <string name="day_early">1 day early</string>
+    <string name="two_days_early">2 days early</string>
+    <string name="three_days_early">3 days early</string>
+    <string name="on_time">On time</string>
+    <string name="five_minutes_early">5 mins early</string>
+    <string name="thirty_minutes_early">30 mins early</string>
+    <string name="one_hour_early">1 hour early</string>
 </resources>

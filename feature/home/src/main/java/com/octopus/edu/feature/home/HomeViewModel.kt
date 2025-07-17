@@ -1,10 +1,13 @@
 package com.octopus.edu.feature.home
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.model.common.retryOnResultError
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.domain.scheduler.ReminderStrategyFactory
+import com.octopus.edu.core.domain.scheduler.ReminderType
 import com.octopus.edu.core.ui.common.base.BaseViewModel
 import com.octopus.edu.feature.home.HomeUiContract.UiEffect
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
@@ -28,6 +31,7 @@ internal class HomeViewModel
     @Inject
     constructor(
         private val entryRepository: EntryRepository,
+        private val reminderStrategyFactory: ReminderStrategyFactory
     ) : BaseViewModel<UiState, UiEffect, UiEvent>() {
         init {
             observeEntries()
@@ -96,6 +100,16 @@ internal class HomeViewModel
                         copy(entryCreationState = entryCreationState.copy(isSetEntryRecurrenceModeEnabled = false))
                     }
 
+                UiEvent.AddEntry.ShowReminderPicker ->
+                    setState {
+                        copy(entryCreationState = entryCreationState.copy(isSetEntryReminderModeEnabled = true))
+                    }
+
+                UiEvent.AddEntry.HideReminderPicker ->
+                    setState {
+                        copy(entryCreationState = entryCreationState.copy(isSetEntryReminderModeEnabled = false))
+                    }
+
                 is UiEvent.UpdateEntryTitle ->
                     setState {
                         copy(
@@ -103,7 +117,7 @@ internal class HomeViewModel
                                 entryCreationState.copy(
                                     data =
                                         entryCreationState.data.copy(
-                                            currentEntryTitle = event.title,
+                                            title = event.title,
                                         ),
                                 ),
                         )
@@ -116,7 +130,7 @@ internal class HomeViewModel
                                 entryCreationState.copy(
                                     data =
                                         entryCreationState.data.copy(
-                                            currentEntryDescription = event.description,
+                                            description = event.description,
                                         ),
                                 ),
                         )
@@ -129,7 +143,7 @@ internal class HomeViewModel
                                 entryCreationState.copy(
                                     dataDraftSnapshot =
                                         entryCreationState.dataDraftSnapshot.copy(
-                                            currentEntryDate = event.date,
+                                            date = event.date,
                                         ),
                                 ),
                         )
@@ -143,7 +157,7 @@ internal class HomeViewModel
                                     isSetEntryTimeModeEnabled = false,
                                     dataDraftSnapshot =
                                         entryCreationState.dataDraftSnapshot.copy(
-                                            currentEntryTime = LocalTime.of(event.hour, event.minute),
+                                            time = LocalTime.of(event.hour, event.minute),
                                         ),
                                 ),
                         )
@@ -154,9 +168,24 @@ internal class HomeViewModel
                         copy(
                             entryCreationState =
                                 entryCreationState.copy(
+                                    isSetEntryRecurrenceModeEnabled = false,
                                     dataDraftSnapshot =
                                         entryCreationState.dataDraftSnapshot.copy(
-                                            currentEntryRecurrence = event.recurrence,
+                                            recurrence = event.recurrence,
+                                        ),
+                                ),
+                        )
+                    }
+
+                is UiEvent.UpdateEntryReminder ->
+                    setState {
+                        copy(
+                            entryCreationState =
+                                entryCreationState.copy(
+                                    isSetEntryReminderModeEnabled = false,
+                                    dataDraftSnapshot =
+                                        entryCreationState.dataDraftSnapshot.copy(
+                                            reminder = event.reminder,
                                         ),
                                 ),
                         )
@@ -172,11 +201,12 @@ internal class HomeViewModel
                             isSetEntryDateModeEnabled = false,
                             data =
                                 entryCreationState.data.copy(
-                                    currentEntryDate =
-                                        entryCreationState.dataDraftSnapshot.currentEntryDate
-                                            ?: entryCreationState.data.currentEntryDate,
-                                    currentEntryTime = entryCreationState.dataDraftSnapshot.currentEntryTime,
-                                    currentEntryRecurrence = entryCreationState.dataDraftSnapshot.currentEntryRecurrence,
+                                    date =
+                                        entryCreationState.dataDraftSnapshot.date
+                                            ?: entryCreationState.data.date,
+                                    time = entryCreationState.dataDraftSnapshot.time,
+                                    reminder = entryCreationState.dataDraftSnapshot.reminder,
+                                    recurrence = entryCreationState.dataDraftSnapshot.recurrence,
                                 ),
                         ),
                 )
@@ -192,7 +222,13 @@ internal class HomeViewModel
                     .onEach { result ->
                         when (result) {
                             is ResultOperation.Error -> {
-                                setEffect(UiEffect.ShowError(result.throwable.message ?: "Unknown Error"))
+                                setEffect(
+                                    UiEffect.ShowError(
+                                        result.throwable.message
+                                            ?: "Unknown Error",
+                                    ),
+                                )
+                                Log.d("HomeViewModel", "saveCurrentEntry: ${result.throwable.message}")
                             }
 
                             is ResultOperation.Success -> {
@@ -220,8 +256,15 @@ internal class HomeViewModel
                                 entryCreationState = EntryCreationState.emptyState(),
                             )
                         }
+                        entry.reminder?.let { reminder ->
+                            scheduleReminder(entry)
+                        }
                         setEffect(UiEffect.ShowEntrySuccessfullyCreated)
                     }
                 }
             }
+
+        private fun scheduleReminder(entry: Entry) {
+            reminderStrategyFactory.getStrategy(entry, ReminderType.NOTIFICATION)?.schedule(entry)
+        }
     }

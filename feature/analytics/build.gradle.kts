@@ -38,6 +38,17 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packaging {
+        resources {
+            excludes.addAll(
+                setOf(
+                    "META-INF/LICENSE.md",
+                    "META-INF/LICENSE-notice.md",
+                ),
+            )
+        }
+    }
 }
 
 dependencies {
@@ -45,7 +56,7 @@ dependencies {
     implementation(project(":core:ui-common"))
     implementation(project(":core:design"))
 
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.coreKtx)
     implementation(libs.androidx.appcompat)
     implementation(libs.compose.ui.tooling)
 

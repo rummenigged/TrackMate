@@ -13,9 +13,11 @@ interface EntryStore {
     fun getAllEntriesOrderedByTime(): Flow<List<EntryEntity>>
 
     suspend fun saveEntry(entry: EntryEntity)
+
+    suspend fun getEntryById(id: String): EntryEntity?
 }
 
-class EntryStoreImpl
+internal class EntryStoreImpl
     @Inject
     constructor(
         private val entryDao: EntryDao,
@@ -27,4 +29,6 @@ class EntryStoreImpl
         override fun getAllEntriesOrderedByTime(): Flow<List<EntryEntity>> = entryDao.getAllEntriesOrderedByTimeAsc()
 
         override suspend fun saveEntry(entry: EntryEntity) = entryDao.insert(entry)
+
+        override suspend fun getEntryById(id: String) = entryDao.getEntryById(id)
     }

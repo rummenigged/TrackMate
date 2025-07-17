@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Track Mate</string>
+    <string name="reminder_channel_name">Task Reminders</string>
+    <string name="reminder_channel_description">Notifications for scheduled task reminders</string>
 </resources>
