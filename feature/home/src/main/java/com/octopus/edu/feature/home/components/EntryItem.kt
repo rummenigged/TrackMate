@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -139,15 +140,17 @@ internal fun EntryItem(
                 modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
             ) {
                 Text(
+                    modifier = Modifier.weight(1f),
                     text = entry.title,
                     style = typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 if (entry is Habit) {
                     entry.recurrence?.let { recurrence ->
-                        Spacer(modifier = Modifier.weight(1F))
-
                         Text(
+                            modifier = Modifier.padding(start = 4.dp),
                             text = stringResource(getRecurrenceAsStringRes(recurrence)),
                             style = typography.labelSmall,
                             color = colorScheme.onSurface.copy(alpha = 0.5f),
