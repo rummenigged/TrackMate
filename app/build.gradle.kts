@@ -112,7 +112,7 @@ dependencies {
     implementation(project(":feature:history"))
     implementation(project(":feature:analytics"))
 
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.coreKtx)
     implementation(libs.navigation.fragmentKtx)
     implementation(libs.navigation.ui)
     implementation(libs.material)

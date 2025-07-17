@@ -57,7 +57,7 @@ dependencies {
     implementation(project(":core:design"))
     implementation(project(":core:domain"))
 
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.coreKtx)
     implementation(libs.androidx.appcompat)
     implementation(libs.compose.ui.tooling)
     implementation(libs.compose.constraintlayout)
