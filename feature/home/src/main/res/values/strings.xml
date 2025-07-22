@@ -28,4 +28,5 @@
     <string name="five_minutes_early">5 mins early</string>
     <string name="thirty_minutes_early">30 mins early</string>
     <string name="one_hour_early">1 hour early</string>
+    <string name="current_month_and_day" type="id">%s, %s</string>
 </resources>
