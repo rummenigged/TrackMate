@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -45,6 +46,7 @@ import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiState
 import com.octopus.edu.feature.home.components.EntryCreationBottomLayout
 import com.octopus.edu.feature.home.components.EntryItem
+import com.octopus.edu.feature.home.components.HomeAppBar
 import com.octopus.edu.feature.home.utils.mockEntryList
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -115,11 +117,26 @@ private fun HomeContent(
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val pagerState =
+        rememberPagerState(
+            initialPage = Int.MAX_VALUE / 2,
+            pageCount = { Int.MAX_VALUE },
+        )
     Column(modifier = modifier.statusBarsPadding()) {
+        HomeAppBar(
+            title =
+                stringResource(
+                    R.string.current_month_and_day,
+                    uiState.currentMonth,
+                    uiState.currentYear,
+                ),
+        )
+
         WeekCalendar(
             selectedDate = uiState.currentDate,
+            pagerState = pagerState,
             onDateSelected = { date ->
-                onEvent(UiEvent.SelectCurrentDate(date))
+                onEvent(UiEvent.SetCurrentDateAs(date))
             },
         )
 

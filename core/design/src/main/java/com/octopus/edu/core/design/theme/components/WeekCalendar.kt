@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
@@ -30,17 +31,24 @@ import java.util.Locale
 fun WeekCalendar(
     selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
+    pagerState: PagerState,
     modifier: Modifier = Modifier,
 ) {
     val today = LocalDate.now()
     val startDate = today.with(DayOfWeek.MONDAY).minusDays(1)
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { Int.MAX_VALUE })
+    val basePage = Int.MAX_VALUE / 2
 
     HorizontalPager(
         state = pagerState,
         modifier = modifier,
     ) { pageIndex ->
-        val weekStart = startDate.plusWeeks(pageIndex.toLong())
+        val weekStart =
+            if (pageIndex < basePage) {
+                startDate.minusWeeks((basePage - pageIndex).toLong())
+            } else {
+                startDate.plusWeeks((pageIndex - basePage).toLong())
+            }
+
         val daysOfWeek = (0..6).map { weekStart.plusDays(it.toLong()) }
 
         Row(
@@ -50,59 +58,74 @@ fun WeekCalendar(
             horizontalArrangement = Arrangement.SpaceAround,
         ) {
             daysOfWeek.forEach { day ->
-                Column(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = day.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
-                        style = typography.labelMedium,
-                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    )
+                DayItem(
+                    day = day,
+                    isSelectedDay = day == selectedDate,
+                    isToday = day == today,
+                    onItemClicked = { selectedDay -> onDateSelected(selectedDay) },
+                )
+            }
+        }
+    }
+}
 
-                    val textColor =
-                        when (day) {
-                            selectedDate -> {
-                                colorScheme.onPrimary
-                            }
+@Composable
+private fun DayItem(
+    day: LocalDate,
+    onItemClicked: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier,
+    isSelectedDay: Boolean = false,
+    isToday: Boolean = false,
+) {
+    Column(
+        modifier = modifier.padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = day.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+            style = typography.labelMedium,
+            color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+        )
 
-                            today -> {
+        val textColor =
+            when {
+                isSelectedDay -> {
+                    colorScheme.onPrimary
+                }
+
+                isToday -> {
+                    colorScheme.primary
+                }
+
+                else -> {
+                    colorScheme.onSurface
+                }
+            }
+
+        Text(
+            modifier =
+                Modifier
+                    .clip(shapes.small)
+                    .background(
+                        when {
+                            isSelectedDay -> {
                                 colorScheme.primary
                             }
 
-                            else -> {
-                                colorScheme.onSurface
+                            isToday -> {
+                                colorScheme.primary.copy(alpha = 0.1f)
                             }
-                        }
 
-                    Text(
-                        modifier =
-                            Modifier
-                                .clip(shapes.small)
-                                .background(
-                                    when (day) {
-                                        selectedDate -> {
-                                            colorScheme.primary
-                                        }
-
-                                        today -> {
-                                            colorScheme.primary.copy(alpha = 0.1f)
-                                        }
-
-                                        else -> {
-                                            Color.Transparent
-                                        }
-                                    },
-                                )
-                                .clickable { onDateSelected(day) }
-                                .padding(8.dp),
-                        text = day.dayOfMonth.toString(),
-                        style = typography.headlineSmall,
-                        color = textColor,
-                    )
-                }
-            }
-        }
+                            else -> {
+                                Color.Transparent
+                            }
+                        },
+                    ).clickable { onItemClicked(day) }
+                    .padding(8.dp),
+            text = day.dayOfMonth.toString(),
+            style = typography.headlineSmall,
+            color = textColor,
+        )
     }
 }
 
@@ -112,6 +135,7 @@ private fun WeekCalendarPreview() {
     TrackMateTheme {
         WeekCalendar(
             selectedDate = LocalDate.now().plusDays(1),
+            pagerState = rememberPagerState(initialPage = 0, pageCount = { Int.MAX_VALUE }),
             onDateSelected = {},
         )
     }

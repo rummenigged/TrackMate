@@ -192,7 +192,7 @@ internal class HomeViewModel
                         )
                     }
 
-                is UiEvent.SelectCurrentDate -> getEntriesVisibleOn(event.date)
+                is UiEvent.SetCurrentDateAs -> getEntriesVisibleOn(event.date)
             }
         }
 
