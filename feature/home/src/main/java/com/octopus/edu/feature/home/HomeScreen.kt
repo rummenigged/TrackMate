@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -39,11 +40,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.FullScreenCircularProgress
+import com.octopus.edu.core.design.theme.components.WeekCalendar
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiState
 import com.octopus.edu.feature.home.components.EntryCreationBottomLayout
 import com.octopus.edu.feature.home.components.EntryItem
+import com.octopus.edu.feature.home.components.HomeAppBar
 import com.octopus.edu.feature.home.utils.mockEntryList
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -70,7 +73,10 @@ internal fun HomeScreen(
                 .clip(shapes.medium)
                 .background(color = colorScheme.surface),
     ) {
-        HomeContentContainer(uiState)
+        HomeContent(
+            uiState = uiState,
+            onEvent = viewModel::processEvent,
+        )
 
         AddEntryFAB(
             modifier = Modifier.align(Alignment.BottomEnd),
@@ -106,30 +112,42 @@ private fun AddEntryFAB(
 }
 
 @Composable
-private fun HomeContentContainer(
+private fun HomeContent(
     uiState: UiState,
+    onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when {
-        uiState.isLoading -> FullScreenCircularProgress()
+    val pagerState =
+        rememberPagerState(
+            initialPage = Int.MAX_VALUE / 2,
+            pageCount = { Int.MAX_VALUE },
+        )
+    Column(modifier = modifier.statusBarsPadding()) {
+        HomeAppBar(
+            title =
+                stringResource(
+                    R.string.current_month_and_day,
+                    uiState.currentMonth,
+                    uiState.currentYear,
+                ),
+        )
 
-        uiState.entries.isEmpty() -> EmptyEntries()
+        WeekCalendar(
+            selectedDate = uiState.currentDate,
+            pagerState = pagerState,
+            onDateSelected = { date ->
+                onEvent(UiEvent.SetCurrentDateAs(date))
+            },
+        )
 
-        else -> {
-            HomeContent(
-                modifier = modifier.statusBarsPadding(),
-                state = uiState,
-            )
+        when {
+            uiState.isLoading -> FullScreenCircularProgress()
+
+            uiState.entries.isEmpty() -> EmptyEntries()
+
+            else -> EntriesList(entries = uiState.entries)
         }
     }
-}
-
-@Composable
-private fun HomeContent(
-    state: UiState,
-    modifier: Modifier = Modifier,
-) {
-    EntriesList(entries = state.entries, modifier = modifier)
 }
 
 @Composable
@@ -140,11 +158,7 @@ private fun EntriesList(
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding =
-            PaddingValues(
-                top = 16.dp,
-                start = 16.dp,
-                end = 16.dp,
-            ),
+            PaddingValues(horizontal = 16.dp),
     ) {
         itemsIndexed(entries, key = { _, entry -> entry.id }) { index, habit ->
             EntryItem(
@@ -200,7 +214,8 @@ private fun EmptyEntries(modifier: Modifier = Modifier) {
 private fun HomePreview() {
     TrackMateTheme {
         HomeContent(
-            state = UiState(entries = mockEntryList(8).toImmutableList()),
+            uiState = UiState(entries = mockEntryList(8).toImmutableList()),
+            onEvent = {},
         )
     }
 }
