@@ -23,4 +23,10 @@ interface EntryDao {
 
     @Query("SELECT * FROM entries ORDER BY time IS NOT NULL, time")
     fun getAllEntriesOrderedByTimeAsc(): Flow<List<EntryEntity>>
+
+    @Query("SELECT * FROM entries WHERE dueDate = :date OR startDate = :date ORDER BY time IS NOT NULL, time")
+    fun getAllEntriesByDateAndOrderedByTimeAsc(date: Long): Flow<List<EntryEntity>>
+
+    @Query("SELECT * FROM entries WHERE dueDate = :date OR startDate <= :date ORDER BY time IS NOT NULL, time")
+    fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
 }

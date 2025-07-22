@@ -131,3 +131,15 @@ fun Habit.Companion.mock(id: String) =
     )
 
 fun Habit.Companion.mockList(count: Int) = (1..count).map { mock(it.toString()) }
+
+fun Habit.appliesTo(date: LocalDate): Boolean {
+    if (date.isBefore(startDate)) return false
+
+    return when (recurrence) {
+        Recurrence.Daily -> true
+        Recurrence.Weekly -> startDate.dayOfWeek == date.dayOfWeek
+        Recurrence.Custom,
+        Recurrence.None,
+        null -> startDate == date
+    }
+}
