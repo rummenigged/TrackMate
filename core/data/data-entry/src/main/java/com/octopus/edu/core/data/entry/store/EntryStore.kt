@@ -10,7 +10,9 @@ interface EntryStore {
 
     suspend fun getTasks(): List<EntryEntity>
 
-    fun getAllEntriesOrderedByTime(): Flow<List<EntryEntity>>
+    fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>>
+
+    fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
 
     suspend fun saveEntry(entry: EntryEntity)
 
@@ -26,7 +28,10 @@ internal class EntryStoreImpl
 
         override suspend fun getTasks(): List<EntryEntity> = entryDao.getTasks()
 
-        override fun getAllEntriesOrderedByTime(): Flow<List<EntryEntity>> = entryDao.getAllEntriesOrderedByTimeAsc()
+        override fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>> =
+            entryDao.getAllEntriesByDateAndOrderedByTimeAsc(date)
+
+        override fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>> = entryDao.getEntriesBeforeOrOn(date)
 
         override suspend fun saveEntry(entry: EntryEntity) = entryDao.insert(entry)
 

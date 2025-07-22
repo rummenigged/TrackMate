@@ -11,14 +11,23 @@ import com.octopus.edu.feature.home.models.EntryCreationState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 internal object HomeUiContract {
     @Stable
     data class UiState(
         val entries: ImmutableList<Entry> = persistentListOf(),
+        val currentDate: LocalDate = LocalDate.now(),
         val isLoading: Boolean = false,
         val entryCreationState: EntryCreationState = EntryCreationState(),
-    ) : ViewState
+    ) : ViewState {
+        val currentMonth: String
+            get() = currentDate.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
+
+        val currentYear: String
+            get() = currentDate.year.toString()
+    }
 
     sealed interface UiEffect : ViewEffect {
         data class ShowError(
@@ -29,6 +38,10 @@ internal object HomeUiContract {
     }
 
     sealed interface UiEvent : ViewEvent {
+        data class SetCurrentDateAs(
+            val date: LocalDate
+        ) : UiEvent
+
         sealed interface Entry {
             data object Add : UiEvent
 
