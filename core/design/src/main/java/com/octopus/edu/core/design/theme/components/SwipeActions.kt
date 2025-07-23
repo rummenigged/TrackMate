@@ -3,8 +3,6 @@ package com.octopus.edu.core.design.theme.components
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.Easing
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -39,27 +37,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import kotlin.math.sqrt
 
 data class SwipeActionsConfig(
     val threshold: Float,
@@ -82,20 +71,6 @@ val DefaultSwipeActionsConfig: SwipeActionsConfig =
         stayDismissed = false,
         onSwiped = {},
     )
-
-data class TutorialAnimationConfig(
-    val duration: Int,
-    val delay: Int,
-    val easing: Easing
-)
-
-val DefaultTutorialAnimationConfig: TutorialAnimationConfig
-    get() =
-        TutorialAnimationConfig(
-            duration = 500,
-            delay = 1000,
-            easing = FastOutSlowInEasing,
-        )
 
 @Composable
 fun SwipActions(
@@ -161,7 +136,7 @@ fun SwipActions(
 }
 
 @Composable
-fun SwipeActionsBackground(
+private fun SwipeActionsBackground(
     state: SwipeToDismissBoxState,
     dismissDirection: SwipeToDismissBoxValue?,
     startActionsConfig: SwipeActionsConfig,
@@ -200,7 +175,7 @@ fun SwipeActionsBackground(
 }
 
 @Composable
-fun SwipeActionBackgroundContent(
+private fun SwipeActionBackgroundContent(
     direction: SwipeToDismissBoxValue,
     willDismiss: Boolean,
     startActionsConfig: SwipeActionsConfig,
@@ -332,7 +307,7 @@ private fun SwipeActionIcon(
     }
 }
 
-fun handlerDismissStateChanges(
+private fun handlerDismissStateChanges(
     dismissValue: SwipeToDismissBoxValue,
     willDismissDirection: SwipeToDismissBoxValue?,
     startActionsConfig: SwipeActionsConfig,
@@ -348,34 +323,4 @@ fun handlerDismissStateChanges(
         endActionsConfig.stayDismissed
     }
     else -> false
-}
-
-class ProgressiveCircleShape(
-    private val progress: Float,
-    private val start: Boolean
-) : Shape {
-    override fun createOutline(
-        size: Size,
-        layoutDirection: LayoutDirection,
-        density: Density
-    ): Outline {
-        val origin =
-            Offset(
-                x = if (start) 0f else size.width,
-                y = size.center.y,
-            )
-
-        val radius = (sqrt(size.height * size.height + size.width * size.width) * 1f) * progress
-
-        return Outline.Generic(
-            Path().apply {
-                addOval(
-                    Rect(
-                        center = origin,
-                        radius = radius,
-                    ),
-                )
-            },
-        )
-    }
 }
