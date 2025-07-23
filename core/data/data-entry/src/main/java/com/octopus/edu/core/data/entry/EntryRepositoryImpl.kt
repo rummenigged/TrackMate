@@ -65,7 +65,6 @@ internal class EntryRepositoryImpl
         override suspend fun saveEntry(entry: Entry): ResultOperation<Unit> =
             safeCall(
                 dispatcher = dispatcherProvider.io,
-                onErrorReturn = { ResultOperation.Error(RuntimeException("Error saving entry")) },
             ) {
                 entryStore.saveEntry(entry.toEntity())
             }
@@ -76,5 +75,12 @@ internal class EntryRepositoryImpl
                     .getEntryById(id)
                     ?.toDomain()
                     ?: throw NoSuchElementException("Invalid or missing entry with id $id")
+            }
+
+        override suspend fun deleteEntry(entryId: String): ResultOperation<Unit> =
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+            ) {
+                entryStore.deleteEntry(entryId)
             }
     }

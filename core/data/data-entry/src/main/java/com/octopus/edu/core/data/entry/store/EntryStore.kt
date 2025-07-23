@@ -17,6 +17,8 @@ interface EntryStore {
     suspend fun saveEntry(entry: EntryEntity)
 
     suspend fun getEntryById(id: String): EntryEntity?
+
+    suspend fun deleteEntry(entryId: String)
 }
 
 internal class EntryStoreImpl
@@ -36,4 +38,6 @@ internal class EntryStoreImpl
         override suspend fun saveEntry(entry: EntryEntity) = entryDao.insert(entry)
 
         override suspend fun getEntryById(id: String) = entryDao.getEntryById(id)
+
+        override suspend fun deleteEntry(entryId: String) = entryDao.delete(entryId)
     }

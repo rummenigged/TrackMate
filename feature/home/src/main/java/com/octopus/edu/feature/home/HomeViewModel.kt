@@ -1,6 +1,5 @@
 package com.octopus.edu.feature.home
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.common.ResultOperation
@@ -49,6 +48,10 @@ internal class HomeViewModel
 
                 UiEvent.Entry.Save -> {
                     saveCurrentEntry(entry = uiStateFlow.value.entryCreationState.toDomain())
+                }
+
+                is UiEvent.Entry.Delete -> {
+                    deleteEntry(event.entryId)
                 }
 
                 UiEvent.AddEntry.Cancel ->
@@ -196,6 +199,25 @@ internal class HomeViewModel
             }
         }
 
+        private fun deleteEntry(entryId: String) =
+            viewModelScope.launch {
+                setState { copy(isLoading = true) }
+                when (val result = entryRepository.deleteEntry(entryId)) {
+                    is ResultOperation.Error -> {
+                        setEffect(
+                            UiEffect.ShowError(
+                                result.throwable.message
+                                    ?: "Unknown Error",
+                            ),
+                        )
+                    }
+                    is ResultOperation.Success -> {
+                        setState { copy(isLoading = false) }
+                        setEffect(UiEffect.ShowEntrySuccessfullyDeleted)
+                    }
+                }
+            }
+
         private fun saveDateAndTimeSettings() {
             setState {
                 copy(
@@ -232,7 +254,6 @@ internal class HomeViewModel
                                             ?: "Unknown Error",
                                     ),
                                 )
-                                Log.d("HomeViewModel", "saveCurrentEntry: ${result.throwable.message}")
                             }
 
                             is ResultOperation.Success -> {
