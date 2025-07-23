@@ -1,10 +1,12 @@
 [versions]
+accompanist = "0.36.0"
 activityCompose = "1.10.1"
 agp = "8.11.1"
 androidxHiltCompiler = "1.2.0"
 androidxTestCore = "1.6.1"
 androidxTestRules = "1.6.1"
 androidxWorkManager = "2.10.2"
+appcompat = "1.7.1"
 autoValue = "1.11.0"
 composeBom = "2025.07.00"
 composeConstraintlayout = "1.1.1"
@@ -28,6 +30,7 @@ kotlinxSerializationJson = "1.9.0"
 kspPluginVersion = "2.2.0-2.0.2"
 ktlint = "12.3.0"
 lifecycleRuntimeKtx = "2.9.2"
+material = "1.12.0"
 mockk = "1.14.5"
 moshi = "1.15.2"
 moshiConverter = "3.0.0"
@@ -37,12 +40,12 @@ okHttp = "5.1.0"
 retrofit = "3.0.0"
 room = "2.7.2"
 turbine = "1.2.1"
-appcompat = "1.7.1"
-material = "1.12.0"
+recyclerview = "1.4.0"
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-coreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -57,6 +60,8 @@ navigation-fragmentKtx = { group = "androidx.navigation", name = "navigation-fra
 navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
 compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 navigation-suite-android = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite-android", version.ref = "navigationSuiteAndroid" }
+
+accompanist-swipeToDismiss = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist" }
 
 auto-value-annotations = { module = "com.google.auto.value:auto-value-annotations", version.ref = "autoValue" }
 auto-value = { module = "com.google.auto.value:auto-value", version.ref = "autoValue" }

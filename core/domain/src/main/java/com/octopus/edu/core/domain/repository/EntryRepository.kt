@@ -17,4 +17,6 @@ interface EntryRepository {
     suspend fun getEntryById(id: String): ResultOperation<Entry>
 
     fun getEntriesVisibleOn(date: LocalDate = LocalDate.now()): Flow<ResultOperation<List<Entry>>>
+
+    suspend fun deleteEntry(entryId: String): ResultOperation<Unit>
 }

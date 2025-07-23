@@ -13,7 +13,7 @@ interface EntryDao {
     suspend fun insert(entry: EntryEntity)
 
     @Query("SELECT * FROM entries WHERE id = :id")
-    fun getEntryById(id: String): EntryEntity?
+    suspend fun getEntryById(id: String): EntryEntity?
 
     @Query("SELECT * FROM entries WHERE type = 'HABIT'")
     suspend fun getHabits(): List<EntryEntity>
@@ -29,4 +29,7 @@ interface EntryDao {
 
     @Query("SELECT * FROM entries WHERE dueDate = :date OR startDate <= :date ORDER BY time IS NOT NULL, time")
     fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
+
+    @Query("DELETE from entries WHERE id = :entryId")
+    suspend fun delete(entryId: String)
 }

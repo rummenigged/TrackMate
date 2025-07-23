@@ -10,8 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +30,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.EntryCard
+import com.octopus.edu.core.design.theme.components.SwipActions
+import com.octopus.edu.core.design.theme.components.SwipeActionsConfig
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Task
@@ -40,6 +46,8 @@ internal fun EntryItem(
     modifier: Modifier = Modifier,
     isFirstItem: Boolean = false,
     isLastItem: Boolean = false,
+    onItemSwipedFromStartToEnd: (Entry) -> Unit = {},
+    onItemSwipedFromEndToStart: (Entry) -> Unit = {},
 ) {
     val timeMaxWidth =
         rememberMaxTextWidthDp(
@@ -123,7 +131,7 @@ internal fun EntryItem(
             )
         }
 
-        EntryCard(
+        SwipActions(
             modifier =
                 Modifier
                     .height(IntrinsicSize.Min)
@@ -134,26 +142,50 @@ internal fun EntryItem(
                         bottom.linkTo(parent.bottom)
                         width = Dimension.fillToConstraints
                     },
+            startActionsConfig =
+                SwipeActionsConfig(
+                    icon = Icons.Rounded.Check,
+                    threshold = 0.4f,
+                    disabledIconTint = colorScheme.onSurface,
+                    swipeActionActivatedBackground = colorScheme.errorContainer,
+                    swipeActionDeactivatedBackground = colorScheme.surfaceContainer,
+                    backgroundShape = shapes.medium,
+                    stayDismissed = true,
+                    onSwiped = { onItemSwipedFromStartToEnd(entry) },
+                ),
+            endActionsConfig =
+                SwipeActionsConfig(
+                    icon = Icons.Rounded.Delete,
+                    threshold = 0.4f,
+                    disabledIconTint = colorScheme.onSurface,
+                    swipeActionActivatedBackground = colorScheme.errorContainer,
+                    swipeActionDeactivatedBackground = colorScheme.surfaceContainer,
+                    backgroundShape = shapes.medium,
+                    stayDismissed = true,
+                    onSwiped = { onItemSwipedFromEndToStart(entry) },
+                ),
         ) {
-            Row(
-                modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
-            ) {
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = entry.title,
-                    style = typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+            EntryCard {
+                Row(
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
+                ) {
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = entry.title,
+                        style = typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
 
-                if (entry is Habit) {
-                    entry.recurrence?.let { recurrence ->
-                        Text(
-                            modifier = Modifier.padding(start = 4.dp),
-                            text = stringResource(getRecurrenceAsStringRes(recurrence)),
-                            style = typography.labelSmall,
-                            color = colorScheme.onSurface.copy(alpha = 0.5f),
-                        )
+                    if (entry is Habit) {
+                        entry.recurrence?.let { recurrence ->
+                            Text(
+                                modifier = Modifier.padding(start = 4.dp),
+                                text = stringResource(getRecurrenceAsStringRes(recurrence)),
+                                style = typography.labelSmall,
+                                color = colorScheme.onSurface.copy(alpha = 0.5f),
+                            )
+                        }
                     }
                 }
             }

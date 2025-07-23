@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -41,7 +40,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.FullScreenCircularProgress
 import com.octopus.edu.core.design.theme.components.WeekCalendar
+import com.octopus.edu.core.design.theme.utils.animatedItemIndexed
+import com.octopus.edu.core.design.theme.utils.updateAnimateItemsState
 import com.octopus.edu.core.domain.model.Entry
+import com.octopus.edu.feature.home.HomeUiContract.UiEntry
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiState
 import com.octopus.edu.feature.home.components.EntryCreationBottomLayout
@@ -145,7 +147,11 @@ private fun HomeContent(
 
             uiState.entries.isEmpty() -> EmptyEntries()
 
-            else -> EntriesList(entries = uiState.entries)
+            else ->
+                EntriesList(
+                    entries = uiState.entries,
+                    onEvent = onEvent,
+                )
         }
     }
 }
@@ -153,18 +159,24 @@ private fun HomeContent(
 @Composable
 private fun EntriesList(
     entries: ImmutableList<Entry>,
+    onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val animatedList by updateAnimateItemsState(entries.map { UiEntry(it) })
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding =
-            PaddingValues(horizontal = 16.dp),
+            PaddingValues(start = 16.dp, top = 8.dp, end = 16.dp),
     ) {
-        itemsIndexed(entries, key = { _, entry -> entry.id }) { index, habit ->
+        animatedItemIndexed(
+            items = animatedList,
+            key = { item -> item.entry.id },
+        ) { index, item ->
             EntryItem(
-                entry = habit,
+                entry = item.entry,
                 isFirstItem = index == 0,
                 isLastItem = index == entries.lastIndex,
+                onItemSwipedFromEndToStart = { entry -> onEvent(UiEvent.Entry.Delete(entry.id)) },
             )
         }
 

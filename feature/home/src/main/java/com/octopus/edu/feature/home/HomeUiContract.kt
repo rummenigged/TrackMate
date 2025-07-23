@@ -1,6 +1,7 @@
 package com.octopus.edu.feature.home
 
 import androidx.compose.runtime.Stable
+import com.octopus.edu.core.design.theme.utils.Comparable
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.core.domain.model.Reminder
@@ -35,6 +36,8 @@ internal object HomeUiContract {
         ) : UiEffect
 
         data object ShowEntrySuccessfullyCreated : UiEffect
+
+        data object ShowEntrySuccessfullyDeleted : UiEffect
     }
 
     sealed interface UiEvent : ViewEvent {
@@ -46,6 +49,10 @@ internal object HomeUiContract {
             data object Add : UiEvent
 
             data object Save : UiEvent
+
+            data class Delete(
+                val entryId: String
+            ) : UiEvent
         }
 
         sealed interface AddEntry {
@@ -94,5 +101,13 @@ internal object HomeUiContract {
         data class UpdateEntryReminder(
             val reminder: Reminder
         ) : UiEvent
+    }
+
+    internal class UiEntry(
+        val entry: Entry
+    ) : Comparable<UiEntry> {
+        override fun areItemsTheSame(newItem: UiEntry): Boolean = this.entry.id == newItem.entry.id
+
+        override fun areContentsTheSame(newItem: UiEntry): Boolean = this.entry == newItem.entry
     }
 }
