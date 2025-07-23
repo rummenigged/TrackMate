@@ -41,8 +41,11 @@ android {
 
 dependencies {
     api(platform(libs.compose.bom))
+    implementation(libs.compose.ui.tooling)
+    implementation(libs.accompanist.swipeToDismiss)
+    implementation(libs.androidx.recyclerview)
+
     api(libs.compose.ui)
     api(libs.compose.ui.tooling.preview)
-    implementation(libs.compose.ui.tooling)
     api(libs.compose.material3)
 }
