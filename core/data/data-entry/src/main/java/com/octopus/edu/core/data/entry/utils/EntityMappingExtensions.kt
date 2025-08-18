@@ -1,21 +1,29 @@
 package com.octopus.edu.core.data.entry.utils
 
+import com.octopus.edu.core.common.ReminderTimeCalculator.calculateReminderDelay
+import com.octopus.edu.core.common.ReminderTimeCalculator.defaultTimeIfNull
+import com.octopus.edu.core.common.ReminderTimeCalculator.getHabitInterval
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.EntryType
+import com.octopus.edu.core.data.database.entity.ReminderEntity
+import com.octopus.edu.core.data.database.entity.ReminderType
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Recurrence
+import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.domain.model.Task
+import com.octopus.edu.core.domain.scheduler.ReminderType.NOTIFICATION
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.util.UUID
 
-fun Long.toLocalDate() = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+fun Long.toLocalDate(): LocalDate = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
 
-fun Long.toLocalTime() = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalTime()
+fun Long.toLocalTime(): LocalTime = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalTime()
 
-fun Long.toInstant() = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toInstant()
+fun Long.toInstant(): Instant = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toInstant()
 
 private fun LocalTime.toEpochMilli(): Long =
     this
@@ -106,3 +114,27 @@ internal fun Entry.toEntity() =
                 type = EntryType.TASK,
             )
     }
+
+internal fun Entry.getReminderAsEntity(): ReminderEntity =
+    ReminderEntity(
+        id = UUID.randomUUID().toString(),
+        taskId = id,
+        triggerAtMillis =
+            calculateReminderDelay(
+                time = defaultTimeIfNull(time),
+                date = if (this is Task) dueDate else (this as Habit).startDate,
+                reminderOffset = reminder?.offset ?: Reminder.None.offset,
+            ).toMillis(),
+        type = if (reminderType == NOTIFICATION) ReminderType.NOTIFICATION else ReminderType.ALARM,
+        isRepeating = this is Habit,
+        repeatIntervalMillis =
+            if (this is Habit) {
+                reminder
+                    ?.offset
+                    ?.let {
+                        getHabitInterval(recurrence, it)
+                    }?.toMillis()
+            } else {
+                null
+            },
+    )
