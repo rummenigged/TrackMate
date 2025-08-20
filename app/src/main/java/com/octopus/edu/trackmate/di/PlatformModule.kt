@@ -1,8 +1,9 @@
 package com.octopus.edu.trackmate.di
 
 import com.octopus.edu.core.domain.scheduler.ReminderScheduler
-import com.octopus.edu.trackmate.workManager.HabitNotificationReminderScheduler
-import com.octopus.edu.trackmate.workManager.TaskNotificationReminderScheduler
+import com.octopus.edu.trackmate.reminderSchedulers.HabitNotificationReminderScheduler
+import com.octopus.edu.trackmate.reminderSchedulers.TaskAlarmReminderScheduler
+import com.octopus.edu.trackmate.reminderSchedulers.TaskNotificationReminderScheduler
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -22,4 +23,9 @@ interface PlatformModule {
     @Singleton
     @Named("HabitNotificationReminderScheduler")
     fun bindHabitNotificationReminderScheduler(reminderScheduler: HabitNotificationReminderScheduler): ReminderScheduler
+
+    @Binds
+    @Singleton
+    @Named("TaskAlarmReminderScheduler")
+    fun bindTaskAlarmReminderScheduler(reminderScheduler: TaskAlarmReminderScheduler): ReminderScheduler
 }

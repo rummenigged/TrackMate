@@ -7,7 +7,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.octopus.edu.trackmate.MainActivity
 import com.octopus.edu.trackmate.R
-import com.octopus.edu.trackmate.workManager.ReminderConstants.REMINDER_NOTIFICATION_CHANNEL_ID_EXTRA
+import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_NOTIFICATION_CHANNEL_ID_EXTRA
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 

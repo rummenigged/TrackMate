@@ -6,7 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
-import com.octopus.edu.trackmate.workManager.ReminderConstants.REMINDER_NOTIFICATION_CHANNEL_ID_EXTRA
+import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_NOTIFICATION_CHANNEL_ID_EXTRA
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
