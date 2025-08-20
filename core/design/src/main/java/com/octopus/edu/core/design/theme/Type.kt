@@ -179,105 +179,90 @@ private fun TypographyPreview() {
             ) {
                 FontInfoRow(
                     typographyName = "Display Large",
-                    fontName = "Roboto",
                     fontSize = "57sp",
                     textStyle = displayLarge,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Display Medium",
-                    fontName = "Roboto",
                     fontSize = "45sp",
                     textStyle = displayMedium,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Display Small",
-                    fontName = "Roboto",
                     fontSize = "36sp",
                     textStyle = displaySmall,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Headline Large",
-                    fontName = "Roboto",
                     fontSize = "32sp",
                     textStyle = headlineLarge,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Headline Medium",
-                    fontName = "Roboto",
                     fontSize = "28sp",
                     textStyle = headlineMedium,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Headline Small",
-                    fontName = "Roboto",
                     fontSize = "24sp",
                     textStyle = headlineSmall,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Title Large",
-                    fontName = "Roboto",
                     fontSize = "22sp",
                     textStyle = titleLarge,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Title Medium",
-                    fontName = "Roboto",
                     fontSize = "16sp",
                     textStyle = titleMedium,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Title Small",
-                    fontName = "Roboto",
                     fontSize = "14sp",
                     textStyle = titleSmall,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Body Large",
-                    fontName = "Roboto",
                     fontSize = "16sp",
                     textStyle = bodyLarge,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Body Medium",
-                    fontName = "Roboto",
                     fontSize = "14sp",
                     textStyle = bodyMedium,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Body Small",
-                    fontName = "Roboto",
                     fontSize = "12sp",
                     textStyle = bodySmall,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Label Large",
-                    fontName = "Roboto",
                     fontSize = "14sp",
                     textStyle = labelLarge,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Label Medium",
-                    fontName = "Roboto",
                     fontSize = "12sp",
                     textStyle = labelMedium,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Label Small",
-                    fontName = "Roboto",
                     fontSize = "11sp",
                     textStyle = labelSmall,
                 )
@@ -289,7 +274,7 @@ private fun TypographyPreview() {
 @Composable
 private fun FontInfoRow(
     typographyName: String,
-    fontName: String,
+    fontName: String = "Roboto",
     fontSize: String,
     textStyle: TextStyle,
 ) {
