@@ -229,21 +229,30 @@ private fun EntryCreationActions(
                 color = dateColor,
             )
 
-            state.data.time?.let { time ->
-                Text(
-                    text = ", $time",
-                    style = typography.bodyLarge,
-                    color = dateColor,
-                )
-            }
+            with(state.data) {
+                time?.let { time ->
+                    Text(
+                        text = ", $time",
+                        style = typography.bodyLarge,
+                        color = dateColor,
+                    )
+                }
 
-            state.data.recurrence?.let { recurrence ->
-                if (recurrence != Recurrence.None) {
+                reminder?.let { reminder ->
                     Icon(
-                        painter = painterResource(R.drawable.ic_autorenew_habit),
-                        contentDescription = stringResource(R.string.recurrence),
+                        painter = painterResource(R.drawable.ic_alarm),
+                        contentDescription = stringResource(R.string.reminder),
                         tint = dateColor,
                     )
+                }
+                recurrence?.let { recurrence ->
+                    if (recurrence != Recurrence.None) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_autorenew_habit),
+                            contentDescription = stringResource(R.string.recurrence),
+                            tint = dateColor,
+                        )
+                    }
                 }
             }
         }

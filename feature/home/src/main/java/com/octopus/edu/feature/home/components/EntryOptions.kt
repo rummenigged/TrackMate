@@ -1,5 +1,6 @@
 package com.octopus.edu.feature.home.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
+import com.octopus.edu.core.domain.model.Reminder.None
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.R
 import com.octopus.edu.feature.home.models.EntryCreationState
@@ -64,6 +66,26 @@ internal fun EntryOptions(
             trailingText = stringResource(state.currentReminderResolvedAsRes),
             isFilled = state.dataDraftSnapshot.reminder != null || state.data.reminder != null,
         )
+
+        with(state) {
+            val isReminderTypeOptionVisible =
+                (dataDraftSnapshot.reminder ?: data.reminder) != null &&
+                    (dataDraftSnapshot.reminder ?: data.reminder) != None
+            AnimatedVisibility(
+                visible = isReminderTypeOptionVisible,
+            ) {
+                SettingsRow(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .clickable { onEvent(UiEvent.AddEntry.ShowReminderTypePicker) },
+                    icon = painterResource(R.drawable.ic_notifications),
+                    title = stringResource(R.string.reminder_type),
+                    trailingText = stringResource(state.currentReminderTypeResolvedAsRes),
+                    isFilled = true,
+                )
+            }
+        }
 
         SettingsRow(
             modifier =

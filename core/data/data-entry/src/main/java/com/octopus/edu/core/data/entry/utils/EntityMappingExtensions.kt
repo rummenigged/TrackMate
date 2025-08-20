@@ -3,6 +3,10 @@ package com.octopus.edu.core.data.entry.utils
 import com.octopus.edu.core.common.ReminderTimeCalculator.calculateReminderDelay
 import com.octopus.edu.core.common.ReminderTimeCalculator.defaultTimeIfNull
 import com.octopus.edu.core.common.ReminderTimeCalculator.getHabitInterval
+import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.common.toInstant
+import com.octopus.edu.core.common.toLocalDate
+import com.octopus.edu.core.common.toLocalTime
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.EntryType
 import com.octopus.edu.core.data.database.entity.ReminderEntity
@@ -13,17 +17,10 @@ import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.scheduler.ReminderType.NOTIFICATION
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.UUID
-
-fun Long.toLocalDate(): LocalDate = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
-
-fun Long.toLocalTime(): LocalTime = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalTime()
-
-fun Long.toInstant(): Instant = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toInstant()
 
 private fun LocalTime.toEpochMilli(): Long =
     this
@@ -107,7 +104,7 @@ internal fun Entry.toEntity() =
                 title = title,
                 description = description,
                 isDone = isDone,
-                dueDate = dueDate.toEpochDay(),
+                dueDate = dueDate.toEpocMilliseconds(),
                 time = time?.toEpochMilli(),
                 createdAt = createdAt.toEpochMilli(),
                 updatedAt = updatedAt?.toEpochMilli(),
