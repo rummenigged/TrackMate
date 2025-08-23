@@ -1,6 +1,5 @@
 package com.octopus.edu.trackmate.reminder
 
-import android.util.Log
 import com.octopus.edu.core.common.ReminderTimeCalculator.calculateReminderDelay
 import com.octopus.edu.core.common.ReminderTimeCalculator.defaultTimeIfNull
 import com.octopus.edu.core.common.ReminderTimeCalculator.getHabitInterval

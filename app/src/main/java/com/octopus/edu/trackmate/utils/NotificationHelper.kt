@@ -6,8 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.octopus.edu.trackmate.MainActivity
 import com.octopus.edu.trackmate.R // Assuming R is correctly imported
+import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.ENTRY_ID_EXTRA
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_NOTIFICATION_CHANNEL_ID_EXTRA
+import com.octopus.edu.trackmate.ui.reminder.ReminderActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,9 +27,14 @@ class NotificationHelper
 
         fun showReminderNotification(
             id: Int,
-            title: String,
-            intent: Intent
+            title: String
         ) {
+            val intent =
+                Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    putExtra(ENTRY_ID_EXTRA, id)
+                }
+
             val pendingIntent =
                 PendingIntent.getActivity(
                     context,
@@ -50,14 +58,21 @@ class NotificationHelper
 
         fun showAlarmNotification(
             entryId: String,
-            title: String,
-            intent: Intent
+            title: String
         ) {
+            val activityIntent =
+                Intent(context, ReminderActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    putExtra(ENTRY_ID_EXTRA, entryId)
+                }
+
             val fullScreenPendingIntent =
                 PendingIntent.getActivity(
                     context,
                     entryId.hashCode(),
-                    intent,
+                    activityIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                 )
 

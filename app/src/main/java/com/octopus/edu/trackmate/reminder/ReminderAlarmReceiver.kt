@@ -4,11 +4,16 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.octopus.edu.core.common.DispatcherProvider
+import com.octopus.edu.core.common.toLocalDate
+import com.octopus.edu.core.domain.model.Entry
+import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.domain.scheduler.ReminderStrategyFactory
+import com.octopus.edu.core.domain.scheduler.ReminderType
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.ENTRY_ID_EXTRA
-import com.octopus.edu.trackmate.ui.reminder.ReminderActivity
 import com.octopus.edu.trackmate.utils.NotificationHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +31,9 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
 
     @Inject
     lateinit var notificationHelper: NotificationHelper
+
+    @Inject
+    lateinit var reminderStrategyFactory: ReminderStrategyFactory
 
     private val job = SupervisorJob()
 
@@ -45,25 +53,61 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
                 when (val result = entryRepository.getEntryById(entryId)) {
                     is ResultOperation.Error -> {}
                     is ResultOperation.Success -> {
-                        val activityIntent =
-                            Intent(context, ReminderActivity::class.java).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                    Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                putExtra(ENTRY_ID_EXTRA, entryId)
-                            }
-
-                        notificationHelper.showAlarmNotification(
-                            entryId,
-                            result.data.title,
-                            activityIntent,
-                        )
+                        processSuccessfulEntry(result.data, intent)
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(
+                    ReminderAlarmReceiver::class.simpleName,
+                    "Exception in onReceive for " +
+                        "entry $entryId",
+                    e,
+                )
             } finally {
                 pendingResult.finish()
+            }
+        }
+    }
+
+    private fun processSuccessfulEntry(
+        entry: Entry,
+        intent: Intent?
+    ) {
+        notificationHelper.showAlarmNotification(entry.id, entry.title)
+
+        if (entry !is Habit) return
+
+        intent?.let {
+            val intervalMillis = it.getLongExtra(ALARM_INTERVAL_EXTRA, 0L)
+            if (it.action == ACTION_HABIT_REMINDER) {
+                try {
+                    val nextOccurrenceTimeMillis = System.currentTimeMillis() + intervalMillis
+                    val nextEntry =
+                        entry.copy(
+                            startDate = nextOccurrenceTimeMillis.toLocalDate(),
+                        )
+
+                    reminderStrategyFactory
+                        .getStrategy(
+                            entry,
+                            ReminderType.ALARM,
+                        )?.schedule(nextEntry)
+                } catch (e: NoSuchElementException) {
+                    Log.e(
+                        ReminderAlarmReceiver::class.simpleName,
+                        "Failed to create next entry " +
+                            "for rescheduling. Ensure 'Entry' is a data class with a 'copy()' " +
+                            "method and a time field (e.g., 'dueDate').",
+                        e,
+                    )
+                } catch (e: Exception) {
+                    Log.e(
+                        ReminderAlarmReceiver::class.simpleName,
+                        "Error rescheduling habit alarm " +
+                            "for entry ${entry.id}",
+                        e,
+                    )
+                }
             }
         }
     }
