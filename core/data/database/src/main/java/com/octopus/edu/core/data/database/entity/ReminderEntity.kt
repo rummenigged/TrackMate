@@ -21,6 +21,12 @@ data class ReminderEntity(
     @PrimaryKey val id: String,
     val taskId: String,
     val triggerAtMillis: Long,
+    val type: ReminderType,
     val isRepeating: Boolean = false,
     val repeatIntervalMillis: Long? = null,
 )
+
+enum class ReminderType {
+    NOTIFICATION,
+    ALARM
+}

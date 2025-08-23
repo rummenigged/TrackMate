@@ -8,6 +8,7 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.octopus.edu.core.data.database.dao.EntryDao
+import com.octopus.edu.core.data.database.dao.ReminderDao
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntrySessionEntity
 import com.octopus.edu.core.data.database.entity.ReminderEntity
@@ -23,7 +24,7 @@ private const val NAME = "trackmate.db"
         TagEntity::class,
         ReminderEntity::class,
     ],
-    version = 2,
+    version = 3,
 )
 @TypeConverters(Converters::class)
 abstract class TrackMateDatabase : RoomDatabase() {
@@ -35,6 +36,16 @@ abstract class TrackMateDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_2_3: Migration =
+            object : Migration(2, 3) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "ALTER TABLE reminders ADD COLUMN type TEXT NOT NULL DEFAULT " +
+                            "'NOTIFICATION'",
+                    )
+                }
+            }
+
         fun create(context: Context): TrackMateDatabase =
             Room
                 .databaseBuilder(
@@ -42,8 +53,11 @@ abstract class TrackMateDatabase : RoomDatabase() {
                     TrackMateDatabase::class.java,
                     NAME,
                 ).addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_2_3)
                 .build()
     }
 
     abstract fun entryDao(): EntryDao
+
+    abstract fun reminderDao(): ReminderDao
 }

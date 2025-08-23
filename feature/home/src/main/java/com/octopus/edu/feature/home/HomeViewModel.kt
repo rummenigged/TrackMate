@@ -6,7 +6,7 @@ import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.model.common.retryOnResultError
 import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.domain.scheduler.ReminderStrategyFactory
-import com.octopus.edu.core.domain.scheduler.ReminderType
+import com.octopus.edu.core.domain.scheduler.ReminderType.NOTIFICATION
 import com.octopus.edu.core.ui.common.base.BaseViewModel
 import com.octopus.edu.feature.home.HomeUiContract.UiEffect
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
@@ -109,9 +109,19 @@ internal class HomeViewModel
                         copy(entryCreationState = entryCreationState.copy(isSetEntryReminderModeEnabled = true))
                     }
 
+                UiEvent.AddEntry.ShowReminderTypePicker ->
+                    setState {
+                        copy(entryCreationState = entryCreationState.copy(isSetEntryReminderTypeModeEnabled = true))
+                    }
+
                 UiEvent.AddEntry.HideReminderPicker ->
                     setState {
                         copy(entryCreationState = entryCreationState.copy(isSetEntryReminderModeEnabled = false))
+                    }
+
+                UiEvent.AddEntry.HideReminderTypePicker ->
+                    setState {
+                        copy(entryCreationState = entryCreationState.copy(isSetEntryReminderTypeModeEnabled = false))
                     }
 
                 is UiEvent.UpdateEntryTitle ->
@@ -195,6 +205,20 @@ internal class HomeViewModel
                         )
                     }
 
+                is UiEvent.UpdateEntryReminderType ->
+                    setState {
+                        copy(
+                            entryCreationState =
+                                entryCreationState.copy(
+                                    isSetEntryReminderTypeModeEnabled = false,
+                                    dataDraftSnapshot =
+                                        entryCreationState.dataDraftSnapshot.copy(
+                                            reminderType = event.reminderType,
+                                        ),
+                                ),
+                        )
+                    }
+
                 is UiEvent.SetCurrentDateAs -> getEntriesVisibleOn(event.date)
             }
         }
@@ -211,6 +235,7 @@ internal class HomeViewModel
                             ),
                         )
                     }
+
                     is ResultOperation.Success -> {
                         setState { copy(isLoading = false) }
                         setEffect(UiEffect.ShowEntrySuccessfullyDeleted)
@@ -231,6 +256,7 @@ internal class HomeViewModel
                                             ?: entryCreationState.data.date,
                                     time = entryCreationState.dataDraftSnapshot.time,
                                     reminder = entryCreationState.dataDraftSnapshot.reminder,
+                                    reminderType = entryCreationState.dataDraftSnapshot.reminderType,
                                     recurrence = entryCreationState.dataDraftSnapshot.recurrence,
                                 ),
                         ),
@@ -281,15 +307,21 @@ internal class HomeViewModel
                                 entryCreationState = EntryCreationState.emptyState(),
                             )
                         }
+
                         entry.reminder?.let { reminder ->
                             scheduleReminder(entry)
                         }
+
                         setEffect(UiEffect.ShowEntrySuccessfullyCreated)
                     }
                 }
             }
 
         private fun scheduleReminder(entry: Entry) {
-            reminderStrategyFactory.getStrategy(entry, ReminderType.NOTIFICATION)?.schedule(entry)
+            reminderStrategyFactory
+                .getStrategy(
+                    entry,
+                    entry.reminderType ?: NOTIFICATION,
+                )?.schedule(entry)
         }
     }
