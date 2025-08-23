@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Devices.TV_1080p
 import androidx.compose.ui.tooling.preview.Preview
@@ -262,6 +264,16 @@ val customColorDarkHighContrast = Color(0xFFE9F0FF)
 val onCustomColorDarkHighContrast = Color(0xFF000000)
 val customColorContainerDarkHighContrast = Color(0xFFA0C5FA)
 val onCustomColorContainerDarkHighContrast = Color(0xFF000B1D)
+
+fun ColorScheme.primaryAndSecondaryGradient(): Brush =
+    Brush.verticalGradient(
+        colors =
+            listOf(
+                primary,
+                secondary,
+                tertiary,
+            ),
+    )
 
 @Preview(name = "Full Light Color Set", device = TV_1080p)
 @Composable

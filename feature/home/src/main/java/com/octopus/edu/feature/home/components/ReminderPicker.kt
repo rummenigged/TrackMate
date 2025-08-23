@@ -98,7 +98,7 @@ private fun ReminderItem(
         Text(
             modifier = Modifier.padding(vertical = 12.dp),
             text = stringResource(getReminderAsStringRes(reminder)),
-            style = typography.headlineSmall,
+            style = typography.titleSmall,
         )
 
         if (isSelected) {

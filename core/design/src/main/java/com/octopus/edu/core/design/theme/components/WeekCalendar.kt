@@ -123,7 +123,7 @@ private fun DayItem(
                     ).clickable { onItemClicked(day) }
                     .padding(8.dp),
             text = day.dayOfMonth.toString(),
-            style = typography.headlineSmall,
+            style = typography.titleMedium,
             color = textColor,
         )
     }

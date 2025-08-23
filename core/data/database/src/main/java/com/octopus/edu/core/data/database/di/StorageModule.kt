@@ -3,6 +3,7 @@ package com.octopus.edu.core.data.database.di
 import android.content.Context
 import com.octopus.edu.core.data.database.TrackMateDatabase
 import com.octopus.edu.core.data.database.dao.EntryDao
+import com.octopus.edu.core.data.database.dao.ReminderDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,4 +23,8 @@ object StorageModule {
     @Provides
     @Singleton
     fun entryDao(database: TrackMateDatabase): EntryDao = database.entryDao()
+
+    @Provides
+    @Singleton
+    fun reminderDao(database: TrackMateDatabase): ReminderDao = database.reminderDao()
 }

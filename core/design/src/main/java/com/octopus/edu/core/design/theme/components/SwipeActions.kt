@@ -23,6 +23,7 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.SwipeToDismissBoxValue.EndToStart
+import androidx.compose.material3.SwipeToDismissBoxValue.Settled
 import androidx.compose.material3.SwipeToDismissBoxValue.StartToEnd
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
@@ -97,13 +98,28 @@ fun SwipActions(
         )
 
     LaunchedEffect(dismissState, startActionsConfig, endActionsConfig, width) {
-        snapshotFlow { dismissState.requireOffset() }
-            .collect { offset ->
+        snapshotFlow { Pair(dismissState.targetValue, dismissState.progress) }
+            .collect { (targetValue, progress) ->
+                val currentDisplacement =
+                    when (targetValue) {
+                        StartToEnd -> progress * width
+                        EndToStart -> -(progress * width)
+                        Settled -> 0f
+                    }
+
                 willDismissDirection =
                     when {
-                        offset > width * startActionsConfig.threshold -> StartToEnd
-                        offset < -width * endActionsConfig.threshold -> EndToStart
-                        else -> null
+                        // Check against positive threshold for StartToEnd
+                        width > 0f && startActionsConfig.threshold > 0f && currentDisplacement > (width * startActionsConfig.threshold) -> {
+                            StartToEnd
+                        }
+                        // Check against negative threshold for EndToStart
+                        width > 0f && endActionsConfig.threshold > 0f && currentDisplacement < -(width * endActionsConfig.threshold) -> {
+                            EndToStart
+                        }
+                        else -> {
+                            null
+                        }
                     }
             }
     }

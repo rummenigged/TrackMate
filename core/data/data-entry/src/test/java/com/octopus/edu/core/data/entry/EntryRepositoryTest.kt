@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.entry
 
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.entry.store.EntryStore
+import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.common.ResultOperation
@@ -20,14 +21,16 @@ import java.time.LocalDate
 class EntryRepositoryTest {
     private lateinit var testDispatchers: TestDispatchers
     private lateinit var entryStore: EntryStore
+    private lateinit var reminderStore: ReminderStore
     private lateinit var repository: EntryRepository
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
         entryStore = mockk()
+        reminderStore = mockk()
         testDispatchers = TestDispatchers()
-        repository = EntryRepositoryImpl(entryStore, testDispatchers)
+        repository = EntryRepositoryImpl(entryStore, reminderStore, testDispatchers)
     }
 
     @Test

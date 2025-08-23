@@ -53,9 +53,10 @@ android {
 
 dependencies {
 
-    implementation(project(":core:ui-common"))
+    implementation(project(":core:common"))
     implementation(project(":core:design"))
     implementation(project(":core:domain"))
+    implementation(project(":core:ui-common"))
 
     implementation(libs.androidx.coreKtx)
     implementation(libs.androidx.appcompat)

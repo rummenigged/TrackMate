@@ -2,7 +2,10 @@ package com.octopus.edu.core.data.entry
 
 import android.database.sqlite.SQLiteException
 import com.octopus.edu.core.common.DispatcherProvider
+import com.octopus.edu.core.common.toEpocMilliseconds
 import com.octopus.edu.core.data.entry.store.EntryStore
+import com.octopus.edu.core.data.entry.store.ReminderStore
+import com.octopus.edu.core.data.entry.utils.getReminderAsEntity
 import com.octopus.edu.core.data.entry.utils.toDomain
 import com.octopus.edu.core.data.entry.utils.toEntity
 import com.octopus.edu.core.data.entry.utils.toHabitOrNull
@@ -26,6 +29,7 @@ internal class EntryRepositoryImpl
     @Inject
     constructor(
         private val entryStore: EntryStore,
+        private val reminderStore: ReminderStore,
         private val dispatcherProvider: DispatcherProvider
     ) : EntryRepository {
         override suspend fun getTasks(): ResultOperation<List<Task>> =
@@ -46,7 +50,7 @@ internal class EntryRepositoryImpl
 
         override fun getEntriesVisibleOn(date: LocalDate): Flow<ResultOperation<List<Entry>>> =
             entryStore
-                .getEntriesBeforeOrOn(date.toEpochDay())
+                .getEntriesBeforeOrOn(date.toEpocMilliseconds())
                 .map { entries ->
                     ResultOperation.Success(
                         entries
@@ -67,6 +71,7 @@ internal class EntryRepositoryImpl
                 dispatcher = dispatcherProvider.io,
             ) {
                 entryStore.saveEntry(entry.toEntity())
+                reminderStore.saveReminder(entry.getReminderAsEntity())
             }
 
         override suspend fun getEntryById(id: String): ResultOperation<Entry> =
