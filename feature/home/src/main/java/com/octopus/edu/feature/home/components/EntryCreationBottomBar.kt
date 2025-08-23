@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.outlined.DateRange
@@ -45,6 +46,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
@@ -135,14 +137,16 @@ private fun BottomInputBar(
                 ),
     ) {
         TextField(
-            value = state.data.title.orEmpty(),
-            colors = textInputColors,
-            onValueChange = { onEvent(UiEvent.UpdateEntryTitle(it)) },
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester),
+            value = state.data.title.orEmpty(),
+            textStyle = typography.bodyLarge,
+            colors = textInputColors,
             shape = shapes.medium,
+            maxLines = 4,
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
             placeholder = {
                 Text(
                     text = stringResource(R.string.task_creation_title_placeholder),
@@ -150,27 +154,28 @@ private fun BottomInputBar(
                     color = colorScheme.onSurface.copy(alpha = 0.5f),
                 )
             },
-            maxLines = 4,
+            onValueChange = { onEvent(UiEvent.UpdateEntryTitle(it)) },
         )
 
         TextField(
-            colors = textInputColors,
-            value = state.data.description.orEmpty(),
-            onValueChange = {
-                onEvent(UiEvent.UpdateEntryDescription(it))
-            },
             modifier = Modifier.fillMaxWidth(),
+            value = state.data.description.orEmpty(),
+            textStyle = typography.bodySmall,
+            colors = textInputColors,
             shape = shapes.medium,
+            maxLines = 4,
             placeholder = {
                 if (!state.data.title.isNullOrEmpty()) {
                     Text(
-                        text = "Description",
+                        text = stringResource(R.string.task_creation_description_placeholder),
                         style = typography.bodyMedium,
                         color = colorScheme.onSurface.copy(alpha = 0.5f),
                     )
                 }
             },
-            maxLines = 4,
+            onValueChange = {
+                onEvent(UiEvent.UpdateEntryDescription(it))
+            },
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -213,6 +218,7 @@ private fun EntryCreationActions(
                 }
 
             Icon(
+                modifier = Modifier.size(20.dp),
                 imageVector = Icons.Outlined.DateRange,
                 contentDescription = stringResource(R.string.entry_date_and_time),
                 tint = dateColor,
@@ -225,25 +231,36 @@ private fun EntryCreationActions(
 
             Text(
                 text = dateText,
-                style = typography.bodyLarge,
+                style = typography.labelLarge,
                 color = dateColor,
             )
 
-            state.data.time?.let { time ->
-                Text(
-                    text = ", $time",
-                    style = typography.bodyLarge,
-                    color = dateColor,
-                )
-            }
+            with(state.data) {
+                time?.let { time ->
+                    Text(
+                        text = ", $time",
+                        style = typography.labelLarge,
+                        color = dateColor,
+                    )
+                }
 
-            state.data.recurrence?.let { recurrence ->
-                if (recurrence != Recurrence.None) {
+                reminder?.let { reminder ->
                     Icon(
-                        painter = painterResource(R.drawable.ic_autorenew_habit),
-                        contentDescription = stringResource(R.string.recurrence),
+                        modifier = Modifier.size(20.dp),
+                        painter = painterResource(R.drawable.ic_alarm),
+                        contentDescription = stringResource(R.string.reminder),
                         tint = dateColor,
                     )
+                }
+                recurrence?.let { recurrence ->
+                    if (recurrence != Recurrence.None) {
+                        Icon(
+                            modifier = Modifier.size(20.dp),
+                            painter = painterResource(R.drawable.ic_autorenew_habit),
+                            contentDescription = stringResource(R.string.recurrence),
+                            tint = dateColor,
+                        )
+                    }
                 }
             }
         }

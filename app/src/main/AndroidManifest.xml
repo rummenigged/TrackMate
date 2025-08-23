@@ -46,6 +46,16 @@
 
         <receiver android:name=".reminder.ReminderAlarmReceiver" />
 
+        <activity
+            android:name=".ui.reminder.ReminderActivity"
+            android:theme="@style/Theme.TrackMate"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"/>
+
+        <receiver android:name=".reminder.ReminderAlarmReceiver"/>
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
