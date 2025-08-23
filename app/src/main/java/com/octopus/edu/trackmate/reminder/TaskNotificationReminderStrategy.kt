@@ -16,11 +16,7 @@ class TaskNotificationReminderStrategy
         @param:Named("TaskNotificationReminderScheduler") private val reminderScheduler: ReminderScheduler,
     ) : ReminderStrategy {
         override fun schedule(entry: Entry) {
-            val date =
-                when (entry) {
-                    is Task -> entry.dueDate
-                    else -> null
-                } ?: return
+            val date = if (entry is Task) entry.dueDate else return
 
             val delay =
                 calculateReminderDelay(

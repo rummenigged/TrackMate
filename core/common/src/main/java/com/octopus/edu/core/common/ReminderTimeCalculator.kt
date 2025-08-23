@@ -14,7 +14,6 @@ object ReminderTimeCalculator {
         now: LocalDateTime = LocalDateTime.now()
     ): Duration {
         val reminderDateTime = date.atTime(time).minus(reminderOffset)
-        val now = LocalDateTime.now()
         return Duration.between(now, reminderDateTime)
     }
 

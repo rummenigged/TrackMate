@@ -1,4 +1,4 @@
-package com.octopus.edu.trackmate.workManager
+package com.octopus.edu.trackmate.reminderSchedulers
 
 import android.content.Context
 import androidx.work.ExistingWorkPolicy
@@ -6,8 +6,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.octopus.edu.core.domain.scheduler.ReminderScheduler
-import com.octopus.edu.trackmate.workManager.ReminderConstants.ENTRY_ID_EXTRA
-import com.octopus.edu.trackmate.workManager.ReminderConstants.REMINDER_WORK_NAME
+import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.ENTRY_ID_EXTRA
+import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_WORK_NAME
+import com.octopus.edu.trackmate.workManager.ReminderWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import java.time.Duration
