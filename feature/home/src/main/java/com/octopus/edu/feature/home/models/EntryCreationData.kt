@@ -2,6 +2,7 @@ package com.octopus.edu.feature.home.models
 
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.core.domain.model.Reminder
+import com.octopus.edu.core.domain.scheduler.ReminderType
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -11,6 +12,7 @@ internal data class EntryCreationData(
     val date: LocalDate? = null,
     val time: LocalTime? = null,
     val reminder: Reminder? = null,
+    val reminderType: ReminderType? = null,
     val recurrence: Recurrence? = null,
 ) {
     companion object

@@ -30,7 +30,13 @@ abstract class BaseViewModel<UiState : ViewState, Effect : ViewEffect, Event : V
         _effect.value = effect
     }
 
+    protected fun markEffectAsConsumed() {
+        _effect.value = null
+    }
+
     abstract fun getInitialState(): UiState
 
     abstract fun processEvent(event: Event)
+
+    protected fun Effect.send() = setEffect(this)
 }

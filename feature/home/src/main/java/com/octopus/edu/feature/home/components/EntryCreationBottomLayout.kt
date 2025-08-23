@@ -7,8 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateTimePicker
+import com.octopus.edu.core.domain.scheduler.ReminderType
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.models.EntryCreationState
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 internal fun EntryCreationBottomLayout(
@@ -63,6 +65,15 @@ internal fun EntryCreationBottomLayout(
                 currentReminder = uiState.dataDraftSnapshot.reminder,
                 onDismiss = { onEvent(UiEvent.AddEntry.HideReminderPicker) },
                 onConfirm = { reminder -> onEvent(UiEvent.UpdateEntryReminder(reminder)) },
+            )
+        }
+
+        if (uiState.isSetEntryReminderTypeModeEnabled) {
+            ReminderTypePicker(
+                ReminderType.entries.toImmutableList(),
+                currentReminderType = uiState.dataDraftSnapshot.reminderType,
+                onDismiss = { onEvent(UiEvent.AddEntry.HideReminderTypePicker) },
+                onConfirm = { reminderType -> onEvent(UiEvent.UpdateEntryReminderType(reminderType)) },
             )
         }
     }

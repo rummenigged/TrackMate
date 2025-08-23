@@ -73,7 +73,7 @@ fun TrackMateDatePicker(
                     text = it.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
-                    style = typography.bodyMedium,
+                    style = typography.labelMedium,
                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 )
             }
@@ -103,7 +103,7 @@ private fun MonthPicker(
                 currentMonth.month.name
                     .lowercase()
                     .replaceFirstChar { it.titlecase() },
-            style = typography.headlineMedium,
+            style = typography.headlineSmall,
             color = colorScheme.onSurface,
         )
 
@@ -187,12 +187,8 @@ private fun CalendarMonthGrid(
 
                 val textStyle =
                     when (date) {
-                        selectedDate -> {
-                            typography.headlineMedium
-                        }
-
-                        today -> {
-                            typography.headlineMedium
+                        today, selectedDate -> {
+                            typography.titleLarge
                         }
 
                         else -> {
