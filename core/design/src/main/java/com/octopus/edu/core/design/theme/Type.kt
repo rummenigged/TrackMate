@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,191 +31,240 @@ internal val Typography =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
-                fontSize = 24.sp,
-                lineHeight = 28.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 57.sp,
+                lineHeight = 64.sp,
+                fontWeight = FontWeight.W400,
             ),
         displayMedium =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
-                fontSize = 20.sp,
-                lineHeight = 24.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 45.sp,
+                lineHeight = 52.sp,
+                fontWeight = FontWeight.W400,
             ),
         displaySmall =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
-                fontSize = 20.sp,
-                lineHeight = 24.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 36.sp,
+                lineHeight = 44.sp,
+                fontWeight = FontWeight.W400,
             ),
         headlineLarge =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
-                fontSize = 18.sp,
-                lineHeight = 22.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 32.sp,
+                lineHeight = 40.sp,
+                fontWeight = FontWeight.W400,
             ),
         headlineMedium =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
-                fontSize = 16.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 28.sp,
+                lineHeight = 36.sp,
+                fontWeight = FontWeight.W400,
             ),
         headlineSmall =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
+                fontSize = 24.sp,
+                lineHeight = 32.sp,
+                fontWeight = FontWeight.W400,
+            ),
+        titleLarge =
+            TextStyle(
+                fontFamily = FontFamily.Default,
+                fontStyle = FontStyle.Normal,
+                fontSize = 22.sp,
+                lineHeight = 28.sp,
+                fontWeight = FontWeight.W400,
+            ),
+        titleMedium =
+            TextStyle(
+                fontFamily = FontFamily.Default,
+                fontStyle = FontStyle.Normal,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                fontWeight = FontWeight.W500,
+            ),
+        titleSmall =
+            TextStyle(
+                fontFamily = FontFamily.Default,
+                fontStyle = FontStyle.Normal,
                 fontSize = 14.sp,
-                lineHeight = 14.sp,
-                fontWeight = FontWeight.Medium,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.W500,
             ),
         bodyLarge =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
-                fontSize = 14.sp,
-                lineHeight = 14.sp,
-                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                fontWeight = FontWeight.W400,
             ),
         bodyMedium =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.W400,
             ),
-        labelLarge =
+        bodySmall =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
-                fontWeight = FontWeight.Black,
+                fontWeight = FontWeight.W400,
+            ),
+        labelLarge =
+            TextStyle(
+                fontFamily = FontFamily.Default,
+                fontStyle = FontStyle.Normal,
+                fontSize = 14.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.W500,
                 letterSpacing = 0.5.sp,
             ),
         labelMedium =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
-                fontSize = 10.sp,
-                lineHeight = 13.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.W500,
                 letterSpacing = 0.5.sp,
             ),
         labelSmall =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontStyle = FontStyle.Normal,
-                fontSize = 10.sp,
-                lineHeight = 13.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 11.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.W500,
             ),
     )
 
-@Preview(device = Devices.PIXEL)
+@Preview(device = TABLET)
 @Composable
 private fun TypographyPreview() {
     TrackMateTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            val h1 = MaterialTheme.typography.displayLarge.copy(color = Color.Black)
-            val h2 = MaterialTheme.typography.displayMedium.copy(color = Color.Black)
-            val h3 = MaterialTheme.typography.displaySmall.copy(color = Color.Black)
-            val h4 = MaterialTheme.typography.headlineLarge.copy(color = Color.Black)
-            val h5 = MaterialTheme.typography.headlineMedium.copy(color = Color.Black)
-            val h6 = MaterialTheme.typography.headlineSmall.copy(color = Color.Black)
-            val body1 = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
-            val body2 = MaterialTheme.typography.bodyMedium.copy(color = Color.Black)
-            val caption1 = MaterialTheme.typography.labelLarge.copy(color = Color.Black)
-            val caption2 = MaterialTheme.typography.labelMedium.copy(color = Color.Black)
-            val caption3 = MaterialTheme.typography.labelSmall.copy(color = Color.Black)
+            val displayLarge = MaterialTheme.typography.displayLarge.copy(color = Color.Black)
+            val displayMedium = MaterialTheme.typography.displayMedium.copy(color = Color.Black)
+            val displaySmall = MaterialTheme.typography.displaySmall.copy(color = Color.Black)
+            val headlineLarge = MaterialTheme.typography.headlineLarge.copy(color = Color.Black)
+            val headlineMedium = MaterialTheme.typography.headlineMedium.copy(color = Color.Black)
+            val headlineSmall = MaterialTheme.typography.headlineSmall.copy(color = Color.Black)
+            val titleLarge = MaterialTheme.typography.titleLarge.copy(color = Color.Black)
+            val titleMedium = MaterialTheme.typography.titleMedium.copy(color = Color.Black)
+            val titleSmall = MaterialTheme.typography.titleSmall.copy(color = Color.Black)
+            val bodyLarge = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
+            val bodyMedium = MaterialTheme.typography.bodyMedium.copy(color = Color.Black)
+            val bodySmall = MaterialTheme.typography.bodySmall.copy(color = Color.Black)
+            val labelLarge = MaterialTheme.typography.labelLarge.copy(color = Color.Black)
+            val labelMedium = MaterialTheme.typography.labelMedium.copy(color = Color.Black)
+            val labelSmall = MaterialTheme.typography.labelSmall.copy(color = Color.Black)
 
             Column(
                 verticalArrangement = Arrangement.Center,
             ) {
                 FontInfoRow(
                     typographyName = "Display Large",
-                    fontName = "Roboto Bold",
-                    fontSize = "24sp",
-                    textStyle = h1,
+                    fontSize = "57sp",
+                    textStyle = displayLarge,
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Display Medium",
-                    fontName = "Roboto Bold",
-                    fontSize = "20sp",
-                    textStyle = h2,
+                    fontSize = "45sp",
+                    textStyle = displayMedium,
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Display Small",
-                    fontName = "Roboto Medium",
-                    fontSize = "20sp",
-                    textStyle = h3,
+                    fontSize = "36sp",
+                    textStyle = displaySmall,
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Headline Large",
-                    fontName = "Roboto Medium",
-                    fontSize = "18sp",
-                    textStyle = h4,
+                    fontSize = "32sp",
+                    textStyle = headlineLarge,
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Headline Medium",
-                    fontName = "Roboto Bold",
-                    fontSize = "16sp",
-                    textStyle = h5,
+                    fontSize = "28sp",
+                    textStyle = headlineMedium,
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Headline Small",
-                    fontName = "Roboto Medium",
-                    fontSize = "14sp",
-                    textStyle = h6,
+                    fontSize = "24sp",
+                    textStyle = headlineSmall,
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+                FontInfoRow(
+                    typographyName = "Title Large",
+                    fontSize = "22sp",
+                    textStyle = titleLarge,
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                FontInfoRow(
+                    typographyName = "Title Medium",
+                    fontSize = "16sp",
+                    textStyle = titleMedium,
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                FontInfoRow(
+                    typographyName = "Title Small",
+                    fontSize = "14sp",
+                    textStyle = titleSmall,
+                )
+                Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Body Large",
-                    fontName = "Roboto Regular",
-                    fontSize = "14sp",
-                    textStyle = body1,
+                    fontSize = "16sp",
+                    textStyle = bodyLarge,
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Body Medium",
-                    fontName = "Roboto Medium",
-                    fontSize = "12sp",
-                    textStyle = body2,
+                    fontSize = "14sp",
+                    textStyle = bodyMedium,
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+                FontInfoRow(
+                    typographyName = "Body Small",
+                    fontSize = "12sp",
+                    textStyle = bodySmall,
+                )
+                Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Label Large",
-                    fontName = "Roboto Black",
-                    fontSize = "12sp",
-                    textStyle = caption1,
+                    fontSize = "14sp",
+                    textStyle = labelLarge,
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Label Medium",
-                    fontName = "Roboto Bold",
-                    fontSize = "10sp",
-                    textStyle = caption2,
+                    fontSize = "12sp",
+                    textStyle = labelMedium,
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 FontInfoRow(
                     typographyName = "Label Small",
-                    fontName = "Roboto Medium",
-                    fontSize = "10sp",
-                    textStyle = caption3,
+                    fontSize = "11sp",
+                    textStyle = labelSmall,
                 )
             }
         }
@@ -225,30 +274,33 @@ private fun TypographyPreview() {
 @Composable
 private fun FontInfoRow(
     typographyName: String,
-    fontName: String,
+    fontName: String = "Roboto",
     fontSize: String,
     textStyle: TextStyle,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.Center,
     ) {
         Text(
             typographyName,
             style = textStyle,
-            modifier = Modifier.width(130.dp),
             textAlign = TextAlign.Center,
         )
+
+        Spacer(modifier = Modifier.width(24.dp))
+
         Text(
             fontName,
             style = textStyle,
-            modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center,
         )
+
+        Spacer(modifier = Modifier.width(24.dp))
+
         Text(
             fontSize,
             style = textStyle,
-            modifier = Modifier.width(130.dp),
             textAlign = TextAlign.Center,
         )
     }

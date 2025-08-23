@@ -24,7 +24,7 @@ internal fun HomeAppBar(
         title = {
             Text(
                 text = title,
-                style = typography.headlineMedium,
+                style = typography.titleMedium,
             )
         },
     )

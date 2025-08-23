@@ -2,15 +2,16 @@ package com.octopus.edu.feature.home.models
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Stable
+import com.octopus.edu.core.common.isToday
+import com.octopus.edu.core.common.isTomorrow
+import com.octopus.edu.core.common.isYesterday
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.domain.model.Task
+import com.octopus.edu.core.domain.scheduler.ReminderType
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.utils.isToday
-import com.octopus.edu.feature.home.utils.isTomorrow
-import com.octopus.edu.feature.home.utils.isYesterday
 import kotlinx.collections.immutable.toImmutableList
 import java.time.Instant
 import java.time.LocalDate
@@ -21,6 +22,12 @@ import java.util.UUID
 import kotlin.time.ExperimentalTime
 
 internal fun EntryCreationState.Companion.emptyState(): EntryCreationState = EntryCreationState()
+
+internal fun getReminderTypeAsStringRes(type: ReminderType): Int =
+    when (type) {
+        ReminderType.NOTIFICATION -> R.string.notification
+        ReminderType.ALARM -> R.string.alarm
+    }
 
 internal fun getRecurrenceAsStringRes(recurrence: Recurrence): Int =
     when (recurrence) {
@@ -55,6 +62,7 @@ internal fun EntryCreationState.toDomain(): Entry =
             createdAt = Instant.now(),
             recurrence = data.recurrence,
             reminder = data.reminder,
+            reminderType = data.reminderType,
             startDate = data.currentEntryDateOrToday,
         )
     } else {
@@ -66,6 +74,7 @@ internal fun EntryCreationState.toDomain(): Entry =
             time = data.time,
             dueDate = data.currentEntryDateOrToday,
             reminder = data.reminder,
+            reminderType = data.reminderType,
             createdAt = Instant.now(),
         )
     }
@@ -77,6 +86,7 @@ internal data class EntryCreationState(
     val isSetEntryTimeModeEnabled: Boolean = false,
     val isSetEntryRecurrenceModeEnabled: Boolean = false,
     val isSetEntryReminderModeEnabled: Boolean = false,
+    val isSetEntryReminderTypeModeEnabled: Boolean = false,
     val data: EntryCreationData = EntryCreationData.empty(),
     val dataDraftSnapshot: EntryCreationData = EntryCreationData.empty(),
 ) {
@@ -115,6 +125,15 @@ internal data class EntryCreationState(
                 dataDraftSnapshot.reminder
                     ?: data.reminder
                     ?: Reminder.None,
+            )
+
+    @get:StringRes
+    val currentReminderTypeResolvedAsRes: Int
+        get() =
+            getReminderTypeAsStringRes(
+                dataDraftSnapshot.reminderType
+                    ?: data.reminderType
+                    ?: ReminderType.NOTIFICATION,
             )
 
     private fun getCurrentEntryDateState(): EntryDateState =

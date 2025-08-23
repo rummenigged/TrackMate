@@ -172,7 +172,7 @@ internal fun EntryItem(
                     Text(
                         modifier = Modifier.weight(1f),
                         text = entry.title,
-                        style = typography.bodyMedium,
+                        style = typography.titleSmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )

@@ -49,7 +49,7 @@ internal fun RecurrencePicker(
         onDismiss = { onDismiss() },
         onConfirm = { onConfirm(internalRecurrence) },
     ) {
-        ReminderOptions(
+        RecurrenceOptions(
             recurrences = EntryCreationState.recurrenceOptions,
             selectedRecurrence = internalRecurrence,
             onOptionSelected = { recurrence -> internalRecurrence = recurrence },
@@ -58,7 +58,7 @@ internal fun RecurrencePicker(
 }
 
 @Composable
-private fun ReminderOptions(
+private fun RecurrenceOptions(
     recurrences: ImmutableList<Recurrence>,
     selectedRecurrence: Recurrence,
     onOptionSelected: (Recurrence) -> Unit,
@@ -69,7 +69,7 @@ private fun ReminderOptions(
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items(recurrences) { recurrence ->
-            ReminderItem(
+            RecurrenceItem(
                 recurrence,
                 isSelected = recurrence == selectedRecurrence,
                 onItemClicked = { recurrence -> onOptionSelected(recurrence) },
@@ -79,7 +79,7 @@ private fun ReminderOptions(
 }
 
 @Composable
-private fun ReminderItem(
+private fun RecurrenceItem(
     recurrence: Recurrence,
     isSelected: Boolean,
     onItemClicked: (Recurrence) -> Unit,
@@ -96,7 +96,7 @@ private fun ReminderItem(
         Text(
             modifier = Modifier.padding(vertical = 12.dp),
             text = stringResource(getRecurrenceAsStringRes(recurrence)),
-            style = typography.headlineSmall,
+            style = typography.titleSmall,
         )
 
         if (isSelected) {

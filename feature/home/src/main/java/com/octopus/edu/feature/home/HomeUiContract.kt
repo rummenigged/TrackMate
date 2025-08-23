@@ -5,6 +5,7 @@ import com.octopus.edu.core.design.theme.utils.Comparable
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.core.domain.model.Reminder
+import com.octopus.edu.core.domain.scheduler.ReminderType
 import com.octopus.edu.core.ui.common.base.ViewEffect
 import com.octopus.edu.core.ui.common.base.ViewEvent
 import com.octopus.edu.core.ui.common.base.ViewState
@@ -74,7 +75,11 @@ internal object HomeUiContract {
 
             data object ShowReminderPicker : UiEvent
 
+            data object ShowReminderTypePicker : UiEvent
+
             data object HideReminderPicker : UiEvent
+
+            data object HideReminderTypePicker : UiEvent
         }
 
         data class UpdateEntryTitle(
@@ -100,6 +105,10 @@ internal object HomeUiContract {
 
         data class UpdateEntryReminder(
             val reminder: Reminder
+        ) : UiEvent
+
+        data class UpdateEntryReminderType(
+            val reminderType: ReminderType
         ) : UiEvent
     }
 
