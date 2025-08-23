@@ -133,7 +133,7 @@ fun SettingsRow(
             text = title,
             style =
                 if (isFilled) {
-                    typography.headlineSmall
+                    typography.titleMedium
                 } else {
                     typography.bodyLarge
                 },

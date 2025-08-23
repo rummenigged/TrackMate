@@ -54,7 +54,7 @@ internal fun ReminderTypePicker(
     ) {
         ReminderTyeOptions(
             reminders = reminders,
-            selectedReminder = currentReminder,
+            selectedReminderType = currentReminder,
             onItemSelected = { reminder -> currentReminder = reminder },
         )
     }
@@ -63,7 +63,7 @@ internal fun ReminderTypePicker(
 @Composable
 private fun ReminderTyeOptions(
     reminders: ImmutableList<ReminderType>,
-    selectedReminder: ReminderType,
+    selectedReminderType: ReminderType,
     onItemSelected: (ReminderType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -72,9 +72,9 @@ private fun ReminderTyeOptions(
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items(reminders) { reminder ->
-            ReminderItem(
+            ReminderTypeItem(
                 reminder,
-                isSelected = reminder == selectedReminder,
+                isSelected = reminder == selectedReminderType,
                 onItemClicked = onItemSelected,
             )
         }
@@ -82,7 +82,7 @@ private fun ReminderTyeOptions(
 }
 
 @Composable
-private fun ReminderItem(
+private fun ReminderTypeItem(
     reminder: ReminderType,
     isSelected: Boolean,
     onItemClicked: (ReminderType) -> Unit,
@@ -99,7 +99,7 @@ private fun ReminderItem(
         Text(
             modifier = Modifier.padding(vertical = 12.dp),
             text = stringResource(getReminderTypeAsStringRes(reminder)),
-            style = typography.headlineSmall,
+            style = typography.titleSmall,
         )
 
         if (isSelected) {
@@ -116,7 +116,7 @@ private fun ReminderItem(
 
 @PreviewLightDark
 @Composable
-private fun ReminderDialogPreview() {
+private fun ReminderTypeDialogPreview() {
     TrackMateTheme {
         ReminderPicker(
             reminders = EntryCreationState.reminderByDayOptions,

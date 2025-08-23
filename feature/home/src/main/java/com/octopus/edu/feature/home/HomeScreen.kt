@@ -216,7 +216,7 @@ private fun EmptyEntries(modifier: Modifier = Modifier) {
 
         Text(
             text = stringResource(R.string.add_new_entries_to_get_started),
-            style = typography.bodySmall,
+            style = typography.bodyMedium,
         )
     }
 }
