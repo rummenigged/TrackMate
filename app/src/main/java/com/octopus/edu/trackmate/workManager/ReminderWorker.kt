@@ -6,8 +6,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.ENTRY_ID_EXTRA
 import com.octopus.edu.trackmate.utils.NotificationHelper
-import com.octopus.edu.trackmate.workManager.ReminderConstants.ENTRY_ID_EXTRA
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
@@ -27,7 +27,7 @@ class ReminderWorker
 
                 is ResultOperation.Success -> {
                     notificationHelper.showReminderNotification(
-                        entryId,
+                        entryId.hashCode(),
                         entry.data.title,
                     )
                     Result.success()

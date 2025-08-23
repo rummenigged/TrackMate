@@ -33,7 +33,7 @@ fun TrackMateDialog(
             }
         },
         title = {
-            Text(text = stringResource(title), style = MaterialTheme.typography.headlineSmall)
+            Text(text = stringResource(title), style = MaterialTheme.typography.titleMedium)
         },
         text = content,
     )
