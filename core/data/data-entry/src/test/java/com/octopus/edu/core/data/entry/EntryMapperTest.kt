@@ -1,9 +1,9 @@
 package com.octopus.edu.core.data.entry
 
+import com.octopus.edu.core.common.toInstant
+import com.octopus.edu.core.common.toLocalDate
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.entry.utils.toHabitOrNull
-import com.octopus.edu.core.data.entry.utils.toInstant
-import com.octopus.edu.core.data.entry.utils.toLocalDate
 import com.octopus.edu.core.data.entry.utils.toTaskOrNull
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Recurrence
