@@ -36,6 +36,7 @@ import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEffect
 import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEffect.ShowError
 import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEvent
 import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiState
+import com.octopus.edu.trackmate.ui.reminder.model.OffsetState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
@@ -133,19 +134,24 @@ class ReminderActivity : ComponentActivity() {
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                uiState.offset?.resolveStringResArgs()?.let { res ->
+                uiState.offset?.let { offset ->
+                    val offsetText =
+                        when (offset) {
+                            is OffsetState.NoOffset -> stringResource(R.string.no_offset)
+                            else ->
+                                pluralStringResource(
+                                    offset.resolveStringResArgs().resId,
+                                    (uiState.offset?.offset ?: 0L).toInt(),
+                                    *offset.resolveStringResArgs().formatArgs.toTypedArray(),
+                                )
+                        }
                     Text(
-                        text =
-                            pluralStringResource(
-                                res.resId,
-                                (uiState.offset?.offset ?: 0).toInt(),
-                                *res.formatArgs.toTypedArray(),
-                            ),
+                        text = offsetText,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
 
-                    Spacer(modifier = Modifier.height(48.dp))
+                    Spacer(modifier = Modifier.height(36.dp))
                 }
 
                 TrackMateOvalButton(

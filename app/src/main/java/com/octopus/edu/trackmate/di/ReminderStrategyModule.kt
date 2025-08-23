@@ -6,6 +6,7 @@ import com.octopus.edu.core.domain.scheduler.ReminderScheduler
 import com.octopus.edu.core.domain.scheduler.ReminderStrategy
 import com.octopus.edu.core.domain.scheduler.ReminderType
 import com.octopus.edu.trackmate.di.mapKey.ReminderStrategyMapKey
+import com.octopus.edu.trackmate.reminder.HabitAlarmReminderStrategy
 import com.octopus.edu.trackmate.reminder.HabitNotificationReminderStrategy
 import com.octopus.edu.trackmate.reminder.TaskAlarmReminderStrategy
 import com.octopus.edu.trackmate.reminder.TaskNotificationReminderStrategy
@@ -40,4 +41,11 @@ object ReminderStrategyModule {
     fun provideTaskAlarmReminderStrategy(
         @Named("TaskAlarmReminderScheduler") scheduler: ReminderScheduler
     ): ReminderStrategy = TaskAlarmReminderStrategy(scheduler)
+
+    @Provides
+    @IntoMap
+    @ReminderStrategyMapKey(entry = Habit::class, type = ReminderType.ALARM)
+    fun provideHabitAlarmReminderStrategy(
+        @Named("HabitAlarmReminderScheduler") scheduler: ReminderScheduler
+    ): ReminderStrategy = HabitAlarmReminderStrategy(scheduler)
 }

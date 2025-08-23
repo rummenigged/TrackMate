@@ -78,7 +78,7 @@ internal object ReminderActivityUiContract {
                 when (offsetInMinutes) {
                     0L -> OffsetState.NoOffset
                     in 1L..58L -> OffsetState.MinuteOffset(offsetInMinutes)
-                    else -> { // offsetInMinutes >= 59L
+                    else -> {
                         val baseHour = offsetInMinutes / 60L
                         val remainderMinutes = offsetInMinutes % 60L
 

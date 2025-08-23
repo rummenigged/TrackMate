@@ -7,7 +7,7 @@ import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.ui.common.base.BaseViewModel
-import com.octopus.edu.trackmate.reminderSchedulers.TaskAlarmReminderScheduler.Companion.ENTRY_ID_EXTRA
+import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.ENTRY_ID_EXTRA
 import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEffect
 import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEvent
 import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiState

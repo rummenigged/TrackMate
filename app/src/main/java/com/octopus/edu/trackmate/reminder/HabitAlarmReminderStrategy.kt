@@ -1,5 +1,6 @@
 package com.octopus.edu.trackmate.reminder
 
+import android.util.Log
 import com.octopus.edu.core.common.ReminderTimeCalculator.calculateReminderDelay
 import com.octopus.edu.core.common.ReminderTimeCalculator.defaultTimeIfNull
 import com.octopus.edu.core.common.ReminderTimeCalculator.getHabitInterval
@@ -11,10 +12,10 @@ import com.octopus.edu.core.domain.scheduler.ReminderStrategy
 import javax.inject.Inject
 import javax.inject.Named
 
-class HabitNotificationReminderStrategy
+class HabitAlarmReminderStrategy
     @Inject
     constructor(
-        @param:Named("HabitNotificationReminderScheduler") private val reminderScheduler: ReminderScheduler
+        @param:Named("HabitAlarmReminderScheduler") private val reminderScheduler: ReminderScheduler
     ) : ReminderStrategy {
         override fun schedule(entry: Entry) {
             val date = if (entry is Habit) entry.startDate else return
