@@ -28,8 +28,8 @@ import com.octopus.edu.core.design.theme.components.TrackMateDialog
 import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.domain.scheduler.ReminderType
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.models.EntryCreationState
-import com.octopus.edu.feature.home.models.getReminderTypeAsStringRes
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.getReminderTypeAsStringRes
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -119,7 +119,7 @@ private fun ReminderTypeItem(
 private fun ReminderTypeDialogPreview() {
     TrackMateTheme {
         ReminderPicker(
-            reminders = EntryCreationState.reminderByDayOptions,
+            reminders = UiState.reminderByDayOptions,
             currentReminder = Reminder.None,
             onConfirm = {},
             onDismiss = {},

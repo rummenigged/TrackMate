@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -46,7 +45,6 @@ import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.feature.home.HomeUiContract.UiEntry
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiState
-import com.octopus.edu.feature.home.components.EntryCreationBottomLayout
 import com.octopus.edu.feature.home.components.EntryItem
 import com.octopus.edu.feature.home.components.HomeAppBar
 import com.octopus.edu.feature.home.utils.mockEntryList
@@ -54,15 +52,19 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
-    HomeScreen(
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    onFabClicked: () -> Unit
+) {
+    HomeScreenInternal(
         modifier = modifier,
-        viewModel = hiltViewModel(),
+        onFabClicked = onFabClicked,
     )
 }
 
 @Composable
-internal fun HomeScreen(
+internal fun HomeScreenInternal(
+    onFabClicked: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -82,15 +84,7 @@ internal fun HomeScreen(
 
         AddEntryFAB(
             modifier = Modifier.align(Alignment.BottomEnd),
-            onClick = { viewModel.processEvent(UiEvent.Entry.Add) },
-        )
-
-        EntryCreationBottomLayout(
-            modifier =
-                Modifier
-                    .fillMaxWidth(),
-            uiState = uiState.entryCreationState,
-            onEvent = viewModel::processEvent,
+            onClick = onFabClicked,
         )
     }
 }

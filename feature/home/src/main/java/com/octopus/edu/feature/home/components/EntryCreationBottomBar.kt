@@ -52,58 +52,35 @@ import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.core.ui.common.extensions.noClickableOverlay
-import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.R
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiEvent
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiState
 import com.octopus.edu.feature.home.models.EntryCreationData
-import com.octopus.edu.feature.home.models.EntryCreationState
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
 
 @Composable
 internal fun EntryCreationBottomBar(
-    state: EntryCreationState,
+    state: UiState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
-    val imePadding =
-        if (imeVisible) {
-            WindowInsets.ime.exclude(WindowInsets.navigationBars).asPaddingValues()
-        } else {
-            PaddingValues(bottom = 0.dp)
-        }
-
     Box(
         modifier =
             modifier
-                .fillMaxSize()
-                .background(colorScheme.scrim.copy(alpha = 0.3f))
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = { onEvent(UiEvent.AddEntry.Cancel) },
-                ),
-        contentAlignment = Alignment.BottomCenter,
+                .fillMaxWidth(),
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(imePadding)
-                    .noClickableOverlay(),
-        ) {
-            BottomInputBar(
-                state = state,
-                onEvent = onEvent,
-            )
-        }
+        BottomInputBar(
+            state = state,
+            onEvent = onEvent,
+        )
     }
 }
 
 @Composable
 private fun BottomInputBar(
-    state: EntryCreationState,
+    state: UiState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -125,16 +102,7 @@ private fun BottomInputBar(
         modifier =
             modifier
                 .fillMaxWidth()
-                .clip(shapes.medium)
-                .background(colorScheme.surface)
-                .padding(8.dp)
-                .draggable(
-                    orientation = Orientation.Vertical,
-                    state =
-                        rememberDraggableState { delta ->
-                            if (delta > 12f) onEvent(UiEvent.AddEntry.Cancel)
-                        },
-                ),
+                .padding(8.dp),
     ) {
         TextField(
             modifier =
@@ -189,7 +157,7 @@ private fun BottomInputBar(
 
 @Composable
 private fun EntryCreationActions(
-    state: EntryCreationState,
+    state: UiState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -204,9 +172,8 @@ private fun EntryCreationActions(
         Row(
             modifier =
                 Modifier
-                    .clip(shapes.small)
                     .padding(4.dp)
-                    .clickable { onEvent(UiEvent.AddEntry.ShowSettingsPicker) },
+                    .clickable { onEvent(UiEvent.ShowSettingsPicker) },
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -272,7 +239,7 @@ private fun EntryCreationActions(
                 Modifier
                     .clip(shapes.medium)
                     .height(28.dp),
-            onClick = { onEvent(UiEvent.Entry.Save) },
+            onClick = { onEvent(UiEvent.Save) },
             colors =
                 IconButtonDefaults.iconButtonColors(
                     containerColor = colorScheme.primary,
@@ -297,7 +264,7 @@ private fun BottomPreview() {
     TrackMateTheme {
         EntryCreationBottomBar(
             state =
-                EntryCreationState(
+                UiState(
                     data =
                         EntryCreationData(
                             date = LocalDate.of(2025, 6, 6),

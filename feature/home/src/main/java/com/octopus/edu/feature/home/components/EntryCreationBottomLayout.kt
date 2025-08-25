@@ -1,43 +1,59 @@
 package com.octopus.edu.feature.home.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateTimePicker
+import com.octopus.edu.core.design.theme.utils.LaunchedEffectAndCollectLatest
 import com.octopus.edu.core.domain.scheduler.ReminderType
-import com.octopus.edu.feature.home.HomeUiContract.UiEvent
-import com.octopus.edu.feature.home.models.EntryCreationState
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiEffect
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiEvent
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.CreateEntryViewModel
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.Flow
 
 @Composable
-internal fun EntryCreationBottomLayout(
-    uiState: EntryCreationState,
-    onEvent: (UiEvent) -> Unit,
-    modifier: Modifier = Modifier,
+fun EntryCreationBottomLayout(
+    onFinished: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier, contentAlignment = Alignment.BottomCenter) {
-        if (uiState.isEntryCreationModeEnabled) {
-            EntryCreationBottomBar(
-                state = uiState,
-                onEvent = onEvent,
-            )
-        }
+    EntryCreationBottomLayoutInternal(modifier = modifier, onFinished = onFinished)
+}
+
+@Composable
+internal fun EntryCreationBottomLayoutInternal(
+    onFinished: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: CreateEntryViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
+
+    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+        EntryCreationBottomBar(
+            state = uiState,
+            onEvent = viewModel::processEvent,
+        )
 
         if (uiState.isSetEntryDateModeEnabled) {
             EntryDateAndTimeSpecificationsBottomBar(
                 state = uiState,
-                onEvent = onEvent,
+                onEvent = viewModel::processEvent,
             )
         }
 
         if (uiState.isSetEntryTimeModeEnabled) {
             TrackMateTimePicker(
-                onDismiss = { onEvent(UiEvent.AddEntry.HideTimePicker) },
+                onDismiss = { viewModel.processEvent(UiEvent.HideTimePicker) },
                 onConfirm = { hour, minute ->
-                    onEvent(UiEvent.UpdateEntryTime(hour, minute))
+                    viewModel.processEvent(UiEvent.UpdateEntryTime(hour, minute))
                 },
             )
         }
@@ -45,8 +61,8 @@ internal fun EntryCreationBottomLayout(
         if (uiState.isSetEntryRecurrenceModeEnabled) {
             RecurrencePicker(
                 currentRecurrence = uiState.dataDraftSnapshot.recurrence,
-                onConfirm = { recurrence -> onEvent(UiEvent.UpdateEntryRecurrence(recurrence)) },
-                onDismiss = { onEvent(UiEvent.AddEntry.HideRecurrencePicker) },
+                onConfirm = { recurrence -> viewModel.processEvent(UiEvent.UpdateEntryRecurrence(recurrence)) },
+                onDismiss = { viewModel.processEvent(UiEvent.HideRecurrencePicker) },
             )
         }
 
@@ -55,16 +71,16 @@ internal fun EntryCreationBottomLayout(
                 if (uiState.dataDraftSnapshot.time != null ||
                     uiState.data.time != null
                 ) {
-                    EntryCreationState.reminderByTimeOptions
+                    UiState.reminderByTimeOptions
                 } else {
-                    EntryCreationState.reminderByDayOptions
+                    UiState.reminderByDayOptions
                 }
 
             ReminderPicker(
                 reminders = reminders,
                 currentReminder = uiState.dataDraftSnapshot.reminder,
-                onDismiss = { onEvent(UiEvent.AddEntry.HideReminderPicker) },
-                onConfirm = { reminder -> onEvent(UiEvent.UpdateEntryReminder(reminder)) },
+                onDismiss = { viewModel.processEvent(UiEvent.HideReminderPicker) },
+                onConfirm = { reminder -> viewModel.processEvent(UiEvent.UpdateEntryReminder(reminder)) },
             )
         }
 
@@ -72,9 +88,36 @@ internal fun EntryCreationBottomLayout(
             ReminderTypePicker(
                 ReminderType.entries.toImmutableList(),
                 currentReminderType = uiState.dataDraftSnapshot.reminderType,
-                onDismiss = { onEvent(UiEvent.AddEntry.HideReminderTypePicker) },
-                onConfirm = { reminderType -> onEvent(UiEvent.UpdateEntryReminderType(reminderType)) },
+                onDismiss = { viewModel.processEvent(UiEvent.HideReminderTypePicker) },
+                onConfirm = { reminderType -> viewModel.processEvent(UiEvent.UpdateEntryReminderType(reminderType)) },
             )
+        }
+    }
+
+    EffectHandler(
+        viewModel.effect,
+        onEvent = viewModel::processEvent,
+        onFinished = onFinished,
+    )
+}
+
+@Composable
+private fun EffectHandler(
+    effectFlow: Flow<UiEffect?>,
+    onEvent: (UiEvent) -> Unit,
+    onFinished: () -> Unit
+) {
+    LaunchedEffectAndCollectLatest(
+        effectFlow,
+        onEffectConsumed = { onEvent(UiEvent.MarkEffectAsConsumed) },
+    ) { effect ->
+        when (effect) {
+            UiEffect.ShowEntrySuccessfullyCreated -> {
+                onFinished()
+            }
+
+            is UiEffect.ShowError -> {
+            }
         }
     }
 }
@@ -83,9 +126,6 @@ internal fun EntryCreationBottomLayout(
 @Composable
 private fun EntryCreationBottomLayoutPreview() {
     TrackMateTheme {
-        EntryCreationBottomLayout(
-            uiState = EntryCreationState(),
-            onEvent = {},
-        )
+        EntryCreationBottomLayout(onFinished = {})
     }
 }

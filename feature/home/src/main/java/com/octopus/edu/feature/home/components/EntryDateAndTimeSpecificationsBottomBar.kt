@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,13 +27,13 @@ import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateDatePicker
 import com.octopus.edu.core.ui.common.extensions.noClickableOverlay
-import com.octopus.edu.feature.home.HomeUiContract.UiEvent
-import com.octopus.edu.feature.home.models.EntryCreationState
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiEvent
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun EntryDateAndTimeSpecificationsBottomBar(
-    state: EntryCreationState,
+    state: UiState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -45,15 +46,14 @@ internal fun EntryDateAndTimeSpecificationsBottomBar(
         Column(
             modifier =
                 Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .noClickableOverlay()
-                    .clip(shapes.medium)
                     .background(colorScheme.surface),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             EntryDatePickerActionButtons(
-                onConfirm = { onEvent(UiEvent.AddEntry.ConfirmDateAndTimeSettings) },
-                onDismiss = { onEvent(UiEvent.AddEntry.CancelDateAndTimeSettings) },
+                onConfirm = { onEvent(UiEvent.ConfirmDateAndTimeSettings) },
+                onDismiss = { onEvent(UiEvent.CancelDateAndTimeSettings) },
             )
 
             Spacer(Modifier.height(8.dp))
@@ -112,7 +112,7 @@ private fun EntryDatePickerActionButtons(
 private fun EntryTimeSpecificationsBottomBarPreview() {
     TrackMateTheme {
         EntryDateAndTimeSpecificationsBottomBar(
-            state = EntryCreationState(isSetEntryDateModeEnabled = true),
+            state = UiState(isSetEntryDateModeEnabled = true),
             onEvent = {},
         )
     }

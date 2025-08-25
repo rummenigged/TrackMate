@@ -38,7 +38,7 @@ import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.mock
 import com.octopus.edu.core.ui.common.extensions.rememberMaxTextWidthDp
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.models.getRecurrenceAsStringRes
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.getRecurrenceAsStringRes
 
 @Composable
 internal fun EntryItem(

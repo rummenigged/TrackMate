@@ -27,8 +27,8 @@ import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateDialog
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.models.EntryCreationState
-import com.octopus.edu.feature.home.models.getRecurrenceAsStringRes
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.getRecurrenceAsStringRes
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -50,7 +50,7 @@ internal fun RecurrencePicker(
         onConfirm = { onConfirm(internalRecurrence) },
     ) {
         RecurrenceOptions(
-            recurrences = EntryCreationState.recurrenceOptions,
+            recurrences = UiState.recurrenceOptions,
             selectedRecurrence = internalRecurrence,
             onOptionSelected = { recurrence -> internalRecurrence = recurrence },
         )
