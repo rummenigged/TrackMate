@@ -23,12 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateDialog
 import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.models.EntryCreationState
-import com.octopus.edu.feature.home.models.getReminderAsStringRes
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.getReminderAsStringRes
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -38,7 +39,7 @@ internal fun ReminderPicker(
     onConfirm: (Reminder) -> Unit,
     currentReminder: Reminder?,
     modifier: Modifier = Modifier,
-) {
+) = trace("ReminderPicker") {
     var currentReminder by remember(currentReminder) {
         mutableStateOf(currentReminder ?: Reminder.None)
     }
@@ -118,7 +119,7 @@ private fun ReminderItem(
 private fun ReminderDialogPreview() {
     TrackMateTheme {
         ReminderPicker(
-            reminders = EntryCreationState.reminderByDayOptions,
+            reminders = UiState.reminderByDayOptions,
             currentReminder = Reminder.None,
             onConfirm = {},
             onDismiss = {},

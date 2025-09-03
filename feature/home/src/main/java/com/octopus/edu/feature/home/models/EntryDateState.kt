@@ -10,7 +10,7 @@ data class ResolvedEntryDate(
     val formatArgs: List<Any> = emptyList()
 )
 
-internal sealed class EntryDateState(
+sealed class EntryDateState(
     open val time: LocalTime?,
     open val recurrence: Recurrence?,
 ) {

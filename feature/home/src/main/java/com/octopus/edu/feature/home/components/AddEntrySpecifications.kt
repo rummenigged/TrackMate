@@ -15,45 +15,42 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateDatePicker
 import com.octopus.edu.core.ui.common.extensions.noClickableOverlay
-import com.octopus.edu.feature.home.HomeUiContract.UiEvent
-import com.octopus.edu.feature.home.models.EntryCreationState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun EntryDateAndTimeSpecificationsBottomBar(
-    state: EntryCreationState,
+internal fun AddEntrySpecifications(
+    state: UiState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
-) {
+) = trace("EntryDateAndTimeSpecificationsBottomBar") {
     LocalSoftwareKeyboardController.current?.hide()
 
     AnimatedVisibility(
         modifier = modifier,
-        visible = state.isSetEntryDateModeEnabled,
+        visible = state.isSetEntrySpecificationsModeEnabled,
     ) {
         Column(
             modifier =
                 Modifier
-                    .fillMaxWidth()
                     .noClickableOverlay()
-                    .clip(shapes.medium)
                     .background(colorScheme.surface),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             EntryDatePickerActionButtons(
-                onConfirm = { onEvent(UiEvent.AddEntry.ConfirmDateAndTimeSettings) },
-                onDismiss = { onEvent(UiEvent.AddEntry.CancelDateAndTimeSettings) },
+                onConfirm = { onEvent(UiEvent.ConfirmDateAndTimeSettings) },
+                onDismiss = { onEvent(UiEvent.CancelDateAndTimeSettings) },
             )
 
             Spacer(Modifier.height(8.dp))
@@ -111,8 +108,8 @@ private fun EntryDatePickerActionButtons(
 @Composable
 private fun EntryTimeSpecificationsBottomBarPreview() {
     TrackMateTheme {
-        EntryDateAndTimeSpecificationsBottomBar(
-            state = EntryCreationState(isSetEntryDateModeEnabled = true),
+        AddEntrySpecifications(
+            state = UiState(isSetEntrySpecificationsModeEnabled = true),
             onEvent = {},
         )
     }

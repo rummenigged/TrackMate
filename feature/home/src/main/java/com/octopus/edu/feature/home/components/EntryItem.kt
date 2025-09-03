@@ -2,12 +2,12 @@ package com.octopus.edu.feature.home.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.trace
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.octopus.edu.core.design.theme.TrackMateTheme
@@ -38,7 +39,7 @@ import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.mock
 import com.octopus.edu.core.ui.common.extensions.rememberMaxTextWidthDp
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.models.getRecurrenceAsStringRes
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.getRecurrenceAsStringRes
 
 @Composable
 internal fun EntryItem(
@@ -48,11 +49,16 @@ internal fun EntryItem(
     isLastItem: Boolean = false,
     onItemSwipedFromStartToEnd: (Entry) -> Unit = {},
     onItemSwipedFromEndToStart: (Entry) -> Unit = {},
-) {
+) = trace("EntryItem") {
+    val allDayLabel = stringResource(R.string.all_day)
+    val timeToDisplay =
+        entry.time?.let { time ->
+            stringResource(R.string.formatted_time_hh_mm, time.hour, time.minute)
+        } ?: allDayLabel
     val timeMaxWidth =
         rememberMaxTextWidthDp(
-            entry.time?.toString() ?: stringResource(R.string.all_day),
-            stringResource(R.string.all_day),
+            timeToDisplay,
+            allDayLabel,
         )
 
     ConstraintLayout(
@@ -64,7 +70,7 @@ internal fun EntryItem(
         val (time, icon, topLine, bottomLine, card) = createRefs()
 
         Text(
-            text = entry.time?.toString() ?: stringResource(R.string.all_day),
+            text = timeToDisplay,
             style = typography.labelMedium,
             color = colorScheme.onSurface,
             modifier =
@@ -96,8 +102,8 @@ internal fun EntryItem(
         val entryIcon =
             remember(entry) {
                 when (entry) {
-                    is Habit -> R.drawable.ic_autorenew_habit
-                    is Task -> R.drawable.ic_task_circle
+                    is Habit -> R.drawable.ic_autorenew_habit_16
+                    is Task -> R.drawable.ic_circle_task_16
                 }
             }
 
@@ -107,7 +113,6 @@ internal fun EntryItem(
             tint = colorScheme.primary,
             modifier =
                 Modifier
-                    .size(16.dp)
                     .constrainAs(icon) {
                         start.linkTo(time.end, margin = 8.dp)
                         top.linkTo(time.top)
@@ -197,7 +202,7 @@ internal fun EntryItem(
 @Composable
 private fun TaskItemPreview() {
     TrackMateTheme {
-        Box(modifier = Modifier.background(color = colorScheme.surface)) {
+        Column(modifier = Modifier.background(color = colorScheme.surface)) {
             EntryItem(Task.mock("2"))
         }
     }
@@ -205,10 +210,10 @@ private fun TaskItemPreview() {
 
 @PreviewLightDark
 @Composable
-private fun TaskHabitPreview() {
+private fun HabitItemPreview() {
     TrackMateTheme {
-        Box(modifier = Modifier.background(color = colorScheme.surface)) {
-            EntryItem(Habit.mock("1"))
+        Column(modifier = Modifier.background(color = colorScheme.surface)) {
+            EntryItem(Habit.mock("2"))
         }
     }
 }
