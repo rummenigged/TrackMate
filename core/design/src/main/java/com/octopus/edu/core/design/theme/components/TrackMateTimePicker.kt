@@ -9,6 +9,7 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.TrackMateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -18,7 +19,7 @@ fun TrackMateTimePicker(
     onConfirm: (hour: Int, minute: Int) -> Unit,
     currentTime: Calendar = Calendar.getInstance(),
     is24Hour: Boolean = true,
-) {
+) = trace("TrackMateTimePicker") {
     val timePickerState =
         rememberTimePickerState(
             initialHour = currentTime.get(Calendar.HOUR_OF_DAY),

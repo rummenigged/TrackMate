@@ -16,7 +16,7 @@ fun <T> LaunchedEffectAndCollectLatest(
     LaunchedEffect(effectFlow) {
         effectFlow.mapNotNull { it }.collect { item ->
             function(item)
-            onEffectConsumed
+            onEffectConsumed()
         }
     }
 }
