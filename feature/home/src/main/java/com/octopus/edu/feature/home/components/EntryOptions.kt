@@ -29,13 +29,13 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.domain.model.Reminder.None
-import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.models.EntryCreationState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
 
 @Composable
 internal fun EntryOptions(
-    state: EntryCreationState,
+    state: UiState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -49,7 +49,7 @@ internal fun EntryOptions(
             modifier =
                 Modifier
                     .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .clickable { onEvent(UiEvent.AddEntry.ShowTimePicker) },
+                    .clickable { onEvent(UiEvent.ShowTimePicker) },
             icon = painterResource(R.drawable.ic_watch),
             title = stringResource(R.string.time),
             trailingText = state.currentTimeResolvedAsText ?: stringResource(R.string.none),
@@ -60,7 +60,7 @@ internal fun EntryOptions(
             modifier =
                 Modifier
                     .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .clickable { onEvent(UiEvent.AddEntry.ShowReminderPicker) },
+                    .clickable { onEvent(UiEvent.ShowReminderPicker) },
             icon = painterResource(R.drawable.ic_alarm),
             title = stringResource(R.string.reminder),
             trailingText = stringResource(state.currentReminderResolvedAsRes),
@@ -78,7 +78,7 @@ internal fun EntryOptions(
                     modifier =
                         Modifier
                             .padding(horizontal = 16.dp, vertical = 12.dp)
-                            .clickable { onEvent(UiEvent.AddEntry.ShowReminderTypePicker) },
+                            .clickable { onEvent(UiEvent.ShowReminderTypePicker) },
                     icon = painterResource(R.drawable.ic_notifications),
                     title = stringResource(R.string.reminder_type),
                     trailingText = stringResource(state.currentReminderTypeResolvedAsRes),
@@ -91,8 +91,8 @@ internal fun EntryOptions(
             modifier =
                 Modifier
                     .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .clickable { onEvent(UiEvent.AddEntry.ShowRecurrencePicker) },
-            icon = painterResource(R.drawable.ic_autorenew_habit),
+                    .clickable { onEvent(UiEvent.ShowRecurrencePicker) },
+            icon = painterResource(R.drawable.ic_autorenew_habit_16),
             title = stringResource(R.string.repeat),
             trailingText = stringResource(state.currentRecurrenceResolvedAsRes),
             isFilled = state.dataDraftSnapshot.recurrence != null || state.data.recurrence != null,
@@ -181,7 +181,7 @@ fun SettingsRow(
 private fun EntryOptionsPreview() {
     TrackMateTheme {
         EntryOptions(
-            state = EntryCreationState(),
+            state = UiState(),
             onEvent = {},
         )
     }

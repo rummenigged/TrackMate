@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.utils.orZeroIfDarkTheme
 
 @Composable
@@ -20,7 +21,7 @@ fun EntryCard(
     backgroundColor: Color = colorScheme.surfaceContainer,
     shape: CornerBasedShape = shapes.medium,
     content: @Composable () -> Unit,
-) {
+) = trace("EntryCard") {
     Card(
         modifier = modifier,
         shape = shape,
