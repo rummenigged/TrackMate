@@ -216,15 +216,6 @@ object AddEntryUiScreen {
 
     internal fun UiState.Companion.emptyState(): UiState = UiState()
 
-    internal fun UiState.emptySpecifications(): UiState =
-        UiState(
-            dataDraftSnapshot =
-                dataDraftSnapshot.copy(
-                    title = dataDraftSnapshot.title,
-                    description = dataDraftSnapshot.description,
-                ),
-        )
-
     internal fun getReminderTypeAsStringRes(type: ReminderType): Int =
         when (type) {
             ReminderType.NOTIFICATION -> R.string.notification
