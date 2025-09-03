@@ -22,18 +22,18 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.trace
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.octopus.edu.core.design.theme.TrackMateTheme
@@ -74,7 +74,6 @@ internal fun HomeScreenInternal(
         modifier =
             modifier
                 .fillMaxSize()
-                .clip(shapes.medium)
                 .background(color = colorScheme.surface),
     ) {
         HomeContent(
@@ -95,7 +94,7 @@ private fun AddEntryFAB(
     modifier: Modifier = Modifier
 ) {
     FloatingActionButton(
-        modifier = modifier.padding(16.dp),
+        modifier = modifier.padding(16.dp).testTag("add_entry_fab"),
         onClick = { onClick() },
         containerColor = colorScheme.primaryContainer,
     ) {
@@ -155,10 +154,10 @@ private fun EntriesList(
     entries: ImmutableList<Entry>,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
-) {
+) = trace("EntriesList") {
     val animatedList by updateAnimateItemsState(entries.map { UiEntry(it) })
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().testTag("entry_list"),
         contentPadding =
             PaddingValues(start = 16.dp, top = 8.dp, end = 16.dp),
     ) {
@@ -167,6 +166,7 @@ private fun EntriesList(
             key = { item -> item.entry.id },
         ) { index, item ->
             EntryItem(
+                modifier = Modifier.testTag("entry_item"),
                 entry = item.entry,
                 isFirstItem = index == 0,
                 isLastItem = index == entries.lastIndex,

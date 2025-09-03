@@ -7,11 +7,11 @@ import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.domain.scheduler.ReminderStrategyFactory
 import com.octopus.edu.core.domain.scheduler.ReminderType.NOTIFICATION
 import com.octopus.edu.core.ui.common.base.BaseViewModel
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiEffect
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiEvent
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiState
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.emptyState
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.toDomain
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEffect
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.emptyState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.toDomain
 import com.octopus.edu.feature.home.models.EntryCreationData
 import com.octopus.edu.feature.home.models.empty
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalTime
 
 @HiltViewModel
-internal class CreateEntryViewModel
+class AddEntryViewModel
     @Inject
     constructor(
         private val entryRepository: EntryRepository,
@@ -37,14 +37,14 @@ internal class CreateEntryViewModel
                 UiEvent.Cancel ->
                     setState {
                         copy(
-                            isSetEntryDateModeEnabled = false,
+                            isSetEntrySpecificationsModeEnabled = false,
                             dataDraftSnapshot = EntryCreationData.empty(),
                         )
                     }
 
                 UiEvent.ShowSettingsPicker ->
                     setState {
-                        copy(isSetEntryDateModeEnabled = true)
+                        copy(isSetEntrySpecificationsModeEnabled = true)
                     }
 
                 UiEvent.ConfirmDateAndTimeSettings -> saveDateAndTimeSettings()
@@ -52,7 +52,7 @@ internal class CreateEntryViewModel
                 UiEvent.CancelDateAndTimeSettings ->
                     setState {
                         copy(
-                            isSetEntryDateModeEnabled = false,
+                            isSetEntrySpecificationsModeEnabled = false,
                             dataDraftSnapshot = EntryCreationData.empty(),
                         )
                     }
@@ -178,7 +178,7 @@ internal class CreateEntryViewModel
         private fun saveDateAndTimeSettings() {
             setState {
                 copy(
-                    isSetEntryDateModeEnabled = false,
+                    isSetEntrySpecificationsModeEnabled = false,
                     data =
                         data.copy(
                             date =
@@ -218,5 +218,18 @@ internal class CreateEntryViewModel
                     entry,
                     entry.reminderType ?: NOTIFICATION,
                 )?.schedule(entry)
+        }
+
+        fun clearAddEntrySpecificationsMode() {
+            setState {
+                copy(
+                    isSetEntrySpecificationsModeEnabled = false,
+                    isSetEntryTimeModeEnabled = false,
+                    isSetEntryRecurrenceModeEnabled = false,
+                    isSetEntryReminderModeEnabled = false,
+                    isSetEntryReminderTypeModeEnabled = false,
+                    dataDraftSnapshot = EntryCreationData.empty(),
+                )
+            }
         }
     }

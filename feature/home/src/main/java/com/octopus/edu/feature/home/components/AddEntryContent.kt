@@ -36,22 +36,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiEvent
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
 import com.octopus.edu.feature.home.models.EntryCreationData
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
 
 @Composable
-internal fun EntryCreationBottomBar(
+internal fun AddEntryContent(
     state: UiState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
-) {
+) = trace("EntryCreationBottomBar") {
     Box(
         modifier =
             modifier
@@ -209,7 +210,7 @@ private fun EntryCreationActions(
                     if (recurrence != Recurrence.None) {
                         Icon(
                             modifier = Modifier.size(20.dp),
-                            painter = painterResource(R.drawable.ic_autorenew_habit),
+                            painter = painterResource(R.drawable.ic_autorenew_habit_16),
                             contentDescription = stringResource(R.string.recurrence),
                             tint = dateColor,
                         )
@@ -248,7 +249,7 @@ private fun EntryCreationActions(
 @Composable
 private fun BottomPreview() {
     TrackMateTheme {
-        EntryCreationBottomBar(
+        AddEntryContent(
             state =
                 UiState(
                     data =

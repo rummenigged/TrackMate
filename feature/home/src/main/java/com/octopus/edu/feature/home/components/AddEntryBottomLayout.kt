@@ -13,37 +13,29 @@ import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateTimePicker
 import com.octopus.edu.core.design.theme.utils.LaunchedEffectAndCollectLatest
 import com.octopus.edu.core.domain.scheduler.ReminderType
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiEffect
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiEvent
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiState
-import com.octopus.edu.feature.home.createEntry.CreateEntryViewModel
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEffect
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun EntryCreationBottomLayout(
-    onFinished: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    EntryCreationBottomLayoutInternal(modifier = modifier, onFinished = onFinished)
-}
-
-@Composable
-internal fun EntryCreationBottomLayoutInternal(
+fun AddEntryBottomLayout(
     onFinished: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CreateEntryViewModel = hiltViewModel(),
+    viewModel: AddEntryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
-        EntryCreationBottomBar(
+        AddEntryContent(
             state = uiState,
             onEvent = viewModel::processEvent,
         )
 
-        if (uiState.isSetEntryDateModeEnabled) {
-            EntryDateAndTimeSpecificationsBottomBar(
+        if (uiState.isSetEntrySpecificationsModeEnabled) {
+            AddEntrySpecifications(
                 state = uiState,
                 onEvent = viewModel::processEvent,
             )
@@ -126,6 +118,6 @@ private fun EffectHandler(
 @Composable
 private fun EntryCreationBottomLayoutPreview() {
     TrackMateTheme {
-        EntryCreationBottomLayout(onFinished = {})
+        AddEntryBottomLayout(onFinished = {})
     }
 }

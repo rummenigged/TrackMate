@@ -27,10 +27,10 @@ import java.util.Locale
 import java.util.UUID
 import kotlin.time.ExperimentalTime
 
-internal object CreateEntryUiScreen {
+object AddEntryUiScreen {
     @Stable
-    internal data class UiState(
-        val isSetEntryDateModeEnabled: Boolean = false,
+    data class UiState(
+        val isSetEntrySpecificationsModeEnabled: Boolean = false,
         val isSetEntryTimeModeEnabled: Boolean = false,
         val isSetEntryRecurrenceModeEnabled: Boolean = false,
         val isSetEntryReminderModeEnabled: Boolean = false,
@@ -215,6 +215,15 @@ internal object CreateEntryUiScreen {
     }
 
     internal fun UiState.Companion.emptyState(): UiState = UiState()
+
+    internal fun UiState.emptySpecifications(): UiState =
+        UiState(
+            dataDraftSnapshot =
+                dataDraftSnapshot.copy(
+                    title = dataDraftSnapshot.title,
+                    description = dataDraftSnapshot.description,
+                ),
+        )
 
     internal fun getReminderTypeAsStringRes(type: ReminderType): Int =
         when (type) {

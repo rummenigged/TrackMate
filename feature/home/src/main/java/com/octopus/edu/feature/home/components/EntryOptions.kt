@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.domain.model.Reminder.None
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiEvent
-import com.octopus.edu.feature.home.createEntry.CreateEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
 
 @Composable
 internal fun EntryOptions(
@@ -92,7 +92,7 @@ internal fun EntryOptions(
                 Modifier
                     .padding(horizontal = 16.dp, vertical = 12.dp)
                     .clickable { onEvent(UiEvent.ShowRecurrencePicker) },
-            icon = painterResource(R.drawable.ic_autorenew_habit),
+            icon = painterResource(R.drawable.ic_autorenew_habit_16),
             title = stringResource(R.string.repeat),
             trailingText = stringResource(state.currentRecurrenceResolvedAsRes),
             isFilled = state.dataDraftSnapshot.recurrence != null || state.data.recurrence != null,
