@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import com.octopus.edu.core.design.theme.TrackMateTheme
-import com.octopus.edu.trackmate.ui.theme.TrackMateApp
+import com.octopus.edu.trackmate.ui.TrackMateApp
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

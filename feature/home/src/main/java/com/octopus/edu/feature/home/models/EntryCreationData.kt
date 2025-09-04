@@ -6,7 +6,7 @@ import com.octopus.edu.core.domain.scheduler.ReminderType
 import java.time.LocalDate
 import java.time.LocalTime
 
-internal data class EntryCreationData(
+data class EntryCreationData(
     val title: String? = null,
     val description: String? = null,
     val date: LocalDate? = null,

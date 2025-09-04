@@ -17,34 +17,37 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TrackMate"
         tools:targetApi="31">
+        <profileable
+            android:shell="true"
+            tools:targetApi="29" />
+
         <activity
             android:name=".MainActivity"
-            android:windowSoftInputMode="adjustResize"
             android:exported="true"
-            android:theme="@style/Theme.TrackMate">
+            android:theme="@style/Theme.TrackMate"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.reminder.ReminderActivity"
-            android:theme="@style/Theme.TrackMate"
+            android:excludeFromRecents="true"
             android:exported="true"
             android:launchMode="singleTop"
             android:showWhenLocked="true"
-            android:turnScreenOn="true"
-            android:excludeFromRecents="true"/>
+            android:theme="@style/Theme.TrackMate"
+            android:turnScreenOn="true" />
 
-        <receiver android:name=".reminder.ReminderAlarmReceiver"/>
+        <receiver android:name=".reminder.ReminderAlarmReceiver" />
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
-            tools:node="remove">
-        </provider>
+            tools:node="remove"/>
     </application>
 
 </manifest>
