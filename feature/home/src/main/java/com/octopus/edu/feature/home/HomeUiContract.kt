@@ -3,13 +3,9 @@ package com.octopus.edu.feature.home
 import androidx.compose.runtime.Stable
 import com.octopus.edu.core.design.theme.utils.Comparable
 import com.octopus.edu.core.domain.model.Entry
-import com.octopus.edu.core.domain.model.Recurrence
-import com.octopus.edu.core.domain.model.Reminder
-import com.octopus.edu.core.domain.scheduler.ReminderType
 import com.octopus.edu.core.ui.common.base.ViewEffect
 import com.octopus.edu.core.ui.common.base.ViewEvent
 import com.octopus.edu.core.ui.common.base.ViewState
-import com.octopus.edu.feature.home.models.EntryCreationState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import java.time.LocalDate
@@ -21,8 +17,7 @@ internal object HomeUiContract {
     data class UiState(
         val entries: ImmutableList<Entry> = persistentListOf(),
         val currentDate: LocalDate = LocalDate.now(),
-        val isLoading: Boolean = false,
-        val entryCreationState: EntryCreationState = EntryCreationState(),
+        val isLoading: Boolean = false
     ) : ViewState {
         val currentMonth: String
             get() = currentDate.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
@@ -36,8 +31,6 @@ internal object HomeUiContract {
             val message: String,
         ) : UiEffect
 
-        data object ShowEntrySuccessfullyCreated : UiEffect
-
         data object ShowEntrySuccessfullyDeleted : UiEffect
     }
 
@@ -47,69 +40,10 @@ internal object HomeUiContract {
         ) : UiEvent
 
         sealed interface Entry {
-            data object Add : UiEvent
-
-            data object Save : UiEvent
-
             data class Delete(
                 val entryId: String
             ) : UiEvent
         }
-
-        sealed interface AddEntry {
-            data object Cancel : UiEvent
-
-            data object ShowSettingsPicker : UiEvent
-
-            data object ConfirmDateAndTimeSettings : UiEvent
-
-            data object CancelDateAndTimeSettings : UiEvent
-
-            data object ShowTimePicker : UiEvent
-
-            data object HideTimePicker : UiEvent
-
-            data object ShowRecurrencePicker : UiEvent
-
-            data object HideRecurrencePicker : UiEvent
-
-            data object ShowReminderPicker : UiEvent
-
-            data object ShowReminderTypePicker : UiEvent
-
-            data object HideReminderPicker : UiEvent
-
-            data object HideReminderTypePicker : UiEvent
-        }
-
-        data class UpdateEntryTitle(
-            val title: String,
-        ) : UiEvent
-
-        data class UpdateEntryDescription(
-            val description: String,
-        ) : UiEvent
-
-        data class UpdateEntryDate(
-            val date: LocalDate,
-        ) : UiEvent
-
-        data class UpdateEntryTime(
-            val hour: Int,
-            val minute: Int,
-        ) : UiEvent
-
-        data class UpdateEntryRecurrence(
-            val recurrence: Recurrence
-        ) : UiEvent
-
-        data class UpdateEntryReminder(
-            val reminder: Reminder
-        ) : UiEvent
-
-        data class UpdateEntryReminderType(
-            val reminderType: ReminderType
-        ) : UiEvent
     }
 
     internal class UiEntry(

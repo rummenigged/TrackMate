@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.TrackMateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -18,7 +19,7 @@ internal fun HomeAppBar(
     title: String,
     background: Color = colorScheme.primary,
     modifier: Modifier = Modifier
-) {
+) = trace("HomeAppBar") {
     TopAppBar(
         modifier = modifier.background(color = background),
         title = {
