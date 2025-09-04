@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -33,7 +34,7 @@ fun WeekCalendar(
     onDateSelected: (LocalDate) -> Unit,
     pagerState: PagerState,
     modifier: Modifier = Modifier,
-) {
+) = trace("WeekCalendar") {
     val today = LocalDate.now()
     val startDate = today.with(DayOfWeek.MONDAY).minusDays(1)
     val basePage = Int.MAX_VALUE / 2

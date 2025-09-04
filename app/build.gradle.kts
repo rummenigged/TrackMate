@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.firebase.appdistribution)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.androidx.baselineprofile)
 }
 
 android {
@@ -51,6 +52,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isProfileable = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -83,6 +85,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -105,6 +108,7 @@ dependencies {
 
     implementation(project(":core:design"))
     implementation(project(":core:data:data-entry"))
+    implementation(project(":core:data:database"))
     implementation(project(":core:ui-common"))
     implementation(project(":core:domain"))
     implementation(project(":core:common"))
@@ -127,6 +131,9 @@ dependencies {
     implementation(libs.navigation.suite.android)
     debugImplementation(libs.compose.ui.tooling)
 
+    implementation(libs.test.performance.runtime.tracing)
+    implementation(libs.test.performance.tracingKtx)
+
     implementation(libs.work.runtime)
 
     implementation(libs.hilt.android)
@@ -139,6 +146,8 @@ dependencies {
     // TODO: Migrate to KSP when the com.google.auto.value:auto-value becomes compatible with it
     kapt(libs.auto.value)
 
+    implementation(libs.performance.profileinstaller)
+    baselineProfile(project(":baselineprofile"))
     testImplementation(project(":core:testing"))
     androidTestImplementation(project(":core:testing"))
 }

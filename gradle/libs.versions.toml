@@ -2,32 +2,34 @@
 accompanist = "0.36.0"
 activityCompose = "1.10.1"
 agp = "8.11.1"
+androidxBaselineprofile = "1.4.0"
 androidxHiltCompiler = "1.2.0"
 androidxTestCore = "1.7.0"
 androidxTestRules = "1.7.0"
 androidxWorkManager = "2.10.3"
 appcompat = "1.7.1"
 autoValue = "1.11.0"
+benchmark = "1.4.0"
 composeBom = "2025.07.00"
 composeConstraintlayout = "1.1.1"
 composeNavigation = "2.9.3"
-coreKtx = "1.16.0"
+coreKtx = "1.17.0"
 coroutinesTest = "1.10.2"
 dataStore = "1.1.7"
 espressoCore = "3.7.0"
 googleFirebaseAppdistribution = "5.1.1"
 googleGmsGoogleServices = "4.4.3"
 hiltNavigationVersion = "1.2.0"
-hiltVersion = "2.57"
+hiltVersion = "2.57.1"
 hiltWorkManager = "1.2.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 konsist = "0.17.3"
-kotlin = "2.2.0"
+kotlin = "2.2.10"
 kotlinCoroutines = "1.10.2"
 kotlinxCollectionsImmutable = "0.4.0"
 kotlinxSerializationJson = "1.9.0"
-kspPluginVersion = "2.2.0-2.0.2"
+kspPluginVersion = "2.2.10-2.0.2"
 ktlint = "12.3.0"
 lifecycleRuntimeKtx = "2.9.2"
 material = "1.12.0"
@@ -37,10 +39,15 @@ moshiConverter = "3.0.0"
 navigation = "2.9.3"
 navigationSuiteAndroid = "1.3.2"
 okHttp = "5.1.0"
+profileinstaller = "1.4.1"
 retrofit = "3.0.0"
 room = "2.7.2"
+runtime-tracing = "1.9.0"
 turbine = "1.2.1"
+tracing-ktx = "1.3.0"
+tracing-perfetto = "1.0.0"
 recyclerview = "1.4.0"
+uiautomator = "2.3.0"
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
@@ -91,6 +98,8 @@ hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", ve
 work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "androidxWorkManager" }
 hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWorkManager" }
 
+performance-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
+
 # classpath dependencies
 ktlint-gradlePlugin = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint" }
 
@@ -109,16 +118,26 @@ test-konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "kon
 test-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 test-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 test-androidx-work = { module = "androidx.work:work-testing", version.ref = "androidxWorkManager" }
+test-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark" }
+
+test-performance-tracing-perfetto = { module = "androidx.tracing:tracing-perfetto", version.ref = "tracing-perfetto" }
+test-performance-tracing-perfetto-binary = { module = "androidx.tracing:tracing-perfetto-binary", version.ref = "tracing-perfetto" }
+test-performance-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "runtime-tracing" }
+test-performance-tracingKtx = { module = "androidx.tracing:tracing-ktx", version.ref = "tracing-ktx" }
+test-androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+android-test = { id = "com.android.test", version.ref = "agp" }
+androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidxBaselineprofile" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version.ref = "googleFirebaseAppdistribution" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltVersion" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "kspPluginVersion" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
-android-library = { id = "com.android.library", version.ref = "agp" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version.ref = "googleFirebaseAppdistribution" }
-google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+
 

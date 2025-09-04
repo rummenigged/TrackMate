@@ -1,25 +1,13 @@
 package com.octopus.edu.feature.home.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.exclude
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,67 +31,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.domain.model.Recurrence
-import com.octopus.edu.core.ui.common.extensions.noClickableOverlay
-import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.R
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
 import com.octopus.edu.feature.home.models.EntryCreationData
-import com.octopus.edu.feature.home.models.EntryCreationState
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
 
 @Composable
-internal fun EntryCreationBottomBar(
-    state: EntryCreationState,
+internal fun AddEntryContent(
+    state: UiState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
-) {
-    val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
-    val imePadding =
-        if (imeVisible) {
-            WindowInsets.ime.exclude(WindowInsets.navigationBars).asPaddingValues()
-        } else {
-            PaddingValues(bottom = 0.dp)
-        }
-
+) = trace("EntryCreationBottomBar") {
     Box(
         modifier =
             modifier
-                .fillMaxSize()
-                .background(colorScheme.scrim.copy(alpha = 0.3f))
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = { onEvent(UiEvent.AddEntry.Cancel) },
-                ),
-        contentAlignment = Alignment.BottomCenter,
+                .fillMaxWidth(),
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(imePadding)
-                    .noClickableOverlay(),
-        ) {
-            BottomInputBar(
-                state = state,
-                onEvent = onEvent,
-            )
-        }
+        BottomInputBar(
+            state = state,
+            onEvent = onEvent,
+        )
     }
 }
 
 @Composable
 private fun BottomInputBar(
-    state: EntryCreationState,
+    state: UiState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -125,16 +89,7 @@ private fun BottomInputBar(
         modifier =
             modifier
                 .fillMaxWidth()
-                .clip(shapes.medium)
-                .background(colorScheme.surface)
-                .padding(8.dp)
-                .draggable(
-                    orientation = Orientation.Vertical,
-                    state =
-                        rememberDraggableState { delta ->
-                            if (delta > 12f) onEvent(UiEvent.AddEntry.Cancel)
-                        },
-                ),
+                .padding(8.dp),
     ) {
         TextField(
             modifier =
@@ -189,7 +144,7 @@ private fun BottomInputBar(
 
 @Composable
 private fun EntryCreationActions(
-    state: EntryCreationState,
+    state: UiState,
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -204,9 +159,8 @@ private fun EntryCreationActions(
         Row(
             modifier =
                 Modifier
-                    .clip(shapes.small)
                     .padding(4.dp)
-                    .clickable { onEvent(UiEvent.AddEntry.ShowSettingsPicker) },
+                    .clickable { onEvent(UiEvent.ShowSettingsPicker) },
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -256,7 +210,7 @@ private fun EntryCreationActions(
                     if (recurrence != Recurrence.None) {
                         Icon(
                             modifier = Modifier.size(20.dp),
-                            painter = painterResource(R.drawable.ic_autorenew_habit),
+                            painter = painterResource(R.drawable.ic_autorenew_habit_16),
                             contentDescription = stringResource(R.string.recurrence),
                             tint = dateColor,
                         )
@@ -272,7 +226,7 @@ private fun EntryCreationActions(
                 Modifier
                     .clip(shapes.medium)
                     .height(28.dp),
-            onClick = { onEvent(UiEvent.Entry.Save) },
+            onClick = { onEvent(UiEvent.Save) },
             colors =
                 IconButtonDefaults.iconButtonColors(
                     containerColor = colorScheme.primary,
@@ -295,9 +249,9 @@ private fun EntryCreationActions(
 @Composable
 private fun BottomPreview() {
     TrackMateTheme {
-        EntryCreationBottomBar(
+        AddEntryContent(
             state =
-                EntryCreationState(
+                UiState(
                     data =
                         EntryCreationData(
                             date = LocalDate.of(2025, 6, 6),
