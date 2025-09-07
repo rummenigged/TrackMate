@@ -63,7 +63,7 @@ class ReminderActivity : ComponentActivity() {
         modifier: Modifier = Modifier,
         reminderViewModel: ReminderViewModel = hiltViewModel()
     ) {
-        val uiState by reminderViewModel.uiStateFlow.collectAsStateWithLifecycle()
+        val uiState by reminderViewModel.uiState.collectAsStateWithLifecycle()
 
         ReminderContent(
             modifier = modifier,
