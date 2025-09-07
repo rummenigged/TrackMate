@@ -36,6 +36,9 @@ dependencies {
     implementation(project(":core:domain"))
 
     implementation(libs.androidx.coreKtx)
+    implementation(libs.credentials)
+    implementation(libs.identity.googleId)
+    implementation(libs.credentials.playService.auth)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
