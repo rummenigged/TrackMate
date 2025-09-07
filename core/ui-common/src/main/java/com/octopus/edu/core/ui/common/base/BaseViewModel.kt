@@ -13,17 +13,17 @@ interface ViewEffect
 interface ViewEvent
 
 abstract class BaseViewModel<UiState : ViewState, Effect : ViewEffect, Event : ViewEvent> : ViewModel() {
-    private val _uiStateFlow by lazy { MutableStateFlow(getInitialState()) }
+    private val _uiState by lazy { MutableStateFlow(getInitialState()) }
 
-    val uiStateFlow
-        get() = _uiStateFlow.asStateFlow()
+    val uiState
+        get() = _uiState.asStateFlow()
 
     private val _effect = MutableStateFlow<Effect?>(value = null)
     val effect: Flow<Effect?>
         get() = _effect.asStateFlow()
 
     protected fun setState(reducer: UiState.() -> UiState) {
-        _uiStateFlow.update(reducer)
+        _uiState.update(reducer)
     }
 
     protected fun setEffect(effect: Effect) {
