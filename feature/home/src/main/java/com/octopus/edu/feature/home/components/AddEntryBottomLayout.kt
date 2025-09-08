@@ -26,7 +26,7 @@ fun AddEntryBottomLayout(
     modifier: Modifier = Modifier,
     viewModel: AddEntryViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
         AddEntryContent(
