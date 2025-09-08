@@ -16,7 +16,7 @@ suspend fun <T : Any> safeCall(
             if (onErrorReturn != null) {
                 ResultOperation.Success(onErrorReturn())
             } else {
-                ResultOperation.Error(RuntimeException(e))
+                ResultOperation.Error(e)
             }
         }
     }

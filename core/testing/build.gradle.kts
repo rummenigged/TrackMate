@@ -54,6 +54,7 @@ dependencies {
     api(libs.test.androidx.espresso.core)
     api(libs.test.coroutines)
     api(libs.test.mockk)
+    api(libs.test.turbine)
     implementation(platform(libs.compose.bom))
     api(libs.test.compose.ui.junit4)
     debugApi(libs.test.compose.ui.manifest)

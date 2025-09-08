@@ -53,6 +53,8 @@ android {
 // You can specify to run the generators on a managed devices or connected devices.
 
 dependencies {
+    implementation(project(":core:common"))
+
     implementation(libs.test.androidx.junit)
     implementation(libs.test.androidx.espresso.core)
     implementation(libs.test.androidx.uiautomator)

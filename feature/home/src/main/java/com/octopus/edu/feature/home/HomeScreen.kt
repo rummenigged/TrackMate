@@ -23,6 +23,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -68,23 +69,20 @@ internal fun HomeScreenInternal(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(color = colorScheme.surface),
-    ) {
-        HomeContent(
-            uiState = uiState,
-            onEvent = viewModel::processEvent,
-        )
+    Surface {
+        Box(modifier = modifier.fillMaxSize()) {
+            HomeContent(
+                uiState = uiState,
+                onEvent = viewModel::processEvent,
+            )
 
-        AddEntryFAB(
-            modifier = Modifier.align(Alignment.BottomEnd),
-            onClick = onFabClicked,
-        )
+            AddEntryFAB(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                onClick = onFabClicked,
+            )
+        }
     }
 }
 
