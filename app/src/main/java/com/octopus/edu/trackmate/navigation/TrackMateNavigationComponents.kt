@@ -55,4 +55,5 @@ internal fun TrackMateBottomNavigationBar(
     }
 }
 
-private fun NavDestination?.hasRoute(destination: TrackMateTopLevelDestination): Boolean = this?.hasRoute(destination.route::class) ?: false
+private fun NavDestination?.hasRoute(destination: TrackMateTopLevelDestination): Boolean =
+    this?.hasRoute(destination.screen::class) ?: false

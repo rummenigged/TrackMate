@@ -31,7 +31,7 @@ class AddEntryViewModel
         override fun processEvent(event: UiEvent) {
             when (event) {
                 UiEvent.Save -> {
-                    saveCurrentEntry(entry = uiStateFlow.value.toDomain())
+                    saveCurrentEntry(entry = uiState.value.toDomain())
                 }
 
                 UiEvent.Cancel ->

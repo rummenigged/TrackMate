@@ -26,7 +26,7 @@ internal fun HistoryScreen(
     modifier: Modifier = Modifier,
     viewModel: HistoryViewModel,
 ) {
-    val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
