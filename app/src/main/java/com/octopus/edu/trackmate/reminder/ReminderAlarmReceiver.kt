@@ -4,8 +4,8 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.octopus.edu.core.common.DispatcherProvider
+import com.octopus.edu.core.common.Logger
 import com.octopus.edu.core.common.toLocalDate
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
@@ -57,12 +57,7 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
                     }
                 }
             } catch (e: Exception) {
-                Log.e(
-                    ReminderAlarmReceiver::class.simpleName,
-                    "Exception in onReceive for " +
-                        "entry $entryId",
-                    e,
-                )
+                Logger.e(message = "Exception in onReceive for entry $entryId", throwable = e)
             } finally {
                 pendingResult.finish()
             }
@@ -93,19 +88,17 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
                             ReminderType.ALARM,
                         )?.schedule(nextEntry)
                 } catch (e: NoSuchElementException) {
-                    Log.e(
-                        ReminderAlarmReceiver::class.simpleName,
-                        "Failed to create next entry " +
-                            "for rescheduling. Ensure 'Entry' is a data class with a 'copy()' " +
-                            "method and a time field (e.g., 'dueDate').",
-                        e,
+                    Logger.e(
+                        message =
+                            "Failed to create next entry " +
+                                "for rescheduling. Ensure 'Entry' is a data class with a 'copy()' " +
+                                "method and a time field (e.g., 'dueDate').",
+                        throwable = e,
                     )
                 } catch (e: Exception) {
-                    Log.e(
-                        ReminderAlarmReceiver::class.simpleName,
-                        "Error rescheduling habit alarm " +
-                            "for entry ${entry.id}",
-                        e,
+                    Logger.e(
+                        message = "Error rescheduling habit alarm for entry ${entry.id}",
+                        throwable = e,
                     )
                 }
             }

@@ -6,8 +6,10 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.octopus.edu.trackmate.logger.CrashReportingTree
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_NOTIFICATION_CHANNEL_ID_EXTRA
 import dagger.hilt.android.HiltAndroidApp
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -28,6 +30,12 @@ class TrackMateApplication :
     override fun onCreate() {
         super.onCreate()
         createEntryReminderNotificationChannel(this)
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        } else {
+            Timber.plant(CrashReportingTree())
+        }
     }
 
     private fun createEntryReminderNotificationChannel(context: Context) {
