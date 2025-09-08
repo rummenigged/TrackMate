@@ -4,16 +4,16 @@ import timber.log.Timber
 
 object Logger {
     fun d(
+        message: String,
         tag: String? = null,
-        message: String
     ) {
         val log = tag?.let { Timber.tag(it) } ?: Timber
         log.d(message)
     }
 
     fun w(
-        tag: String? = null,
         message: String,
+        tag: String? = null,
         throwable: Throwable? = null
     ) {
         val log = tag?.let { Timber.tag(it) } ?: Timber
@@ -25,8 +25,8 @@ object Logger {
     }
 
     fun e(
-        tag: String? = null,
         message: String,
+        tag: String? = null,
         throwable: Throwable? = null
     ) {
         val log = tag?.let { Timber.tag(it) } ?: Timber

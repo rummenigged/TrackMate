@@ -1,5 +1,6 @@
 package com.octopus.edu.core.data.auth.authAdapter
 
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.octopus.edu.core.common.Logger
@@ -11,7 +12,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.tasks.await
 
 interface FirebaseAuthAdapter {
-    suspend fun signInWithCredentials(token: String)
+    suspend fun getIdToken(forceRefresh: Boolean): String?
+
+    suspend fun signInWithCredentials(token: String): AuthResult
 
     fun isUserLoggedIn(): Flow<Boolean>
 
@@ -21,9 +24,19 @@ interface FirebaseAuthAdapter {
 class FirebaseAuthAdapterImpl(
     private val firebaseAuth: FirebaseAuth
 ) : FirebaseAuthAdapter {
-    override suspend fun signInWithCredentials(token: String) {
+    override suspend fun getIdToken(forceRefresh: Boolean): String? {
+        val user = firebaseAuth.currentUser
+        return try {
+            user?.getIdToken(forceRefresh)?.await()?.token
+        } catch (e: Exception) {
+            Logger.e(message = "Failed to get ID token", throwable = e)
+            null
+        }
+    }
+
+    override suspend fun signInWithCredentials(token: String): AuthResult {
         val firebaseCredential = GoogleAuthProvider.getCredential(token, null)
-        firebaseAuth.signInWithCredential(firebaseCredential).await()
+        return firebaseAuth.signInWithCredential(firebaseCredential).await()
     }
 
     override fun isUserLoggedIn(): Flow<Boolean> =
