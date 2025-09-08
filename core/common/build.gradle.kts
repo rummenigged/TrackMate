@@ -40,6 +40,8 @@ dependencies {
     implementation(libs.identity.googleId)
     implementation(libs.credentials.playService.auth)
 
+    api(libs.timber)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 }

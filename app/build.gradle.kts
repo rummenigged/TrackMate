@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.google.firebase.appdistribution)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.androidx.baselineprofile)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
@@ -24,6 +25,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "SERVER_CLIENT_ID", "\"676253091296-gn78v7d7b4fojcmn0sodr1csh503mlfc.apps.googleusercontent.com\"")
     }
 
     signingConfigs {
@@ -112,11 +115,13 @@ dependencies {
     implementation(project(":core:ui-common"))
     implementation(project(":core:domain"))
     implementation(project(":core:common"))
+    implementation(project(":feature:signIn"))
     implementation(project(":feature:home"))
     implementation(project(":feature:history"))
     implementation(project(":feature:analytics"))
 
     implementation(libs.androidx.coreKtx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.navigation.fragmentKtx)
     implementation(libs.navigation.ui)
     implementation(libs.material)
@@ -129,6 +134,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.navigation.suite.android)
+    implementation(libs.firebase.crashlytics)
     debugImplementation(libs.compose.ui.tooling)
 
     implementation(libs.test.performance.runtime.tracing)

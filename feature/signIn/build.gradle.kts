@@ -55,6 +55,7 @@ dependencies {
     implementation(project(":core:design"))
     implementation(project(":core:data:data-auth"))
     implementation(project(":core:ui-common"))
+    implementation(project(":core:common"))
 
     implementation(libs.androidx.coreKtx)
     implementation(libs.androidx.appcompat)
@@ -64,8 +65,6 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
-
-    implementation(libs.credentials)
 
     testImplementation(project(":core:testing"))
     androidTestImplementation(project(":core:testing"))
