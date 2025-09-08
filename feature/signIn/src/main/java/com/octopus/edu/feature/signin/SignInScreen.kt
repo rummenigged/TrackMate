@@ -81,8 +81,6 @@ private fun EffectHandler(
                     snackBarHostState.showSnackbar(message)
                 }
             }
-
-            else -> {}
         }
     }
 }
