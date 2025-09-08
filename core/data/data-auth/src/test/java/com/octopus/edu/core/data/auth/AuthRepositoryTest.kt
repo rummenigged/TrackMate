@@ -1,5 +1,6 @@
 package com.octopus.edu.core.data.auth
 
+import com.google.firebase.auth.AuthResult
 import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.data.auth.authAdapter.FirebaseAuthAdapter
 import com.octopus.edu.core.domain.model.common.ResultOperation
@@ -28,6 +29,9 @@ class AuthRepositoryTest {
     @MockK
     private lateinit var mockDispatcherProvider: DispatcherProvider
 
+    @MockK
+    private lateinit var mockAuthResult: AuthResult
+
     private lateinit var authRepository: AuthRepositoryImpl
 
     private val testDispatcher = StandardTestDispatcher()
@@ -55,16 +59,20 @@ class AuthRepositoryTest {
         }
 
     @Test
-    fun `signIn when adapter succeeds within safeCall returns Success`() =
+    fun `signIn when adapter signInWithCredentials successfully returns AuthResult then repo returns Success Unit`() =
         runTest(testDispatcher) {
             val testToken = "test_id_token"
 
-            coEvery { mockFirebaseAuthAdapter.signInWithCredentials(testToken) } returns Unit
+            coEvery { mockFirebaseAuthAdapter.signInWithCredentials(testToken) } returns mockAuthResult
 
             val result = authRepository.signIn(testToken)
 
-            Assert.assertTrue(result is ResultOperation.Success)
+            Assert.assertTrue("Result should be Success", result is ResultOperation.Success)
+
+            Assert.assertEquals(ResultOperation.Success(Unit), result)
+
             coVerify(exactly = 1) { mockFirebaseAuthAdapter.signInWithCredentials(testToken) }
+
             verify { mockDispatcherProvider.io }
         }
 
