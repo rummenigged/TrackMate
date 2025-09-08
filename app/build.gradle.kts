@@ -25,8 +25,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "SERVER_CLIENT_ID", "\"676253091296-gn78v7d7b4fojcmn0sodr1csh503mlfc.apps.googleusercontent.com\"")
     }
 
     signingConfigs {
