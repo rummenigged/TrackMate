@@ -10,7 +10,6 @@ import com.octopus.edu.trackmate.logger.CrashReportingTree
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_NOTIFICATION_CHANNEL_ID_EXTRA
 import com.octopus.edu.trackmate.sync.EntrySyncManager
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.DelicateCoroutinesApi
 import timber.log.Timber
 import javax.inject.Inject
 
