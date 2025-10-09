@@ -8,7 +8,9 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.octopus.edu.trackmate.logger.CrashReportingTree
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_NOTIFICATION_CHANNEL_ID_EXTRA
+import com.octopus.edu.trackmate.sync.EntrySyncManager
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.DelicateCoroutinesApi
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -18,6 +20,9 @@ class TrackMateApplication :
     Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject
+    lateinit var syncManager: EntrySyncManager
 
     override val workManagerConfiguration: Configuration
         get() =
@@ -30,6 +35,8 @@ class TrackMateApplication :
     override fun onCreate() {
         super.onCreate()
         createEntryReminderNotificationChannel(this)
+
+        syncManager.start()
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
