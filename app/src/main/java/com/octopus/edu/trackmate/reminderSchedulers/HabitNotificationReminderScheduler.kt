@@ -8,7 +8,7 @@ import androidx.work.workDataOf
 import com.octopus.edu.core.domain.scheduler.ReminderScheduler
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.ENTRY_ID_EXTRA
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_WORK_NAME
-import com.octopus.edu.trackmate.workManager.ReminderWorker
+import com.octopus.edu.trackmate.workManager.reminder.ReminderWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Duration
 import javax.inject.Inject
