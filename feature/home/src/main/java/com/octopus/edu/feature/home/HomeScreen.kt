@@ -93,7 +93,7 @@ private fun AddEntryFAB(
 ) {
     FloatingActionButton(
         modifier = modifier.padding(16.dp).testTag("add_entry_fab"),
-        onClick = { onClick() },
+        onClick = onClick,
         containerColor = colorScheme.primaryContainer,
     ) {
         Icon(

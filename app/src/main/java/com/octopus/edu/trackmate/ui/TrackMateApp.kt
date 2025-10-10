@@ -1,9 +1,12 @@
 package com.octopus.edu.trackmate.ui
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -11,9 +14,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
@@ -35,6 +41,7 @@ import com.octopus.edu.feature.signin.AuthUiContract.UiState
 import com.octopus.edu.feature.signin.AuthViewModel
 import com.octopus.edu.feature.signin.SignInScreen
 import com.octopus.edu.trackmate.navigation.TrackMateNavigationWrapper
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +88,9 @@ internal fun TrackMateApp(viewModel: AuthViewModel = hiltViewModel()) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MainAppContent(addEntryViewModel: AddEntryViewModel = hiltViewModel()) {
+    val snackBarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     val mainContentNavController = rememberNavController()
     val navActions =
         remember(mainContentNavController) {
@@ -136,10 +146,28 @@ internal fun MainAppContent(addEntryViewModel: AddEntryViewModel = hiltViewModel
             onDismissRequest = closeEntryCreationSheet,
             sheetState = sheetState,
         ) {
+            val context = LocalContext.current
             AddEntryBottomLayout(
                 viewModel = addEntryViewModel,
-                onFinished = closeEntryCreationSheet,
+                onSuccess = { messageRes, args ->
+                    closeEntryCreationSheet()
+                    scope.launch {
+                        messageRes?.let {
+                            snackBarHostState.showSnackbar(context.getString(it, args))
+                        }
+                    }
+                },
+                onError = { message ->
+                    scope.launch {
+                        snackBarHostState.showSnackbar(message)
+                    }
+                },
             )
         }
     }
+
+    SnackbarHost(
+        modifier = Modifier.padding(top = 56.dp),
+        hostState = snackBarHostState,
+    )
 }

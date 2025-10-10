@@ -27,7 +27,7 @@ import java.util.Locale
 import java.util.UUID
 import kotlin.time.ExperimentalTime
 
-object AddEntryUiScreen {
+object AddEntryUiContractor {
     @Stable
     data class UiState(
         val isSetEntrySpecificationsModeEnabled: Boolean = false,
@@ -152,7 +152,10 @@ object AddEntryUiScreen {
             val message: String,
         ) : UiEffect
 
-        data object ShowEntrySuccessfullyCreated : UiEffect
+        data class EntrySuccessfullyCreated(
+            @field:StringRes val messageRes: Int?,
+            val args: List<Any> = emptyList(),
+        ) : UiEffect
     }
 
     sealed interface UiEvent : ViewEvent {
