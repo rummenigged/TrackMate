@@ -5,6 +5,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
 import com.octopus.edu.core.data.database.entity.EntryEntity
+import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
+import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.PENDING
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -30,6 +32,18 @@ interface EntryDao {
     @Query("SELECT * FROM entries WHERE dueDate = :date OR startDate <= :date ORDER BY time IS NOT NULL, time")
     fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
 
+    @Query("SELECT * FROM entries WHERE syncState = :pending")
+    fun streamPendingEntries(pending: SyncStateEntity = PENDING): Flow<List<EntryEntity>>
+
+    @Query("SELECT * FROM entries WHERE syncState = :pending")
+    fun getPendingEntries(pending: SyncStateEntity = PENDING): List<EntryEntity>
+
     @Query("DELETE from entries WHERE id = :entryId")
     suspend fun delete(entryId: String)
+
+    @Query("UPDATE entries SET syncState = :syncState WHERE id = :entryId")
+    fun updateSyncState(
+        entryId: String,
+        syncState: SyncStateEntity
+    )
 }

@@ -24,7 +24,7 @@ private const val NAME = "trackmate.db"
         TagEntity::class,
         ReminderEntity::class,
     ],
-    version = 3,
+    version = 4,
 )
 @TypeConverters(Converters::class)
 abstract class TrackMateDatabase : RoomDatabase() {
@@ -46,6 +46,15 @@ abstract class TrackMateDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_3_4: Migration =
+            object : Migration(3, 4) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "ALTER TABLE entries ADD COLUMN syncState TEXT NOT NULL DEFAULT 'PENDING'",
+                    )
+                }
+            }
+
         fun create(context: Context): TrackMateDatabase =
             Room
                 .databaseBuilder(
@@ -54,6 +63,7 @@ abstract class TrackMateDatabase : RoomDatabase() {
                     NAME,
                 ).addMigrations(MIGRATION_1_2)
                 .addMigrations(MIGRATION_2_3)
+                .addMigrations(MIGRATION_3_4)
                 .build()
     }
 

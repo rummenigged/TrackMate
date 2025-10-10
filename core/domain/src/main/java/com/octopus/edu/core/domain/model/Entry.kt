@@ -6,6 +6,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.time.ExperimentalTime
 
+enum class SyncState { PENDING, SYNCED, FAILED }
+
 @OptIn(ExperimentalTime::class)
 sealed class Entry {
     abstract val id: String
@@ -17,6 +19,7 @@ sealed class Entry {
     abstract val updatedAt: Instant?
     abstract val reminder: Reminder?
     abstract val reminderType: ReminderType?
+    abstract val syncState: SyncState
 }
 
 @OptIn(ExperimentalTime::class)
@@ -30,6 +33,7 @@ data class Task(
     override val updatedAt: Instant? = null,
     override val reminder: Reminder? = null,
     override val reminderType: ReminderType? = null,
+    override val syncState: SyncState = SyncState.PENDING,
     val dueDate: LocalDate,
 ) : Entry() {
     companion object
@@ -46,6 +50,7 @@ data class Habit(
     override val updatedAt: Instant? = null,
     override val reminder: Reminder? = null,
     override val reminderType: ReminderType? = null,
+    override val syncState: SyncState = SyncState.PENDING,
     val startDate: LocalDate,
     val recurrence: Recurrence?,
     val streakCount: Int? = null,

@@ -21,6 +21,7 @@ data class EntryEntity(
     val isArchived: Boolean = false,
     val createdAt: Long,
     val updatedAt: Long? = null,
+    val syncState: SyncStateEntity,
 ) {
     enum class EntryType { TASK, HABIT }
 
@@ -29,4 +30,6 @@ data class EntryEntity(
         WEEKLY,
         CUSTOM,
     }
+
+    enum class SyncStateEntity { PENDING, SYNCED, FAILED }
 }

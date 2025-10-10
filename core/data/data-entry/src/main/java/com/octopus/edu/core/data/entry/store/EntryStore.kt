@@ -10,15 +10,24 @@ interface EntryStore {
 
     suspend fun getTasks(): List<EntryEntity>
 
-    fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>>
-
-    fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
-
     suspend fun saveEntry(entry: EntryEntity)
 
     suspend fun getEntryById(id: String): EntryEntity?
 
     suspend fun deleteEntry(entryId: String)
+
+    suspend fun updateEntrySyncState(
+        entryId: String,
+        syncStateEntity: EntryEntity.SyncStateEntity
+    )
+
+    suspend fun getPendingEntries(): List<EntryEntity>
+
+    fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>>
+
+    fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
+
+    fun streamPendingEntries(): Flow<List<EntryEntity>>
 }
 
 internal class EntryStoreImpl
@@ -30,14 +39,23 @@ internal class EntryStoreImpl
 
         override suspend fun getTasks(): List<EntryEntity> = entryDao.getTasks()
 
+        override suspend fun getPendingEntries(): List<EntryEntity> = entryDao.getPendingEntries()
+
+        override suspend fun getEntryById(id: String) = entryDao.getEntryById(id)
+
+        override suspend fun saveEntry(entry: EntryEntity) = entryDao.insert(entry)
+
+        override suspend fun updateEntrySyncState(
+            entryId: String,
+            syncStateEntity: EntryEntity.SyncStateEntity
+        ) = entryDao.updateSyncState(entryId, syncStateEntity)
+
+        override suspend fun deleteEntry(entryId: String) = entryDao.delete(entryId)
+
+        override fun streamPendingEntries(): Flow<List<EntryEntity>> = entryDao.streamPendingEntries()
+
         override fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>> =
             entryDao.getAllEntriesByDateAndOrderedByTimeAsc(date)
 
         override fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>> = entryDao.getEntriesBeforeOrOn(date)
-
-        override suspend fun saveEntry(entry: EntryEntity) = entryDao.insert(entry)
-
-        override suspend fun getEntryById(id: String) = entryDao.getEntryById(id)
-
-        override suspend fun deleteEntry(entryId: String) = entryDao.delete(entryId)
     }

@@ -1,9 +1,12 @@
 package com.octopus.edu.core.data.entry.di
 
+import com.google.firebase.firestore.FirebaseFirestore
 import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.dao.ReminderDao
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
+import com.octopus.edu.core.data.entry.api.EntryApi
+import com.octopus.edu.core.data.entry.api.EntryApiImpl
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.EntryStoreImpl
 import com.octopus.edu.core.data.entry.store.ReminderStore
@@ -18,11 +21,15 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 object EntryDataModule {
     @Provides
+    fun provideEntryApi(api: FirebaseFirestore): EntryApi = EntryApiImpl(api)
+
+    @Provides
     fun providesEntryRepository(
         entryStore: EntryStore,
+        entryApi: EntryApi,
         reminderStore: ReminderStore,
         dispatcherProvider: DispatcherProvider
-    ): EntryRepository = EntryRepositoryImpl(entryStore, reminderStore, dispatcherProvider)
+    ): EntryRepository = EntryRepositoryImpl(entryStore, entryApi, reminderStore, dispatcherProvider)
 
     @Provides
     fun providesEntryStore(entryDao: EntryDao): EntryStore = EntryStoreImpl(entryDao)

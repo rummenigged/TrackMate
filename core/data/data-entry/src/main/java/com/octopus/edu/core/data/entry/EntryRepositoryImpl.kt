@@ -1,8 +1,13 @@
 package com.octopus.edu.core.data.entry
 
 import android.database.sqlite.SQLiteException
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.FirebaseFirestoreException.Code.DEADLINE_EXCEEDED
+import com.google.firebase.firestore.FirebaseFirestoreException.Code.RESOURCE_EXHAUSTED
+import com.google.firebase.firestore.FirebaseFirestoreException.Code.UNAVAILABLE
 import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.data.entry.utils.getReminderAsEntity
@@ -12,6 +17,7 @@ import com.octopus.edu.core.data.entry.utils.toHabitOrNull
 import com.octopus.edu.core.data.entry.utils.toTaskOrNull
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
+import com.octopus.edu.core.domain.model.SyncState
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.appliesTo
 import com.octopus.edu.core.domain.model.common.ResultOperation
@@ -29,9 +35,26 @@ internal class EntryRepositoryImpl
     @Inject
     constructor(
         private val entryStore: EntryStore,
+        private val entryApi: EntryApi,
         private val reminderStore: ReminderStore,
         private val dispatcherProvider: DispatcherProvider
     ) : EntryRepository {
+        override val pendingEntries: Flow<List<Entry>>
+            get() =
+                entryStore
+                    .streamPendingEntries()
+                    .map { entries ->
+                        entries.mapNotNull { entry -> entry.toDomain() }
+                    }
+
+        override suspend fun getPendingEntries(): ResultOperation<List<Entry>> =
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+                onErrorReturn = { emptyList() },
+            ) {
+                entryStore.getPendingEntries().mapNotNull { entry -> entry.toDomain() }
+            }
+
         override suspend fun getTasks(): ResultOperation<List<Task>> =
             safeCall(
                 dispatcher = dispatcherProvider.io,
@@ -66,16 +89,31 @@ internal class EntryRepositoryImpl
                     this.emit(errorResult)
                 }.flowOn(dispatcherProvider.io)
 
-        override suspend fun saveEntry(entry: Entry): ResultOperation<Unit> =
-            safeCall(
-                dispatcher = dispatcherProvider.io,
-            ) {
-                entryStore.saveEntry(entry.toEntity())
-                reminderStore.saveReminder(entry.getReminderAsEntity())
+        override suspend fun saveEntry(entry: Entry): ResultOperation<Unit> {
+            val result =
+                safeCall(
+                    dispatcher = dispatcherProvider.io,
+                ) {
+                    entryStore.saveEntry(entry.toEntity())
+                    reminderStore.saveReminder(entry.getReminderAsEntity())
+                }
+            if (result is ResultOperation.Success) {
+                val entryDate =
+                    when (entry) {
+                        is Task -> entry.dueDate
+                        is Habit -> entry.startDate
+                    }
             }
+            return result
+        }
 
         override suspend fun getEntryById(id: String): ResultOperation<Entry> =
-            safeCall(dispatcher = dispatcherProvider.io) {
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    exception is IOException || exception is SQLiteException
+                },
+            ) {
                 entryStore
                     .getEntryById(id)
                     ?.toDomain()
@@ -87,5 +125,28 @@ internal class EntryRepositoryImpl
                 dispatcher = dispatcherProvider.io,
             ) {
                 entryStore.deleteEntry(entryId)
+            }
+
+        override suspend fun pushEntry(entry: Entry): ResultOperation<Unit> =
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    exception is FirebaseFirestoreException &&
+                        (
+                            exception.code == UNAVAILABLE ||
+                                exception.code == DEADLINE_EXCEEDED ||
+                                exception.code == RESOURCE_EXHAUSTED
+                        )
+                },
+            ) {
+                entryApi.saveEntry(entry)
+            }
+
+        override suspend fun updateEntrySyncState(
+            entryId: String,
+            syncState: SyncState
+        ): ResultOperation<Unit> =
+            safeCall(dispatcher = dispatcherProvider.io) {
+                entryStore.updateEntrySyncState(entryId, syncState.toEntity())
             }
     }
