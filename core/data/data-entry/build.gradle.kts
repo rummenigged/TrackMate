@@ -38,10 +38,13 @@ android {
 dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:common"))
+    implementation(project(":core:network"))
     implementation(project(":core:data:database"))
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(platform(libs.firebase.bom))
 
     testImplementation(project(":core:testing"))
+    testImplementation(libs.test.robolectric)
 }

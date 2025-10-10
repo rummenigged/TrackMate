@@ -37,5 +37,8 @@ android {
 
 dependencies {
     implementation(libs.coroutines.core)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
     testImplementation(project(":core:testing"))
 }
