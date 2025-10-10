@@ -13,6 +13,12 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField(
+            "boolean",
+            "USE_FIREBASE_EMULATOR",
+            rootProject.extra["USE_FIREBASE_EMULATOR"].toString(),
+        )
     }
 
     buildTypes {
@@ -22,6 +28,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+        }
+
+        debug {
+            buildConfigField("String", "FIREBASE_EMULATOR_HOST", "\"192.168.0.4\"")
         }
     }
 
@@ -33,9 +43,15 @@ android {
     kotlin {
         jvmToolchain(rootProject.ext["kotlinOptionsJVMTarget"].toString().toInt())
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
+
+    implementation(project(":core:common"))
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -46,4 +62,6 @@ dependencies {
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.converter)
     ksp(libs.moshi.kotlinCodeGen)
+
+    api(libs.firebase.firestore)
 }
