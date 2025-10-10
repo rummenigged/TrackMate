@@ -18,3 +18,10 @@ fun Long.toLocalTime(): LocalTime = Instant.ofEpochMilli(this).atZone(ZoneId.sys
 fun Long.toInstant(): Instant = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toInstant()
 
 fun LocalDate.toEpocMilliseconds(): Long = this.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+fun LocalTime.toEpochMilli(): Long =
+    this
+        .atDate(LocalDate.of(1970, 1, 1)) // reference epoch date
+        .atZone(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli()
