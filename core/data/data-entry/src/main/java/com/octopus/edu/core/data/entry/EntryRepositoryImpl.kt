@@ -97,13 +97,6 @@ internal class EntryRepositoryImpl
                     entryStore.saveEntry(entry.toEntity())
                     reminderStore.saveReminder(entry.getReminderAsEntity())
                 }
-            if (result is ResultOperation.Success) {
-                val entryDate =
-                    when (entry) {
-                        is Task -> entry.dueDate
-                        is Habit -> entry.startDate
-                    }
-            }
             return result
         }
 
