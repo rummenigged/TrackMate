@@ -70,7 +70,7 @@ fun TrackMateDatePicker(
         Row(modifier = Modifier.fillMaxWidth()) {
             DayOfWeek.entries.forEach {
                 Text(
-                    text = it.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                    text = it.minus(1).getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = typography.labelMedium,

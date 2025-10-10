@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,7 +37,14 @@ fun WeekCalendar(
     modifier: Modifier = Modifier,
 ) = trace("WeekCalendar") {
     val today = LocalDate.now()
-    val startDate = today.with(DayOfWeek.MONDAY).minusDays(1)
+    val startDate =
+        remember(today) {
+            if (today.dayOfWeek == DayOfWeek.SUNDAY) {
+                today
+            } else {
+                today.with(DayOfWeek.MONDAY).minusDays(1)
+            }
+        }
     val basePage = Int.MAX_VALUE / 2
 
     HorizontalPager(
