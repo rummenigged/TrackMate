@@ -1,8 +1,10 @@
 package com.octopus.edu.core.data.entry
 
+import com.octopus.edu.core.common.toEpocMilliseconds
 import com.octopus.edu.core.common.toInstant
 import com.octopus.edu.core.common.toLocalDate
 import com.octopus.edu.core.data.database.entity.EntryEntity
+import com.octopus.edu.core.data.entry.utils.toEntity
 import com.octopus.edu.core.data.entry.utils.toHabitOrNull
 import com.octopus.edu.core.data.entry.utils.toTaskOrNull
 import com.octopus.edu.core.domain.model.Habit
@@ -24,12 +26,13 @@ class EntryMapperTest {
                 title = "Finish report",
                 description = "Due tomorrow",
                 isDone = false,
-                dueDate = LocalDate.of(2025, 6, 30).toEpochDay(),
+                dueDate = LocalDate.of(2025, 6, 30).toEpocMilliseconds(),
                 recurrence = null,
                 streakCount = null,
                 lastCompletedDate = null,
-                createdAt = LocalDate.of(2025, 6, 30).toEpochDay(),
-                updatedAt = LocalDate.of(2025, 7, 20).toEpochDay(),
+                createdAt = LocalDate.of(2025, 6, 30).toEpocMilliseconds(),
+                updatedAt = LocalDate.of(2025, 7, 20).toEpocMilliseconds(),
+                syncState = EntryEntity.SyncStateEntity.SYNCED,
             )
 
         val task = entity.toTaskOrNull()
@@ -42,6 +45,7 @@ class EntryMapperTest {
         assertFalse(task?.isDone == true)
         assertEquals(entity.createdAt.toInstant(), task?.createdAt)
         assertEquals(entity.updatedAt?.toInstant(), task?.updatedAt)
+        assertEquals(entity.syncState, task?.syncState?.toEntity())
     }
 
     @Test
@@ -56,9 +60,10 @@ class EntryMapperTest {
                 dueDate = null,
                 recurrence = EntryEntity.Recurrence.DAILY,
                 streakCount = 5,
-                lastCompletedDate = LocalDate.of(2025, 6, 27).toEpochDay(),
+                lastCompletedDate = LocalDate.of(2025, 6, 27).toEpocMilliseconds(),
                 createdAt = 100L,
                 updatedAt = 200L,
+                syncState = EntryEntity.SyncStateEntity.SYNCED,
             )
 
         val habit = entity.toHabitOrNull()
@@ -73,6 +78,7 @@ class EntryMapperTest {
         assertEquals(entity.lastCompletedDate?.toInstant(), habit?.lastCompletedDate)
         assertEquals(entity.createdAt.toInstant(), habit?.createdAt)
         assertEquals(entity.updatedAt?.toInstant(), habit?.updatedAt)
+        assertEquals(entity.syncState, habit?.syncState?.toEntity())
     }
 
     @Test
@@ -87,9 +93,10 @@ class EntryMapperTest {
                 dueDate = null,
                 recurrence = EntryEntity.Recurrence.DAILY,
                 streakCount = 1,
-                lastCompletedDate = LocalDate.now().toEpochDay(),
+                lastCompletedDate = LocalDate.now().toEpocMilliseconds(),
                 createdAt = 1,
                 updatedAt = null,
+                syncState = EntryEntity.SyncStateEntity.SYNCED,
             )
 
         assertEquals(invalid.toTaskOrNull(), null) //
@@ -104,12 +111,13 @@ class EntryMapperTest {
                 title = "This is not a habit",
                 description = "fail",
                 isDone = false,
-                dueDate = LocalDate.now().toEpochDay(),
+                dueDate = LocalDate.now().toEpocMilliseconds(),
                 recurrence = null,
                 streakCount = null,
                 lastCompletedDate = null,
                 createdAt = 1,
                 updatedAt = null,
+                syncState = EntryEntity.SyncStateEntity.SYNCED,
             )
 
         assertEquals(invalid.toHabitOrNull(), null)

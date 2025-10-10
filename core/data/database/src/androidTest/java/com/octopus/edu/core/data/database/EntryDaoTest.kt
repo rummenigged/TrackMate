@@ -53,6 +53,7 @@ class EntryDaoTest {
                     lastCompletedDate = LocalDate.now().toEpochDay(),
                     createdAt = System.currentTimeMillis(),
                     updatedAt = null,
+                    syncState = EntryEntity.SyncStateEntity.SYNCED,
                 )
 
             val task =
@@ -68,6 +69,7 @@ class EntryDaoTest {
                     lastCompletedDate = null,
                     createdAt = System.currentTimeMillis(),
                     updatedAt = null,
+                    syncState = EntryEntity.SyncStateEntity.SYNCED,
                 )
 
             // When
