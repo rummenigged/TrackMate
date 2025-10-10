@@ -50,6 +50,7 @@ dependencies {
     implementation(project(":core:common"))
 
     api(libs.test.junit)
+    api(libs.test.kotlin.junit)
     api(libs.test.androidx.junit)
     api(libs.test.androidx.espresso.core)
     api(libs.test.coroutines)
