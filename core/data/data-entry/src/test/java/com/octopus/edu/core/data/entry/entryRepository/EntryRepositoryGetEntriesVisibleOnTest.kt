@@ -28,6 +28,7 @@ import org.junit.Test
 import java.io.IOException
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.util.concurrent.ConcurrentHashMap
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntryRepositoryGetEntriesVisibleOnTest {
@@ -37,7 +38,7 @@ class EntryRepositoryGetEntriesVisibleOnTest {
     private lateinit var reminderStore: ReminderStore
     private lateinit var repository: EntryRepository
     private val dbSemaphore = Semaphore(Int.MAX_VALUE)
-    private val entryLocks = hashMapOf<String, Mutex>()
+    private val entryLocks = ConcurrentHashMap<String, Mutex>()
 
     private val testDate = LocalDate.of(2024, 1, 8) // Monday
     private val testDateMillis = testDate.toEpocMilliseconds()

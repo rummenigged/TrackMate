@@ -41,6 +41,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntryRepositoryTest {
@@ -50,7 +51,7 @@ class EntryRepositoryTest {
     private lateinit var reminderStore: ReminderStore
     private lateinit var repository: EntryRepository
     private val dbSemaphore = Semaphore(Int.MAX_VALUE)
-    private val entryLocks = hashMapOf<String, Mutex>()
+    private val entryLocks = ConcurrentHashMap<String, Mutex>()
 
     private val testDate = LocalDate.of(2024, 1, 8)
     private val dayBeforeTestDate = testDate.minusDays(1)

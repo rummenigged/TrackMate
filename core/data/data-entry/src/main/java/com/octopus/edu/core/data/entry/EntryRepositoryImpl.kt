@@ -41,6 +41,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import java.io.IOException
 import java.time.LocalDate
+import java.util.concurrent.ConcurrentHashMap
 
 internal class EntryRepositoryImpl
     @Inject
@@ -49,7 +50,7 @@ internal class EntryRepositoryImpl
         private val entryApi: EntryApi,
         private val reminderStore: ReminderStore,
         private val dbSemaphore: Semaphore,
-        private val entryLocks: HashMap<String, Mutex>,
+        private val entryLocks: ConcurrentHashMap<String, Mutex>,
         private val dispatcherProvider: DispatcherProvider
     ) : EntryRepository {
         override val pendingEntries: Flow<List<Entry>>

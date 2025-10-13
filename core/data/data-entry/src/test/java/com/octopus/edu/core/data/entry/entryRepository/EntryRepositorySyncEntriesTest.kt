@@ -22,6 +22,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -33,7 +34,7 @@ class EntryRepositorySyncEntriesTest {
     private val reminderStore: ReminderStore = mockk(relaxed = true)
     private val dispatcherProvider = TestDispatchers()
     private val dbSemaphore = Semaphore(Int.MAX_VALUE)
-    private val entryLocks = hashMapOf<String, Mutex>()
+    private val entryLocks = ConcurrentHashMap<String, Mutex>()
 
     @Before
     fun setUp() {

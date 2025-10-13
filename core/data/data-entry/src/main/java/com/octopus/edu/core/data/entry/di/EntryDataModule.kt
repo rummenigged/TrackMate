@@ -19,6 +19,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Singleton
 
 @Module
@@ -35,7 +36,7 @@ object EntryDataModule {
         entryApi: EntryApi,
         reminderStore: ReminderStore,
         dbSemaphore: Semaphore,
-        entryLocks: HashMap<String, Mutex>,
+        entryLocks: ConcurrentHashMap<String, Mutex>,
         dispatcherProvider: DispatcherProvider
     ): EntryRepository =
         EntryRepositoryImpl(
@@ -61,5 +62,5 @@ object EntryDataModule {
 
     @Provides
     @Singleton
-    fun providesEntryLocks(): HashMap<String, Mutex> = HashMap()
+    fun providesEntryLocks(): ConcurrentHashMap<String, Mutex> = ConcurrentHashMap()
 }
