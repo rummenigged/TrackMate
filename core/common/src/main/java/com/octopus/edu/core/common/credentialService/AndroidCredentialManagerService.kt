@@ -1,6 +1,6 @@
 package com.octopus.edu.core.common.credentialService
 
-import android.app.Application
+import android.content.Context
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -17,16 +17,15 @@ import jakarta.inject.Inject
 class AndroidCredentialManagerService
     @Inject
     constructor(
-        private val application: Application,
         private val credentialRequest: GetCredentialRequest,
         private val credentialManager: CredentialManager,
     ) : ICredentialService {
-        override suspend fun initiateGoogleSignIn(): SignInInitiationResult =
+        override suspend fun initiateGoogleSignIn(context: Context): SignInInitiationResult =
             try {
                 val credential =
                     credentialManager
                         .getCredential(
-                            application,
+                            context,
                             credentialRequest,
                         ).credential
 

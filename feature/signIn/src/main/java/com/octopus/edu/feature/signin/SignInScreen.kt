@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -124,6 +125,7 @@ private fun SigInInButtonWithLoading(
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     AnimatedVisibility(
         modifier = modifier,
         visible = isLoading,
@@ -142,7 +144,7 @@ private fun SigInInButtonWithLoading(
         PrimaryIconButton(
             text = stringResource(R.string.login_google),
             iconRes = com.octopus.edu.core.design.R.drawable.ic_google_new,
-            onClick = { onEvent(UiEvent.OnGoogleSignIn) },
+            onClick = { onEvent(UiEvent.OnGoogleSignIn(context)) },
         )
     }
 }

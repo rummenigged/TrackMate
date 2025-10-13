@@ -1,5 +1,6 @@
 package com.octopus.edu.feature.signin
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.octopus.edu.core.common.Logger
 import com.octopus.edu.core.domain.credentialManager.ICredentialService
@@ -32,7 +33,7 @@ class AuthViewModel
             when (event) {
                 UiEvent.OnSignOut -> signOut()
                 UiEvent.MarkEffectConsumed -> markEffectAsConsumed()
-                UiEvent.OnGoogleSignIn -> onGoogleSignIn()
+                is UiEvent.OnGoogleSignIn -> onGoogleSignIn(event.context)
             }
         }
 
@@ -47,10 +48,10 @@ class AuthViewModel
                 }
             }
 
-        private fun onGoogleSignIn() =
+        private fun onGoogleSignIn(context: Context) =
             viewModelScope.launch {
                 setState { AuthUiContract.UiState.Authenticating }
-                when (val result = credentialService.initiateGoogleSignIn()) {
+                when (val result = credentialService.initiateGoogleSignIn(context)) {
                     is SignInInitiationResult.Authenticated -> {
                         signIn(result.idToken)
                     }

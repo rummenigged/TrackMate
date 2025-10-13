@@ -1,5 +1,6 @@
 package com.octopus.edu.feature.signin
 
+import android.content.Context
 import app.cash.turbine.test
 import com.octopus.edu.core.common.Logger
 import com.octopus.edu.core.domain.credentialManager.ICredentialService
@@ -28,6 +29,7 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import net.bytebuddy.matcher.ElementMatchers.any
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -47,6 +49,9 @@ class AuthViewModelTest {
 
     @MockK
     private lateinit var mockAuthRepository: AuthRepository
+
+    @MockK
+    private lateinit var context: Context
 
     private lateinit var viewModel: AuthViewModel
     private lateinit var isUserLoggedInFlow: MutableStateFlow<Boolean>
@@ -115,10 +120,10 @@ class AuthViewModelTest {
         runTest(testDispatcher.scheduler) {
             val testToken = "google_auth_token"
             val initiationResult = SignInInitiationResult.Authenticated(testToken)
-            coEvery { mockCredentialService.initiateGoogleSignIn() } returns initiationResult
+            coEvery { mockCredentialService.initiateGoogleSignIn(any()) } returns initiationResult
             coEvery { mockAuthRepository.signIn(testToken) } returns ResultOperation.Success(Unit)
 
-            viewModel.processEvent(UiEvent.OnGoogleSignIn)
+            viewModel.processEvent(UiEvent.OnGoogleSignIn(context))
             testScheduler.advanceUntilIdle()
 
             assertEquals(UiState.Authenticating, viewModel.uiState.value)
@@ -127,7 +132,7 @@ class AuthViewModelTest {
             testScheduler.advanceUntilIdle()
             assertEquals(UiState.Authenticated, viewModel.uiState.value)
 
-            coVerify(exactly = 1) { mockCredentialService.initiateGoogleSignIn() }
+            coVerify(exactly = 1) { mockCredentialService.initiateGoogleSignIn(context) }
             coVerify(exactly = 1) { mockAuthRepository.signIn(testToken) }
         }
 
@@ -139,12 +144,12 @@ class AuthViewModelTest {
             val signInException = RuntimeException("Firebase Sign-In Failed")
             val mappedErrorMessage = "Firebase Sign-In Failed User Message"
 
-            coEvery { mockCredentialService.initiateGoogleSignIn() } returns initiationResult
+            coEvery { mockCredentialService.initiateGoogleSignIn(any()) } returns initiationResult
             coEvery { mockAuthRepository.signIn(testToken) } returns ResultOperation.Error(signInException)
             every { AuthErrorMapper.toUserMessage(signInException.message) } returns mappedErrorMessage
 
             viewModel.effect.test {
-                viewModel.processEvent(UiEvent.OnGoogleSignIn)
+                viewModel.processEvent(UiEvent.OnGoogleSignIn(context))
                 testScheduler.advanceUntilIdle()
 
                 assertEquals(UiState.Unauthenticated, viewModel.uiState.value)
@@ -160,11 +165,11 @@ class AuthViewModelTest {
             val mappedErrorMessage = "Credential service init error User Message"
             val initiationResult = SignInInitiationResult.Error(errorMessage)
 
-            coEvery { mockCredentialService.initiateGoogleSignIn() } returns initiationResult
+            coEvery { mockCredentialService.initiateGoogleSignIn(any()) } returns initiationResult
             every { AuthErrorMapper.toUserMessage(errorMessage) } returns mappedErrorMessage
 
             viewModel.effect.test {
-                viewModel.processEvent(UiEvent.OnGoogleSignIn)
+                viewModel.processEvent(UiEvent.OnGoogleSignIn(context))
                 testScheduler.advanceUntilIdle()
 
                 println("effect is ${awaitItem()}")
@@ -179,9 +184,9 @@ class AuthViewModelTest {
     fun `OnGoogleSignIn when initiateGoogleSignIn is NoOp`() =
         runTest(testDispatcher.scheduler) {
             val initiationResult = SignInInitiationResult.NoOp
-            coEvery { mockCredentialService.initiateGoogleSignIn() } returns initiationResult
+            coEvery { mockCredentialService.initiateGoogleSignIn(any()) } returns initiationResult
 
-            viewModel.processEvent(UiEvent.OnGoogleSignIn)
+            viewModel.processEvent(UiEvent.OnGoogleSignIn(context))
             testScheduler.advanceUntilIdle()
 
             assertEquals(UiState.Unauthenticated, viewModel.uiState.value)

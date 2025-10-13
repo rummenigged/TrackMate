@@ -1,5 +1,6 @@
 package com.octopus.edu.feature.signin
 
+import android.content.Context
 import com.octopus.edu.core.ui.common.base.ViewEffect
 import com.octopus.edu.core.ui.common.base.ViewEvent
 import com.octopus.edu.core.ui.common.base.ViewState
@@ -20,7 +21,7 @@ class AuthUiContract {
     sealed interface UiEvent : ViewEvent {
         data object MarkEffectConsumed : UiEvent
 
-        data object OnGoogleSignIn : UiEvent
+        data class OnGoogleSignIn(val context: Context) : UiEvent
 
         data object OnSignOut : UiEvent
     }

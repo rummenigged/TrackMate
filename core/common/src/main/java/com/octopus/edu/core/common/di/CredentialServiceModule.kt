@@ -29,12 +29,10 @@ class CredentialServiceModule {
 
     @Provides
     fun provideCredentialService(
-        application: Application,
         credentialRequest: GetCredentialRequest,
         credentialManager: CredentialManager
     ): ICredentialService =
         AndroidCredentialManagerService(
-            application = application,
             credentialRequest = credentialRequest,
             credentialManager = credentialManager,
         )
