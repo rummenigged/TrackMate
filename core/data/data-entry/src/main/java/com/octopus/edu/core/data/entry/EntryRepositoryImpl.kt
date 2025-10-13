@@ -6,8 +6,12 @@ import com.google.firebase.firestore.FirebaseFirestoreException.Code.DEADLINE_EX
 import com.google.firebase.firestore.FirebaseFirestoreException.Code.RESOURCE_EXHAUSTED
 import com.google.firebase.firestore.FirebaseFirestoreException.Code.UNAVAILABLE
 import com.octopus.edu.core.common.DispatcherProvider
+import com.octopus.edu.core.common.Logger
 import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.data.database.entity.EntryEntity
+import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.CONFLICT
 import com.octopus.edu.core.data.entry.api.EntryApi
+import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.data.entry.utils.getReminderAsEntity
@@ -23,11 +27,18 @@ import com.octopus.edu.core.domain.model.appliesTo
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.domain.utils.safeCall
+import com.octopus.edu.core.network.utils.NetworkResponse
 import jakarta.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import java.io.IOException
 import java.time.LocalDate
 
@@ -37,22 +48,22 @@ internal class EntryRepositoryImpl
         private val entryStore: EntryStore,
         private val entryApi: EntryApi,
         private val reminderStore: ReminderStore,
+        private val dbSemaphore: Semaphore,
+        private val entryLocks: HashMap<String, Mutex>,
         private val dispatcherProvider: DispatcherProvider
     ) : EntryRepository {
         override val pendingEntries: Flow<List<Entry>>
             get() =
                 entryStore
                     .streamPendingEntries()
-                    .map { entries ->
-                        entries.mapNotNull { entry -> entry.toDomain() }
-                    }
+                    .map { it.mapNotNull(EntryEntity::toDomain) }
 
         override suspend fun getPendingEntries(): ResultOperation<List<Entry>> =
             safeCall(
                 dispatcher = dispatcherProvider.io,
                 onErrorReturn = { emptyList() },
             ) {
-                entryStore.getPendingEntries().mapNotNull { entry -> entry.toDomain() }
+                entryStore.getPendingEntries().mapNotNull(EntryEntity::toDomain)
             }
 
         override suspend fun getTasks(): ResultOperation<List<Task>> =
@@ -142,4 +153,40 @@ internal class EntryRepositoryImpl
             safeCall(dispatcher = dispatcherProvider.io) {
                 entryStore.updateEntrySyncState(entryId, syncState.toEntity())
             }
+
+        override suspend fun syncEntries(): ResultOperation<Unit> =
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+            ) {
+                when (val result = entryApi.fetchEntries()) {
+                    is NetworkResponse.Error -> {
+                        Logger.e(message = "Error to fetch entries", throwable = result.exception)
+                    }
+                    is NetworkResponse.Success -> {
+                        result.data
+                            .map { entry ->
+                                async { syncEntrySafely(entry) }
+                            }.awaitAll()
+                    }
+                }
+            }
+
+        private suspend fun syncEntrySafely(entry: EntryDto) {
+            dbSemaphore.withPermit {
+                val mutex = entryLocks.computeIfAbsent(entry.id) { Mutex() }
+                mutex.withLock {
+                    try {
+                        entryStore.upsertIfNewest(entry.toEntity())
+                    } catch (e: Exception) {
+                        entryStore.updateEntrySyncState(entry.id, CONFLICT)
+                        Logger.e(
+                            message = "Error to save entry ${entry.id}",
+                            throwable = e,
+                        )
+                    } finally {
+                        entryLocks.remove(entry.id)
+                    }
+                }
+            }
+        }
     }

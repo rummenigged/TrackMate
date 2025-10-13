@@ -240,6 +240,36 @@ class EntryStoreTest {
         }
 
     @Test
+    fun `upsertIfNewest should call dao upsertIfNewest`() =
+        runTest {
+            // Given
+            coJustRun { entryDao.upsertIfNewest(testEntry) }
+
+            // When
+            entryStore.upsertIfNewest(testEntry)
+
+            // Then
+            coVerify(exactly = 1) { entryDao.upsertIfNewest(testEntry) }
+        }
+
+    @Test
+    fun `upsertIfNewest should throw exception when dao throws exception`() =
+        runTest {
+            // Given
+            val exception = RuntimeException("Database error")
+            coEvery { entryDao.upsertIfNewest(testEntry) } coAnswers { throw exception }
+
+            // When & Then
+            val thrownException =
+                assertFailsWith<RuntimeException> {
+                    entryStore.upsertIfNewest(testEntry)
+                }
+
+            assertEquals(exception, thrownException)
+            coVerify(exactly = 1) { entryDao.upsertIfNewest(testEntry) }
+        }
+
+    @Test
     fun `deleteEntry should call dao delete`() =
         runTest {
             // Given

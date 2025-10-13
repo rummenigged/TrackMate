@@ -1,9 +1,13 @@
 package com.octopus.edu.core.data.entry.api
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObjects
+import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.utils.toDTO
 import com.octopus.edu.core.domain.model.Entry
+import com.octopus.edu.core.network.utils.NetworkResponse
 import kotlinx.coroutines.tasks.await
+import java.lang.Exception
 import javax.inject.Inject
 
 class EntryApiImpl
@@ -23,4 +27,13 @@ class EntryApiImpl
                 .set(entryDto)
                 .await()
         }
+
+        override suspend fun fetchEntries(): NetworkResponse<List<EntryDto>> =
+            try {
+                val querySnapshot = api.collection(COLLECTION_ENTRIES).get().await()
+                val entries = querySnapshot.toObjects<EntryDto>()
+                NetworkResponse.Success(entries)
+            } catch (e: Exception) {
+                NetworkResponse.Error(e)
+            }
     }

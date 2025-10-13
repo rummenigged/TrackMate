@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.api.EntryApiImpl
+import com.octopus.edu.core.data.entry.api.EntryApiImpl.Companion.COLLECTION_ENTRIES
 import com.octopus.edu.core.data.entry.utils.toDTO
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.mock
@@ -36,7 +37,7 @@ class EntryApiTest {
 
     @Before
     fun setUp() {
-        coEvery { mockFirestore.collection("entries") } returns mockCollection
+        coEvery { mockFirestore.collection(COLLECTION_ENTRIES) } returns mockCollection
         entryApi = EntryApiImpl(mockFirestore)
     }
 
@@ -47,7 +48,7 @@ class EntryApiTest {
             every { mockCollection.document(entry.toDTO().id).set(entry.toDTO()) } returns Tasks.forResult(null)
             entryApi.saveEntry(entry)
 
-            verify {
+            verify(exactly = 1) {
                 mockCollection
                     .document(entry.toDTO().id)
                     .set(entry.toDTO())

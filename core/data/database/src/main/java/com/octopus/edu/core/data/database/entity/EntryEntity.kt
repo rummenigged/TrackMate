@@ -31,5 +31,5 @@ data class EntryEntity(
         CUSTOM,
     }
 
-    enum class SyncStateEntity { PENDING, SYNCED, FAILED }
+    enum class SyncStateEntity { PENDING, SYNCED, FAILED, CONFLICT }
 }

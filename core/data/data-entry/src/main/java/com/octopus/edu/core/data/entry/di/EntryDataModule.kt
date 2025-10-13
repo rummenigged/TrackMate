@@ -4,6 +4,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.dao.ReminderDao
+import com.octopus.edu.core.data.entry.BuildConfig
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.api.EntryApiImpl
@@ -16,24 +17,49 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object EntryDataModule {
     @Provides
+    @Singleton
     fun provideEntryApi(api: FirebaseFirestore): EntryApi = EntryApiImpl(api)
 
     @Provides
+    @Singleton
     fun providesEntryRepository(
         entryStore: EntryStore,
         entryApi: EntryApi,
         reminderStore: ReminderStore,
+        dbSemaphore: Semaphore,
+        entryLocks: HashMap<String, Mutex>,
         dispatcherProvider: DispatcherProvider
-    ): EntryRepository = EntryRepositoryImpl(entryStore, entryApi, reminderStore, dispatcherProvider)
+    ): EntryRepository =
+        EntryRepositoryImpl(
+            entryStore,
+            entryApi,
+            reminderStore,
+            dbSemaphore,
+            entryLocks,
+            dispatcherProvider,
+        )
 
     @Provides
+    @Singleton
     fun providesEntryStore(entryDao: EntryDao): EntryStore = EntryStoreImpl(entryDao)
 
     @Provides
+    @Singleton
     fun providesReminderStore(reminderDao: ReminderDao): ReminderStore = ReminderStoreImpl(reminderDao)
+
+    @Provides
+    @Singleton
+    fun providesEntryDatabaseSemaphore(): Semaphore = Semaphore(BuildConfig.DB_SYNC_CONCURRENCY)
+
+    @Provides
+    @Singleton
+    fun providesEntryLocks(): HashMap<String, Mutex> = HashMap()
 }

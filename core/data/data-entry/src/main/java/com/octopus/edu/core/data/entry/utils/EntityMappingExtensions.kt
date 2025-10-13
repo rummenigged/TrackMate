@@ -66,8 +66,8 @@ internal fun EntryEntity.toHabitOrNull(): Habit? {
 internal fun EntryEntity.SyncStateEntity.toDomain(): SyncState =
     when (this) {
         EntryEntity.SyncStateEntity.PENDING -> SyncState.PENDING
-        EntryEntity.SyncStateEntity.SYNCED -> SyncState.SYNCED
         EntryEntity.SyncStateEntity.FAILED -> SyncState.FAILED
+        else -> SyncState.SYNCED
     }
 
 internal fun EntryEntity.Recurrence?.toDomain(): Recurrence =
@@ -161,6 +161,28 @@ internal fun Recurrence?.toDto(): String =
         Recurrence.Weekly -> "Weekly"
         else -> "None"
     }
+
+internal fun EntryDto.toEntity(): EntryEntity =
+    EntryEntity(
+        id = id,
+        type = if (type == "HABIT") EntryType.HABIT else EntryType.TASK,
+        title = title,
+        description = description,
+        isDone = isDone,
+        dueDate = dueDate?.toInstant()?.toEpochMilli(),
+        time = time?.toInstant()?.toEpochMilli(),
+        createdAt = createdAt.toInstant().toEpochMilli(),
+        updatedAt = updatedAt?.toInstant()?.toEpochMilli(),
+        recurrence =
+            when (recurrence) {
+                "Custom" -> EntryEntity.Recurrence.CUSTOM
+                "Daily" -> EntryEntity.Recurrence.DAILY
+                "Weekly" -> EntryEntity.Recurrence.WEEKLY
+                else -> null
+            },
+        startDate = startDate,
+        syncState = EntryEntity.SyncStateEntity.SYNCED,
+    )
 
 internal fun Entry.getReminderAsEntity(): ReminderEntity =
     ReminderEntity(

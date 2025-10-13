@@ -2,6 +2,7 @@ package com.octopus.edu.core.domain.utils
 
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.withContext
 
 suspend fun <T : Any> safeCall(
@@ -9,7 +10,7 @@ suspend fun <T : Any> safeCall(
     onErrorReturn: (() -> T)? = null,
     isRetriableWhen: ((Throwable) -> Boolean)? = null,
     doOnError: (suspend (Throwable) -> Unit)? = null,
-    block: suspend () -> T,
+    block: suspend CoroutineScope.() -> T,
 ): ResultOperation<T> =
     withContext(dispatcher) {
         try {

@@ -12,6 +12,8 @@ interface EntryStore {
 
     suspend fun saveEntry(entry: EntryEntity)
 
+    suspend fun upsertIfNewest(entry: EntryEntity)
+
     suspend fun getEntryById(id: String): EntryEntity?
 
     suspend fun deleteEntry(entryId: String)
@@ -44,6 +46,8 @@ internal class EntryStoreImpl
         override suspend fun getEntryById(id: String) = entryDao.getEntryById(id)
 
         override suspend fun saveEntry(entry: EntryEntity) = entryDao.insert(entry)
+
+        override suspend fun upsertIfNewest(entry: EntryEntity) = entryDao.upsertIfNewest(entry)
 
         override suspend fun updateEntrySyncState(
             entryId: String,

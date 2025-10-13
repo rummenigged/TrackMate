@@ -31,4 +31,6 @@ interface EntryRepository {
     ): ResultOperation<Unit>
 
     suspend fun getPendingEntries(): ResultOperation<List<Entry>>
+
+    suspend fun syncEntries(): ResultOperation<Unit>
 }

@@ -4,9 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
+import androidx.room.Transaction
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.PENDING
+import com.octopus.edu.core.data.database.utils.EntrySyncResolver
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -46,4 +48,12 @@ interface EntryDao {
         entryId: String,
         syncState: SyncStateEntity
     )
+
+    @Transaction
+    suspend fun upsertIfNewest(entry: EntryEntity) {
+        val localEntry = getEntryById(entry.id)
+        if (localEntry == null || EntrySyncResolver.shouldReplace(localEntry, entry)) {
+            insert(entry)
+        }
+    }
 }

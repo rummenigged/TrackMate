@@ -19,6 +19,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
@@ -34,6 +36,8 @@ class EntryRepositoryGetEntriesVisibleOnTest {
     private lateinit var entryApi: EntryApi
     private lateinit var reminderStore: ReminderStore
     private lateinit var repository: EntryRepository
+    private val dbSemaphore = Semaphore(Int.MAX_VALUE)
+    private val entryLocks = hashMapOf<String, Mutex>()
 
     private val testDate = LocalDate.of(2024, 1, 8) // Monday
     private val testDateMillis = testDate.toEpocMilliseconds()
@@ -150,7 +154,15 @@ class EntryRepositoryGetEntriesVisibleOnTest {
         reminderStore = mockk(relaxed = true) // relaxed for saveEntry calls if not directly tested here
         entryApi = mockk()
         testDispatchers = TestDispatchers()
-        repository = EntryRepositoryImpl(entryStore, entryApi, reminderStore, testDispatchers)
+        repository =
+            EntryRepositoryImpl(
+                entryStore,
+                entryApi,
+                reminderStore,
+                dbSemaphore,
+                entryLocks,
+                testDispatchers,
+            )
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.entry.entryRepository
 
 import android.database.sqlite.SQLiteException
 import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.common.toInstant
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
@@ -25,6 +26,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -46,6 +49,8 @@ class EntryRepositoryTest {
     private lateinit var entryApi: EntryApi
     private lateinit var reminderStore: ReminderStore
     private lateinit var repository: EntryRepository
+    private val dbSemaphore = Semaphore(Int.MAX_VALUE)
+    private val entryLocks = hashMapOf<String, Mutex>()
 
     private val testDate = LocalDate.of(2024, 1, 8)
     private val dayBeforeTestDate = testDate.minusDays(1)
@@ -75,7 +80,15 @@ class EntryRepositoryTest {
         reminderStore = mockk(relaxed = true)
         entryApi = mockk(relaxed = true)
         testDispatchers = TestDispatchers()
-        repository = EntryRepositoryImpl(entryStore, entryApi, reminderStore, testDispatchers)
+        repository =
+            EntryRepositoryImpl(
+                entryStore,
+                entryApi,
+                reminderStore,
+                dbSemaphore,
+                entryLocks,
+                testDispatchers,
+            )
 
         defaultRandomId = UUID.randomUUID().toString()
         defaultDateNow = LocalDateTime.of(2025, 9, 15, 8, 0)

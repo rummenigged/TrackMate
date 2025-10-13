@@ -256,6 +256,7 @@ object AddEntryUiContractor {
                 isDone = false,
                 time = data.time,
                 createdAt = Instant.now(),
+                updatedAt = Instant.now(),
                 recurrence = data.recurrence,
                 reminder = data.reminder,
                 reminderType = data.reminderType,
@@ -272,6 +273,7 @@ object AddEntryUiContractor {
                 reminder = data.reminder,
                 reminderType = data.reminderType,
                 createdAt = Instant.now(),
+                updatedAt = Instant.now(),
             )
         }
 }
