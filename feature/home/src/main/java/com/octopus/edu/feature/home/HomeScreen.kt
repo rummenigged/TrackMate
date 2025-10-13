@@ -16,15 +16,20 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -104,6 +109,7 @@ private fun AddEntryFAB(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeContent(
     uiState: UiState,
@@ -115,34 +121,48 @@ private fun HomeContent(
             initialPage = Int.MAX_VALUE / 2,
             pageCount = { Int.MAX_VALUE },
         )
-    Column(modifier = modifier.statusBarsPadding()) {
-        HomeAppBar(
-            title =
-                stringResource(
-                    R.string.current_month_and_day,
-                    uiState.currentMonth,
-                    uiState.currentYear,
-                ),
-        )
 
-        WeekCalendar(
-            selectedDate = uiState.currentDate,
-            pagerState = pagerState,
-            onDateSelected = { date ->
-                onEvent(UiEvent.SetCurrentDateAs(date))
-            },
-        )
+    val pullToRefreshState = rememberPullToRefreshState()
 
-        when {
-            uiState.isLoading -> FullScreenCircularProgress()
+    PullToRefreshBox(
+        modifier = modifier,
+        isRefreshing = uiState.isRefreshing,
+        state = pullToRefreshState,
+        onRefresh = { onEvent(UiEvent.Refresh) },
+    ) {
+        Column(modifier = Modifier.statusBarsPadding()) {
+            HomeAppBar(
+                title =
+                    stringResource(
+                        R.string.current_month_and_day,
+                        uiState.currentMonth,
+                        uiState.currentYear,
+                    ),
+            )
 
-            uiState.entries.isEmpty() -> EmptyEntries()
+            WeekCalendar(
+                selectedDate = uiState.currentDate,
+                pagerState = pagerState,
+                onDateSelected = { date ->
+                    onEvent(UiEvent.SetCurrentDateAs(date))
+                },
+            )
 
-            else ->
-                EntriesList(
-                    entries = uiState.entries,
-                    onEvent = onEvent,
-                )
+            when {
+                uiState.isLoading -> FullScreenCircularProgress()
+                uiState.entries.isEmpty() ->
+                    EmptyEntries(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                    )
+                else ->
+                    EntriesList(
+                        entries = uiState.entries,
+                        onEvent = onEvent,
+                    )
+            }
         }
     }
 }
@@ -156,8 +176,7 @@ private fun EntriesList(
     val animatedList by updateAnimateItemsState(entries.map { UiEntry(it) })
     LazyColumn(
         modifier = modifier.fillMaxSize().testTag("entry_list"),
-        contentPadding =
-            PaddingValues(start = 16.dp, top = 8.dp, end = 16.dp),
+        contentPadding = PaddingValues(start = 16.dp, top = 8.dp, end = 16.dp),
     ) {
         animatedItemIndexed(
             items = animatedList,
@@ -186,9 +205,7 @@ private fun EmptyEntries(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
     ) {
         Box(
-            modifier =
-                Modifier
-                    .background(color = colorScheme.surfaceContainer, shape = CircleShape),
+            modifier = Modifier.background(color = colorScheme.surfaceContainer, shape = CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

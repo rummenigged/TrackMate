@@ -36,6 +36,27 @@ internal class HomeViewModel
                 }
 
                 is UiEvent.SetCurrentDateAs -> getEntriesVisibleOn(event.date)
+                UiEvent.Refresh -> refreshData()
+            }
+        }
+
+        private fun refreshData() {
+            viewModelScope.launch {
+                setState { copy(isRefreshing = true) }
+                when (val result = entryRepository.syncEntries()) {
+                    is ResultOperation.Error -> {
+                        setState { copy(isRefreshing = false) }
+                        setEffect(
+                            UiEffect.ShowError(
+                                result.throwable.message
+                                    ?: "Unknown Error",
+                            ),
+                        )
+                    }
+                    is ResultOperation.Success -> {
+                        setState { copy(isRefreshing = false) }
+                    }
+                }
             }
         }
 
