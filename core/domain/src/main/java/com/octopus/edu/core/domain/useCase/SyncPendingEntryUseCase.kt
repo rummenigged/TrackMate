@@ -25,6 +25,7 @@ class SyncPendingEntryUseCase
                     if (result.isRetriable) {
                         SyncResult.TransientError
                     } else {
+                        entryRepository.updateEntrySyncState(entryId, SyncState.FAILED)
                         SyncResult.PermanentError
                     }
                 }
@@ -40,6 +41,7 @@ class SyncPendingEntryUseCase
                     if (result.isRetriable) {
                         SyncResult.TransientError
                     } else {
+                        entryRepository.updateEntrySyncState(entry.id, SyncState.FAILED)
                         SyncResult.PermanentError
                     }
                 }
