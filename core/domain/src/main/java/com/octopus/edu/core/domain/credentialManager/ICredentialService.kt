@@ -1,5 +1,7 @@
 package com.octopus.edu.core.domain.credentialManager
 
+import android.content.Context
+
 sealed interface AuthResult {
     data class Success(
         val idToken: String
@@ -26,7 +28,7 @@ sealed interface SignInInitiationResult {
 }
 
 interface ICredentialService {
-    suspend fun initiateGoogleSignIn(): SignInInitiationResult
+    suspend fun initiateGoogleSignIn(context: Context): SignInInitiationResult
 
     suspend fun clearUserCredentials(onError: (Throwable) -> Unit)
 }
