@@ -228,7 +228,7 @@ class EntryRepositoryGetEntriesVisibleOnTest {
                 Assert.assertTrue(
                     entries.any {
                         it.id == "habit2" &&
-                            it is Habit && (it as Habit).recurrence == Recurrence.Weekly
+                            it is Habit && it.recurrence == Recurrence.Weekly
                     },
                 )
                 awaitComplete()

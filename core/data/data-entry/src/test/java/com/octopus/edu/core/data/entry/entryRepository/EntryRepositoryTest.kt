@@ -2,7 +2,6 @@ package com.octopus.edu.core.data.entry.entryRepository
 
 import android.database.sqlite.SQLiteException
 import com.octopus.edu.core.common.toEpocMilliseconds
-import com.octopus.edu.core.common.toInstant
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
@@ -320,7 +319,7 @@ class EntryRepositoryTest {
             val result = repository.getEntryById(expectedEntryEntity.id)
 
             assertTrue(result is ResultOperation.Success)
-            Assert.assertEquals(expectedEntryEntity.toDomain(), (result as ResultOperation.Success).data)
+            assertEquals(expectedEntryEntity.toDomain(), (result as ResultOperation.Success).data)
             coVerify(exactly = 1) { entryStore.getEntryById(expectedEntryEntity.id) }
         }
 

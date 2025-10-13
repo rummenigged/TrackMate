@@ -29,8 +29,6 @@ import kotlin.test.assertFailsWith
 class EntryApiTest {
     private val mockCollection = mockk<CollectionReference>()
 
-    private val mockDocRef = mockk<DocumentReference>()
-
     private val mockFirestore = mockk<FirebaseFirestore>()
 
     private lateinit var entryApi: EntryApi
