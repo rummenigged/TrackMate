@@ -82,20 +82,6 @@ class EntryRepositoryGetEntriesVisibleOnTest {
             syncState = EntryEntity.SyncStateEntity.PENDING,
         )
 
-    private val taskDueAfterTestDateEntity =
-        EntryEntity(
-            // Should be filtered by getEntriesBeforeOrOn
-            id = "task3",
-            type = EntryEntity.EntryType.TASK,
-            title = "Task after Test Date",
-            description = "",
-            isDone = false,
-            dueDate = dayAfterTestDate.toEpocMilliseconds(),
-            recurrence = null,
-            createdAt = dayBeforeTestDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
-            syncState = EntryEntity.SyncStateEntity.PENDING,
-        )
-
     private val dailyHabitEntity =
         EntryEntity(
             id = "habit1",
