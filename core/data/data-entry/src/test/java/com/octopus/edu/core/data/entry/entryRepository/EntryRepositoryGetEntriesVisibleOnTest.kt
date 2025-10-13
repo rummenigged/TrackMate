@@ -43,7 +43,6 @@ class EntryRepositoryGetEntriesVisibleOnTest {
     private val testDate = LocalDate.of(2024, 1, 8) // Monday
     private val testDateMillis = testDate.toEpocMilliseconds()
     private val dayBeforeTestDate = testDate.minusDays(1)
-    private val dayAfterTestDate = testDate.plusDays(1)
 
     private val taskDueOnTestDateEntity =
         EntryEntity(
