@@ -3,7 +3,6 @@ package com.octopus.edu.core.data.entry
 import android.os.Build
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.octopus.edu.core.data.entry.api.EntryApi
