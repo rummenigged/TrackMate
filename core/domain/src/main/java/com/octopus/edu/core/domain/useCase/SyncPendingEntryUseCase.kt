@@ -2,17 +2,12 @@ package com.octopus.edu.core.domain.useCase
 
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.SyncState
+import com.octopus.edu.core.domain.model.common.ErrorType.PermanentError
+import com.octopus.edu.core.domain.model.common.ErrorType.TransientError
 import com.octopus.edu.core.domain.model.common.ResultOperation
+import com.octopus.edu.core.domain.model.common.SyncResult
 import com.octopus.edu.core.domain.repository.EntryRepository
 import javax.inject.Inject
-
-sealed interface SyncResult {
-    object Success : SyncResult
-
-    object TransientError : SyncResult
-
-    object PermanentError : SyncResult
-}
 
 class SyncPendingEntryUseCase
     @Inject
@@ -23,10 +18,10 @@ class SyncPendingEntryUseCase
             when (val result = entryRepository.getEntryById(entryId)) {
                 is ResultOperation.Error -> {
                     if (result.isRetriable) {
-                        SyncResult.TransientError
+                        SyncResult.Error(TransientError(result.throwable))
                     } else {
                         entryRepository.updateEntrySyncState(entryId, SyncState.FAILED)
-                        SyncResult.PermanentError
+                        SyncResult.Error(PermanentError(result.throwable))
                     }
                 }
 
@@ -39,10 +34,10 @@ class SyncPendingEntryUseCase
             when (val result = entryRepository.pushEntry(entry)) {
                 is ResultOperation.Error -> {
                     if (result.isRetriable) {
-                        SyncResult.TransientError
+                        SyncResult.Error(TransientError(result.throwable))
                     } else {
                         entryRepository.updateEntrySyncState(entry.id, SyncState.FAILED)
-                        SyncResult.PermanentError
+                        SyncResult.Error(PermanentError(result.throwable))
                     }
                 }
                 is ResultOperation.Success -> {
