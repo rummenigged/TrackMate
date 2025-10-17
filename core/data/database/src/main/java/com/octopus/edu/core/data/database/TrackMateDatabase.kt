@@ -7,8 +7,10 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.octopus.edu.core.data.database.dao.DeletedEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.dao.ReminderDao
+import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntrySessionEntity
 import com.octopus.edu.core.data.database.entity.ReminderEntity
@@ -23,8 +25,9 @@ private const val NAME = "trackmate.db"
         EntrySessionEntity::class,
         TagEntity::class,
         ReminderEntity::class,
+        DeletedEntryEntity::class,
     ],
-    version = 4,
+    version = 5,
 )
 @TypeConverters(Converters::class)
 abstract class TrackMateDatabase : RoomDatabase() {
@@ -55,6 +58,17 @@ abstract class TrackMateDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_4_5: Migration =
+            object : Migration(4, 5) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS `deleted_entry` " +
+                            "(`id` TEXT NOT NULL, `deletedAt` INTEGER NOT NULL, " +
+                            "`syncState` TEXT NOT NULL, PRIMARY KEY(`id`))",
+                    )
+                }
+            }
+
         fun create(context: Context): TrackMateDatabase =
             Room
                 .databaseBuilder(
@@ -64,10 +78,13 @@ abstract class TrackMateDatabase : RoomDatabase() {
                 ).addMigrations(MIGRATION_1_2)
                 .addMigrations(MIGRATION_2_3)
                 .addMigrations(MIGRATION_3_4)
+                .addMigrations(MIGRATION_4_5)
                 .build()
     }
 
     abstract fun entryDao(): EntryDao
 
     abstract fun reminderDao(): ReminderDao
+
+    abstract fun deletedEntryDao(): DeletedEntryDao
 }
