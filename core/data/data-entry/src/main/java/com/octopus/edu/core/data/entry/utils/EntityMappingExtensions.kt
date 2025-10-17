@@ -9,11 +9,14 @@ import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.common.toInstant
 import com.octopus.edu.core.common.toLocalDate
 import com.octopus.edu.core.common.toLocalTime
+import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.EntryType
 import com.octopus.edu.core.data.database.entity.ReminderEntity
 import com.octopus.edu.core.data.database.entity.ReminderType
+import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
+import com.octopus.edu.core.domain.model.DeletedEntry
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Recurrence
@@ -206,4 +209,16 @@ internal fun Entry.getReminderAsEntity(): ReminderEntity =
             } else {
                 null
             },
+    )
+
+internal fun DeletedEntryEntity.toDomain(): DeletedEntry =
+    DeletedEntry(
+        id = id,
+        deletedAt = deletedAt.toInstant(),
+    )
+
+internal fun DeletedEntry.toDto(): DeletedEntryDto =
+    DeletedEntryDto(
+        id = id,
+        deletedAt = Timestamp(deletedAt),
     )

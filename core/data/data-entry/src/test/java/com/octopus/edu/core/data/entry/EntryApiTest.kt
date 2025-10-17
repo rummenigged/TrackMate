@@ -5,15 +5,22 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.toObjects
 import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.api.EntryApiImpl
+import com.octopus.edu.core.data.entry.api.EntryApiImpl.Companion.COLLECTION_DELETED_ENTRIES
 import com.octopus.edu.core.data.entry.api.EntryApiImpl.Companion.COLLECTION_ENTRIES
+import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
+import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.utils.toDTO
+import com.octopus.edu.core.domain.model.DeletedEntry
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.mock
-import io.mockk.coEvery
+import com.octopus.edu.core.network.utils.NetworkResponse
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -21,12 +28,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.time.Instant
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
 class EntryApiTest {
-    private val mockCollection = mockk<CollectionReference>()
+    private val mockEntriesCollection = mockk<CollectionReference>(relaxed = true)
+    private val mockDeletedEntriesCollection = mockk<CollectionReference>(relaxed = true)
 
     private val mockFirestore = mockk<FirebaseFirestore>()
 
@@ -34,7 +45,8 @@ class EntryApiTest {
 
     @Before
     fun setUp() {
-        coEvery { mockFirestore.collection(COLLECTION_ENTRIES) } returns mockCollection
+        every { mockFirestore.collection(COLLECTION_ENTRIES) } returns mockEntriesCollection
+        every { mockFirestore.collection(COLLECTION_DELETED_ENTRIES) } returns mockDeletedEntriesCollection
         entryApi = EntryApiImpl(mockFirestore)
     }
 
@@ -42,13 +54,16 @@ class EntryApiTest {
     fun `saveEntry stores data in firestore`() =
         runTest {
             val entry = Task.mock("1")
-            every { mockCollection.document(entry.toDTO().id).set(entry.toDTO()) } returns Tasks.forResult(null)
+            val entryDto = entry.toDTO()
+            every {
+                mockEntriesCollection.document(entryDto.id).set(entryDto)
+            } returns Tasks.forResult(null)
             entryApi.saveEntry(entry)
 
             verify(exactly = 1) {
-                mockCollection
-                    .document(entry.toDTO().id)
-                    .set(entry.toDTO())
+                mockEntriesCollection
+                    .document(entryDto.id)
+                    .set(entryDto)
             }
         }
 
@@ -56,7 +71,7 @@ class EntryApiTest {
     fun `saveEntry throws FirebaseFirestoreException when permission denied`() =
         runTest {
             val entry = Task.mock("2")
-            every { mockCollection.document(any()).set(any()) } returns
+            every { mockEntriesCollection.document(any()).set(any()) } returns
                 Tasks.forException(
                     FirebaseFirestoreException(
                         "Permission Denied",
@@ -73,13 +88,86 @@ class EntryApiTest {
     fun `saveEntry throws generic exception`() =
         runTest {
             val entry = Task.mock("2")
-            every { mockCollection.document(any()).set(any()) } returns
+            every { mockEntriesCollection.document(any()).set(any()) } returns
                 Tasks.forException(
                     IllegalStateException("Unexpected Error"),
                 )
 
             assertFailsWith<IllegalStateException> {
                 entryApi.saveEntry(entry)
+            }
+        }
+
+    @Test
+    fun `fetchEntries returns Success on successful fetch`() =
+        runTest {
+            // Given
+            val mockSnapshot = mockk<QuerySnapshot>()
+            val expectedEntries = listOf(EntryDto(id = "1"), EntryDto(id = "2"))
+            every { mockSnapshot.toObjects<EntryDto>() } returns expectedEntries
+            every { mockEntriesCollection.get() } returns Tasks.forResult(mockSnapshot)
+
+            // When
+            val response = entryApi.fetchEntries()
+
+            // Then
+            assertIs<NetworkResponse.Success<List<EntryDto>>>(response)
+            assertEquals(expectedEntries, response.data)
+        }
+
+    @Test
+    fun `fetchEntries returns Error on fetch failure`() =
+        runTest {
+            // Given
+            val exception = FirebaseFirestoreException("Unavailable", FirebaseFirestoreException.Code.UNAVAILABLE)
+            every { mockEntriesCollection.get() } returns Tasks.forException(exception)
+
+            // When
+            val response = entryApi.fetchEntries()
+
+            // Then
+            assertIs<NetworkResponse.Error>(response)
+            assertEquals(exception, response.exception)
+        }
+
+    @Test
+    fun `pushDeletedEntry successfully pushes entry to firestore`() =
+        runTest {
+            // Given
+            val deletedEntry = DeletedEntry("deleted-id-1", Instant.now())
+            val idSlot = slot<String>()
+            val dtoSlot = slot<DeletedEntryDto>()
+            every {
+                mockDeletedEntriesCollection.document(capture(idSlot)).set(capture(dtoSlot))
+            } returns Tasks.forResult(null)
+
+            // When
+            entryApi.pushDeletedEntry(deletedEntry)
+
+            // Then
+            verify(exactly = 1) {
+                mockDeletedEntriesCollection.document(any()).set(any())
+            }
+
+            // Assert that the captured ID and DTO are correct
+            assertEquals(deletedEntry.id, idSlot.captured)
+            assertEquals(deletedEntry.id, dtoSlot.captured.id)
+            assertEquals(deletedEntry.deletedAt.epochSecond, dtoSlot.captured.deletedAt.seconds)
+        }
+
+    @Test
+    fun `pushDeletedEntry throws exception on firestore failure`() =
+        runTest {
+            // Given
+            val deletedEntry = DeletedEntry("deleted-id-2", Instant.now())
+            val exception = FirebaseFirestoreException("Permission Denied", FirebaseFirestoreException.Code.PERMISSION_DENIED)
+            every {
+                mockDeletedEntriesCollection.document(any()).set(any())
+            } returns Tasks.forException(exception)
+
+            // When & Then
+            assertFailsWith<FirebaseFirestoreException> {
+                entryApi.pushDeletedEntry(deletedEntry)
             }
         }
 }
