@@ -1,8 +1,11 @@
 package com.octopus.edu.core.data.entry
 
 import app.cash.turbine.test
+import com.octopus.edu.core.common.TransactionRunner
 import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.data.database.dao.DeletedEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
+import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.EntryStoreImpl
@@ -13,6 +16,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -33,6 +37,8 @@ class EntryStoreTest {
     val mockkRule = MockKRule(this)
 
     private val entryDao: EntryDao = mockk()
+    private val deletedEntryDao: DeletedEntryDao = mockk()
+    private val roomTransactionRunner: TransactionRunner = mockk()
     private lateinit var entryStore: EntryStore
 
     private val testEntryId = "test-id"
@@ -57,7 +63,7 @@ class EntryStoreTest {
 
     @Before
     fun setUp() {
-        entryStore = EntryStoreImpl(entryDao)
+        entryStore = EntryStoreImpl(entryDao, deletedEntryDao, roomTransactionRunner)
     }
 
     @Test
@@ -270,24 +276,40 @@ class EntryStoreTest {
         }
 
     @Test
-    fun `deleteEntry should call dao delete`() =
+    fun `deleteEntry should run delete and save in a transaction`() =
         runTest {
             // Given
+            coEvery { roomTransactionRunner.run<Unit>(any()) } coAnswers {
+                val block = it.invocation.args[0] as suspend () -> Unit
+                block.invoke()
+            }
+
             coJustRun { entryDao.delete(testEntryId) }
+            val deletedEntrySlot = slot<DeletedEntryEntity>()
+            coJustRun { deletedEntryDao.save(capture(deletedEntrySlot)) }
 
             // When
             entryStore.deleteEntry(testEntryId)
 
             // Then
+            coVerify(exactly = 1) { roomTransactionRunner.run<Unit>(any()) }
             coVerify(exactly = 1) { entryDao.delete(testEntryId) }
+            coVerify(exactly = 1) { deletedEntryDao.save(any()) }
+
+            assertEquals(testEntryId, deletedEntrySlot.captured.id)
         }
 
     @Test
-    fun `deleteEntry should throw exception when dao throws exception`() =
+    fun `deleteEntry should throw exception and not save when dao throws exception`() =
         runTest {
             // Given
             val exception = RuntimeException("Database error")
-            coEvery { entryDao.delete(testEntryId) } coAnswers { throw exception }
+
+            coEvery { roomTransactionRunner.run<Unit>(any()) } coAnswers {
+                val block = it.invocation.args[0] as suspend () -> Unit
+                block.invoke()
+            }
+            coEvery { entryDao.delete(testEntryId) } throws exception
 
             // When & Then
             val thrownException =
@@ -296,6 +318,7 @@ class EntryStoreTest {
                 }
             assertEquals(exception, thrownException)
             coVerify(exactly = 1) { entryDao.delete(testEntryId) }
+            coVerify(exactly = 0) { deletedEntryDao.save(any()) }
         }
 
     @Test
