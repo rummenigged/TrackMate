@@ -1,9 +1,12 @@
 package com.octopus.edu.trackmate.di
 
+import android.content.Context
+import androidx.work.WorkManager
 import com.octopus.edu.core.common.DispatcherProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -16,10 +19,16 @@ annotation class ApplicationScope
 
 @Module
 @InstallIn(SingletonComponent::class)
-class AppModule {
+object AppModule {
     @Singleton
     @ApplicationScope
     @Provides
     fun providesApplicationScope(dispatcherProvider: DispatcherProvider): CoroutineScope =
         CoroutineScope(SupervisorJob() + dispatcherProvider.default)
+
+    @Singleton
+    @Provides
+    fun providesWorkManager(
+        @ApplicationContext context: Context
+    ): WorkManager = WorkManager.getInstance(context)
 }
