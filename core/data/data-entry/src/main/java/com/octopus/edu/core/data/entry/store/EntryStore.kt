@@ -1,6 +1,9 @@
 package com.octopus.edu.core.data.entry.store
 
+import com.octopus.edu.core.common.TransactionRunner
+import com.octopus.edu.core.data.database.dao.DeletedEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
+import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -18,9 +21,16 @@ interface EntryStore {
 
     suspend fun deleteEntry(entryId: String)
 
+    suspend fun getDeletedEntry(entryId: String): DeletedEntryEntity?
+
     suspend fun updateEntrySyncState(
         entryId: String,
         syncStateEntity: EntryEntity.SyncStateEntity
+    )
+
+    suspend fun updateDeletedEntrySyncState(
+        entryId: String,
+        syncState: EntryEntity.SyncStateEntity
     )
 
     suspend fun getPendingEntries(): List<EntryEntity>
@@ -30,12 +40,16 @@ interface EntryStore {
     fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
 
     fun streamPendingEntries(): Flow<List<EntryEntity>>
+
+    fun streamPendingDeletedEntries(): Flow<List<DeletedEntryEntity>>
 }
 
 internal class EntryStoreImpl
     @Inject
     constructor(
         private val entryDao: EntryDao,
+        private val deletedEntryDao: DeletedEntryDao,
+        private val roomTransactionRunner: TransactionRunner
     ) : EntryStore {
         override suspend fun getHabits(): List<EntryEntity> = entryDao.getHabits()
 
@@ -54,9 +68,30 @@ internal class EntryStoreImpl
             syncStateEntity: EntryEntity.SyncStateEntity
         ) = entryDao.updateSyncState(entryId, syncStateEntity)
 
-        override suspend fun deleteEntry(entryId: String) = entryDao.delete(entryId)
+        override suspend fun updateDeletedEntrySyncState(
+            entryId: String,
+            syncState: EntryEntity.SyncStateEntity
+        ) {
+            deletedEntryDao.updateSyncState(entryId, syncState)
+        }
+
+        override suspend fun deleteEntry(entryId: String) {
+            roomTransactionRunner.run {
+                entryDao.delete(entryId)
+                deletedEntryDao.save(
+                    DeletedEntryEntity(
+                        id = entryId,
+                        deletedAt = System.currentTimeMillis(),
+                    ),
+                )
+            }
+        }
+
+        override suspend fun getDeletedEntry(entryId: String): DeletedEntryEntity? = deletedEntryDao.getDeletedEntry(entryId)
 
         override fun streamPendingEntries(): Flow<List<EntryEntity>> = entryDao.streamPendingEntries()
+
+        override fun streamPendingDeletedEntries(): Flow<List<DeletedEntryEntity>> = deletedEntryDao.streamPendingDeletedEntries()
 
         override fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>> =
             entryDao.getAllEntriesByDateAndOrderedByTimeAsc(date)

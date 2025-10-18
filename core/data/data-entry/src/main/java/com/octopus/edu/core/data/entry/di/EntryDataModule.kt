@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.entry.di
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.octopus.edu.core.common.DispatcherProvider
+import com.octopus.edu.core.common.TransactionRunner
 import com.octopus.edu.core.data.database.dao.DeletedEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.dao.ReminderDao
@@ -58,8 +59,9 @@ object EntryDataModule {
     @Singleton
     fun providesEntryStore(
         entryDao: EntryDao,
-        deletedEntryDao: DeletedEntryDao
-    ): EntryStore = EntryStoreImpl(entryDao, deletedEntryDao)
+        deletedEntryDao: DeletedEntryDao,
+        roomTransactionRunner: TransactionRunner
+    ): EntryStore = EntryStoreImpl(entryDao, deletedEntryDao, roomTransactionRunner)
 
     @Provides
     @Singleton

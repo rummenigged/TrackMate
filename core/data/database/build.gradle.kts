@@ -49,12 +49,14 @@ android {
 
 dependencies {
 
+    implementation(project(":core:common"))
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
     implementation(libs.room)
     ksp(libs.room.compiler)
-    implementation(libs.room.kotlinKtx)
+    api(libs.room.kotlinKtx)
     implementation(libs.dataStore)
 
     testImplementation(project(":core:testing"))
