@@ -124,7 +124,7 @@ class EntryRepositoryTest {
                         lastCompletedDate = null,
                         createdAt = System.currentTimeMillis(),
                         updatedAt = null,
-                        syncState = EntryEntity.SyncStateEntity.SYNCED,
+                        syncState = SyncStateEntity.SYNCED,
                     ),
                 )
             coEvery { entryStore.getTasks() } returns entryEntities
@@ -158,7 +158,7 @@ class EntryRepositoryTest {
                         lastCompletedDate = LocalDate.now().toEpocMilliseconds(),
                         createdAt = System.currentTimeMillis(),
                         updatedAt = null,
-                        syncState = EntryEntity.SyncStateEntity.SYNCED,
+                        syncState = SyncStateEntity.SYNCED,
                     ),
                 )
             coEvery { entryStore.getHabits() } returns entryEntities
@@ -189,7 +189,7 @@ class EntryRepositoryTest {
                         dueDate = LocalDate.now().toEpocMilliseconds(),
                         recurrence = null,
                         createdAt = System.currentTimeMillis(),
-                        syncState = EntryEntity.SyncStateEntity.SYNCED,
+                        syncState = SyncStateEntity.SYNCED,
                     ),
                     EntryEntity(
                         id = "2",
@@ -200,7 +200,7 @@ class EntryRepositoryTest {
                         dueDate = null,
                         recurrence = EntryEntity.Recurrence.DAILY,
                         createdAt = System.currentTimeMillis(),
-                        syncState = EntryEntity.SyncStateEntity.SYNCED,
+                        syncState = SyncStateEntity.SYNCED,
                     ),
                 )
             coEvery { entryStore.getTasks() } returns entryEntities
@@ -229,7 +229,7 @@ class EntryRepositoryTest {
                         dueDate = null,
                         recurrence = EntryEntity.Recurrence.DAILY,
                         createdAt = System.currentTimeMillis(),
-                        syncState = EntryEntity.SyncStateEntity.SYNCED,
+                        syncState = SyncStateEntity.SYNCED,
                     ),
                     EntryEntity(
                         id = "1",
@@ -239,7 +239,7 @@ class EntryRepositoryTest {
                         isDone = false,
                         dueDate = LocalDate.now().toEpocMilliseconds(),
                         createdAt = System.currentTimeMillis(),
-                        syncState = EntryEntity.SyncStateEntity.SYNCED,
+                        syncState = SyncStateEntity.SYNCED,
                     ),
                 )
             coEvery { entryStore.getHabits() } returns entryEntities
@@ -480,7 +480,7 @@ class EntryRepositoryTest {
 
             // Then
             kotlin.test.assertTrue(result is ResultOperation.Success)
-            val deletedEntry = (result as ResultOperation.Success).data
+            val deletedEntry = result.data
             kotlin.test.assertEquals(entryId, deletedEntry.id)
             kotlin.test.assertEquals(deletedEntity.deletedAt, deletedEntry.deletedAt.toEpochMilli())
         }
