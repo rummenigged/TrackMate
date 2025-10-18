@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.entry.di
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.octopus.edu.core.common.DispatcherProvider
+import com.octopus.edu.core.data.database.dao.DeletedEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.dao.ReminderDao
 import com.octopus.edu.core.data.entry.BuildConfig
@@ -13,6 +14,7 @@ import com.octopus.edu.core.data.entry.store.EntryStoreImpl
 import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.data.entry.store.ReminderStoreImpl
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.domain.utils.ErrorClassifier
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,6 +38,8 @@ object EntryDataModule {
         entryApi: EntryApi,
         reminderStore: ReminderStore,
         dbSemaphore: Semaphore,
+        @DatabaseErrorClassifierQualifier databaseErrorClassifier: ErrorClassifier,
+        @NetworkErrorClassifierQualifier networkErrorClassifier: ErrorClassifier,
         entryLocks: ConcurrentHashMap<String, Mutex>,
         dispatcherProvider: DispatcherProvider
     ): EntryRepository =
@@ -45,12 +49,17 @@ object EntryDataModule {
             reminderStore,
             dbSemaphore,
             entryLocks,
+            databaseErrorClassifier,
+            networkErrorClassifier,
             dispatcherProvider,
         )
 
     @Provides
     @Singleton
-    fun providesEntryStore(entryDao: EntryDao): EntryStore = EntryStoreImpl(entryDao)
+    fun providesEntryStore(
+        entryDao: EntryDao,
+        deletedEntryDao: DeletedEntryDao
+    ): EntryStore = EntryStoreImpl(entryDao, deletedEntryDao)
 
     @Provides
     @Singleton

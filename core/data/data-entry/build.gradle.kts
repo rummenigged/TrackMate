@@ -52,5 +52,4 @@ dependencies {
     implementation(platform(libs.firebase.bom))
 
     testImplementation(project(":core:testing"))
-    testImplementation(libs.test.robolectric)
 }

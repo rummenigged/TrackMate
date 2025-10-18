@@ -1,5 +1,6 @@
 package com.octopus.edu.core.domain.repository
 
+import com.octopus.edu.core.domain.model.DeletedEntry
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.SyncState
@@ -10,6 +11,8 @@ import java.time.LocalDate
 
 interface EntryRepository {
     val pendingEntries: Flow<List<Entry>>
+
+    val deletedEntryIds: Flow<List<String>>
 
     suspend fun getTasks(): ResultOperation<List<Task>>
 
@@ -33,4 +36,13 @@ interface EntryRepository {
     suspend fun getPendingEntries(): ResultOperation<List<Entry>>
 
     suspend fun syncEntries(): ResultOperation<Unit>
+
+    suspend fun getDeletedEntry(entryId: String): ResultOperation<DeletedEntry>
+
+    suspend fun pushDeletedEntry(deletedEntry: DeletedEntry): ResultOperation<Unit>
+
+    suspend fun updateDeletedEntrySyncState(
+        entryId: String,
+        syncState: SyncState
+    ): ResultOperation<Unit>
 }

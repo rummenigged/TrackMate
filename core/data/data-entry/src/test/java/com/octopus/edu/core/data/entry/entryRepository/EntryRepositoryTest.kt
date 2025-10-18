@@ -1,6 +1,5 @@
 package com.octopus.edu.core.data.entry.entryRepository
 
-import android.database.sqlite.SQLiteException
 import com.octopus.edu.core.common.toEpocMilliseconds
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
@@ -14,8 +13,10 @@ import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.domain.model.SyncState
 import com.octopus.edu.core.domain.model.Task
+import com.octopus.edu.core.domain.model.common.ErrorType
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.domain.utils.ErrorClassifier
 import com.octopus.edu.core.testing.TestDispatchers
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -33,7 +34,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.io.IOException
+import java.sql.SQLTimeoutException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -48,6 +49,8 @@ class EntryRepositoryTest {
     private lateinit var entryApi: EntryApi
     private lateinit var reminderStore: ReminderStore
     private lateinit var repository: EntryRepository
+    private lateinit var databaseErrorClassifier: ErrorClassifier
+    private lateinit var networkErrorClassifier: ErrorClassifier
     private val dbSemaphore = Semaphore(Int.MAX_VALUE)
     private val entryLocks = ConcurrentHashMap<String, Mutex>()
 
@@ -74,11 +77,14 @@ class EntryRepositoryTest {
 
     @Before
     fun setUp() {
+        mockkStatic("com.octopus.edu.core.data.entry.utils.EntityMappingExtensionsKt")
         MockKAnnotations.init(this)
         entryStore = mockk()
         reminderStore = mockk(relaxed = true)
         entryApi = mockk(relaxed = true)
         testDispatchers = TestDispatchers()
+        databaseErrorClassifier = mockk()
+        networkErrorClassifier = mockk()
         repository =
             EntryRepositoryImpl(
                 entryStore,
@@ -86,6 +92,8 @@ class EntryRepositoryTest {
                 reminderStore,
                 dbSemaphore,
                 entryLocks,
+                databaseErrorClassifier,
+                networkErrorClassifier,
                 testDispatchers,
             )
 
@@ -326,6 +334,9 @@ class EntryRepositoryTest {
     fun `getEntryById throws NoSuchElementException when not found`() =
         runTest {
             val expectedEntryEntity = testTaskDomain.toEntity()
+            every {
+                databaseErrorClassifier.classify(any())
+            } returns ErrorType.TransientError(NoSuchElementException())
             coEvery { entryStore.getEntryById(expectedEntryEntity.id) } returns null
 
             val result = repository.getEntryById(expectedEntryEntity.id)
@@ -336,23 +347,14 @@ class EntryRepositoryTest {
         }
 
     @Test
-    fun `getEntryById returns retriable error when throws a IOException`() =
+    fun `getEntryById returns retriable error when throws a SQLTimeoutException`() =
         runTest {
             val expectedEntryEntity = testTaskDomain.toEntity()
-            coEvery { entryStore.getEntryById(expectedEntryEntity.id) } throws IOException()
-
-            val result = repository.getEntryById(expectedEntryEntity.id)
-
-            assertTrue(result is ResultOperation.Error)
-            assertTrue((result as ResultOperation.Error).isRetriable)
-            coVerify(exactly = 1) { entryStore.getEntryById(expectedEntryEntity.id) }
-        }
-
-    @Test
-    fun `getEntryById returns retriable error when throws a SQLiteException`() =
-        runTest {
-            val expectedEntryEntity = testTaskDomain.toEntity()
-            coEvery { entryStore.getEntryById(expectedEntryEntity.id) } throws SQLiteException()
+            val expectedException = SQLTimeoutException()
+            coEvery { entryStore.getEntryById(expectedEntryEntity.id) } throws expectedException
+            every {
+                databaseErrorClassifier.classify(expectedException)
+            } returns ErrorType.TransientError(expectedException)
 
             val result = repository.getEntryById(expectedEntryEntity.id)
 
@@ -365,7 +367,11 @@ class EntryRepositoryTest {
     fun `getEntryById returns non-retriable error when throws a RuntimeException`() =
         runTest {
             val expectedEntryEntity = testTaskDomain.toEntity()
-            coEvery { entryStore.getEntryById(expectedEntryEntity.id) } throws RuntimeException()
+            val expectedException = RuntimeException("Mapping failed")
+            coEvery { entryStore.getEntryById(expectedEntryEntity.id) } throws expectedException
+            every {
+                databaseErrorClassifier.classify(expectedException)
+            } returns ErrorType.PermanentError(expectedException)
 
             val result = repository.getEntryById(expectedEntryEntity.id)
 
@@ -378,7 +384,11 @@ class EntryRepositoryTest {
     fun `getEntryById returns non-retriable error when throws an exception while mapping to domain`() =
         runTest {
             val expectedEntryEntity = testTaskDomain.toEntity()
-            every { expectedEntryEntity.toDomain() } throws RuntimeException()
+            val expectedException = RuntimeException("Mapping failed")
+            every { expectedEntryEntity.toDomain() } throws expectedException
+            every {
+                databaseErrorClassifier.classify(expectedException)
+            } returns ErrorType.PermanentError(expectedException)
             coEvery { entryStore.getEntryById(expectedEntryEntity.id) } returns expectedEntryEntity
 
             val result = repository.getEntryById(expectedEntryEntity.id)

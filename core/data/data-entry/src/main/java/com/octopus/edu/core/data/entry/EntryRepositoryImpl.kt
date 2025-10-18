@@ -1,10 +1,5 @@
 package com.octopus.edu.core.data.entry
 
-import android.database.sqlite.SQLiteException
-import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.FirebaseFirestoreException.Code.DEADLINE_EXCEEDED
-import com.google.firebase.firestore.FirebaseFirestoreException.Code.RESOURCE_EXHAUSTED
-import com.google.firebase.firestore.FirebaseFirestoreException.Code.UNAVAILABLE
 import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.common.Logger
 import com.octopus.edu.core.common.toEpocMilliseconds
@@ -12,6 +7,8 @@ import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.CONFLICT
 import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
+import com.octopus.edu.core.data.entry.di.DatabaseErrorClassifierQualifier
+import com.octopus.edu.core.data.entry.di.NetworkErrorClassifierQualifier
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.data.entry.utils.getReminderAsEntity
@@ -19,13 +16,16 @@ import com.octopus.edu.core.data.entry.utils.toDomain
 import com.octopus.edu.core.data.entry.utils.toEntity
 import com.octopus.edu.core.data.entry.utils.toHabitOrNull
 import com.octopus.edu.core.data.entry.utils.toTaskOrNull
+import com.octopus.edu.core.domain.model.DeletedEntry
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.SyncState
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.appliesTo
+import com.octopus.edu.core.domain.model.common.ErrorType.TransientError
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.domain.utils.ErrorClassifier
 import com.octopus.edu.core.domain.utils.safeCall
 import com.octopus.edu.core.network.utils.NetworkResponse
 import jakarta.inject.Inject
@@ -39,7 +39,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
-import java.io.IOException
 import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 
@@ -51,13 +50,27 @@ internal class EntryRepositoryImpl
         private val reminderStore: ReminderStore,
         private val dbSemaphore: Semaphore,
         private val entryLocks: ConcurrentHashMap<String, Mutex>,
+        @field:DatabaseErrorClassifierQualifier
+        private val databaseErrorClassifier: ErrorClassifier,
+        @field:NetworkErrorClassifierQualifier
+        private val networkErrorClassifier: ErrorClassifier,
         private val dispatcherProvider: DispatcherProvider
     ) : EntryRepository {
         override val pendingEntries: Flow<List<Entry>>
             get() =
                 entryStore
                     .streamPendingEntries()
-                    .map { it.mapNotNull(EntryEntity::toDomain) }
+                    .map {
+                        it.mapNotNull(EntryEntity::toDomain)
+                    }.flowOn(dispatcherProvider.io)
+
+        override val deletedEntryIds: Flow<List<String>>
+            get() =
+                entryStore
+                    .streamPendingDeletedEntries()
+                    .map {
+                        it.map { deletedEntry -> deletedEntry.id }
+                    }.flowOn(dispatcherProvider.io)
 
         override suspend fun getPendingEntries(): ResultOperation<List<Entry>> =
             safeCall(
@@ -96,7 +109,8 @@ internal class EntryRepositoryImpl
                     val errorResult =
                         ResultOperation.Error(
                             throwable = exception,
-                            isRetriable = exception is IOException || exception is SQLiteException,
+                            isRetriable =
+                                databaseErrorClassifier.classify(exception) is TransientError,
                         )
                     this.emit(errorResult)
                 }.flowOn(dispatcherProvider.io)
@@ -116,7 +130,7 @@ internal class EntryRepositoryImpl
             safeCall(
                 dispatcher = dispatcherProvider.io,
                 isRetriableWhen = { exception ->
-                    exception is IOException || exception is SQLiteException
+                    databaseErrorClassifier.classify(exception) is TransientError
                 },
             ) {
                 entryStore
@@ -136,12 +150,7 @@ internal class EntryRepositoryImpl
             safeCall(
                 dispatcher = dispatcherProvider.io,
                 isRetriableWhen = { exception ->
-                    exception is FirebaseFirestoreException &&
-                        (
-                            exception.code == UNAVAILABLE ||
-                                exception.code == DEADLINE_EXCEEDED ||
-                                exception.code == RESOURCE_EXHAUSTED
-                        )
+                    networkErrorClassifier.classify(exception) is TransientError
                 },
             ) {
                 entryApi.saveEntry(entry)
@@ -170,6 +179,39 @@ internal class EntryRepositoryImpl
                             }.awaitAll()
                     }
                 }
+            }
+
+        override suspend fun getDeletedEntry(entryId: String): ResultOperation<DeletedEntry> =
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    databaseErrorClassifier.classify(exception) is TransientError
+                },
+            ) {
+                entryStore
+                    .getDeletedEntry(entryId)
+                    ?.toDomain()
+                    ?: throw NoSuchElementException("Invalid or missing deleted entry with id $entryId")
+            }
+
+        override suspend fun pushDeletedEntry(deletedEntry: DeletedEntry): ResultOperation<Unit> =
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    networkErrorClassifier.classify(exception) is TransientError
+                },
+            ) {
+                entryApi.pushDeletedEntry(deletedEntry)
+            }
+
+        override suspend fun updateDeletedEntrySyncState(
+            entryId: String,
+            syncState: SyncState
+        ): ResultOperation<Unit> =
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+            ) {
+                entryStore.updateDeletedEntrySyncState(entryId, syncState.toEntity())
             }
 
         private suspend fun syncEntrySafely(entry: EntryDto) {

@@ -10,8 +10,10 @@ import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.core.domain.model.Task
+import com.octopus.edu.core.domain.model.common.ErrorType
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.domain.utils.ErrorClassifier
 import com.octopus.edu.core.testing.TestDispatchers
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -25,7 +27,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import java.io.IOException
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.concurrent.ConcurrentHashMap
@@ -37,6 +38,8 @@ class EntryRepositoryGetEntriesVisibleOnTest {
     private lateinit var entryApi: EntryApi
     private lateinit var reminderStore: ReminderStore
     private lateinit var repository: EntryRepository
+    private lateinit var databaseErrorClassifier: ErrorClassifier
+    private lateinit var networkErrorClassifier: ErrorClassifier
     private val dbSemaphore = Semaphore(Int.MAX_VALUE)
     private val entryLocks = ConcurrentHashMap<String, Mutex>()
 
@@ -140,6 +143,8 @@ class EntryRepositoryGetEntriesVisibleOnTest {
         reminderStore = mockk(relaxed = true) // relaxed for saveEntry calls if not directly tested here
         entryApi = mockk()
         testDispatchers = TestDispatchers()
+        databaseErrorClassifier = mockk()
+        networkErrorClassifier = mockk()
         repository =
             EntryRepositoryImpl(
                 entryStore,
@@ -147,6 +152,8 @@ class EntryRepositoryGetEntriesVisibleOnTest {
                 reminderStore,
                 dbSemaphore,
                 entryLocks,
+                databaseErrorClassifier,
+                networkErrorClassifier,
                 testDispatchers,
             )
     }
@@ -268,25 +275,12 @@ class EntryRepositoryGetEntriesVisibleOnTest {
         }
 
     @Test
-    fun `getEntriesVisibleOn emits retriable error on IOException from store`() =
-        runTest {
-            val ioException = IOException("Network error")
-            every { entryStore.getEntriesBeforeOrOn(testDateMillis) } returns flow { throw ioException }
-
-            repository.getEntriesVisibleOn(testDate).test {
-                val result = awaitItem()
-                Assert.assertTrue(result is ResultOperation.Error)
-                val errorResult = result as ResultOperation.Error
-                Assert.assertEquals(ioException, errorResult.throwable)
-                Assert.assertTrue(errorResult.isRetriable)
-                awaitComplete()
-            }
-        }
-
-    @Test
     fun `getEntriesVisibleOn emits non-retriable error on other Exception from store`() =
         runTest {
             val runtimeException = RuntimeException("Some other DB error")
+            every {
+                databaseErrorClassifier.classify(runtimeException)
+            } returns ErrorType.PermanentError(runtimeException)
             every { entryStore.getEntriesBeforeOrOn(testDateMillis) } returns flow { throw runtimeException }
 
             repository.getEntriesVisibleOn(testDate).test {

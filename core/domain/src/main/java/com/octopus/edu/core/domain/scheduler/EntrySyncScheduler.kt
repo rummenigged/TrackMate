@@ -5,5 +5,7 @@ interface EntrySyncScheduler {
 
     fun scheduleBatchSync()
 
+    fun scheduleDeletedEntrySync(entryId: String)
+
     fun cancelEntrySync(entryId: String)
 }
