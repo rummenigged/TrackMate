@@ -1,7 +1,9 @@
 package com.octopus.edu.core.data.entry.entryRepository
 
 import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
+import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.store.EntryStore
@@ -9,6 +11,7 @@ import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.data.entry.utils.getReminderAsEntity
 import com.octopus.edu.core.data.entry.utils.toDomain
 import com.octopus.edu.core.data.entry.utils.toEntity
+import com.octopus.edu.core.domain.model.DeletedEntry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.domain.model.SyncState
@@ -34,7 +37,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 import java.sql.SQLTimeoutException
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -460,5 +465,90 @@ class EntryRepositoryTest {
             assertTrue(result is ResultOperation.Error)
             assertEquals(storeException, (result as ResultOperation.Error).throwable)
             coVerify(exactly = 1) { entryStore.updateEntrySyncState(entryId, expectedSyncStateEntity) }
+        }
+
+    @Test
+    fun `getDeletedEntry returns DeletedEntry on success`() =
+        runTest {
+            // Given
+            val entryId = "deleted-1"
+            val deletedEntity = DeletedEntryEntity(entryId, System.currentTimeMillis(), SyncStateEntity.PENDING)
+            coEvery { entryStore.getDeletedEntry(entryId) } returns deletedEntity
+
+            // When
+            val result = repository.getDeletedEntry(entryId)
+
+            // Then
+            kotlin.test.assertTrue(result is ResultOperation.Success)
+            val deletedEntry = (result as ResultOperation.Success).data
+            kotlin.test.assertEquals(entryId, deletedEntry.id)
+            kotlin.test.assertEquals(deletedEntity.deletedAt, deletedEntry.deletedAt.toEpochMilli())
+        }
+
+    @Test
+    fun `getDeletedEntry returns error when entry not found`() =
+        runTest {
+            // Given
+            val entryId = "non-existent"
+            every {
+                databaseErrorClassifier.classify(any())
+            } returns ErrorType.TransientError(NoSuchElementException())
+            coEvery { entryStore.getDeletedEntry(entryId) } returns null
+
+            // When
+            val result = repository.getDeletedEntry(entryId)
+
+            // Then
+            kotlin.test.assertTrue(result is ResultOperation.Error)
+            kotlin.test.assertTrue(result.throwable is NoSuchElementException)
+        }
+
+    @Test
+    fun `pushDeletedEntry returns success when api call succeeds`() =
+        runTest {
+            // Given
+            val deletedEntry = DeletedEntry("deleted-1", Instant.now())
+            coJustRun { entryApi.pushDeletedEntry(deletedEntry) }
+
+            // When
+            val result = repository.pushDeletedEntry(deletedEntry)
+
+            // Then
+            kotlin.test.assertTrue(result is ResultOperation.Success)
+            coVerify(exactly = 1) { entryApi.pushDeletedEntry(deletedEntry) }
+        }
+
+    @Test
+    fun `pushDeletedEntry returns error when api call fails`() =
+        runTest {
+            // Given
+            val deletedEntry = DeletedEntry("deleted-1", Instant.now())
+            val apiException = IOException("Network failed")
+            coEvery { entryApi.pushDeletedEntry(deletedEntry) } throws apiException
+            every { networkErrorClassifier.classify(apiException) } returns ErrorType.TransientError(apiException)
+
+            // When
+            val result = repository.pushDeletedEntry(deletedEntry)
+
+            // Then
+            kotlin.test.assertTrue(result is ResultOperation.Error)
+            kotlin.test.assertTrue(result.isRetriable)
+            kotlin.test.assertEquals(apiException, result.throwable)
+        }
+
+    @Test
+    fun `updateDeletedEntrySyncState completes successfully`() =
+        runTest {
+            // Given
+            val entryId = "deleted-1"
+            val syncState = SyncState.SYNCED
+            coJustRun { entryStore.updateDeletedEntrySyncState(entryId, syncState.toEntity()) }
+
+            // When
+            val result = repository.updateDeletedEntrySyncState(entryId, syncState)
+
+            // Then
+            kotlin.test.assertTrue(result is ResultOperation.Success)
+            coVerify(exactly = 1) { entryStore.updateDeletedEntrySyncState(entryId, syncState.toEntity()) }
         }
 }

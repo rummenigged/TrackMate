@@ -8,6 +8,7 @@ import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.domain.model.common.ResultOperation
+import com.octopus.edu.core.domain.utils.ErrorClassifier
 import com.octopus.edu.core.network.utils.NetworkResponse
 import com.octopus.edu.core.testing.TestDispatchers
 import io.mockk.coEvery
@@ -35,6 +36,8 @@ class EntryRepositorySyncEntriesTest {
     private val dispatcherProvider = TestDispatchers()
     private val dbSemaphore = Semaphore(Int.MAX_VALUE)
     private val entryLocks = ConcurrentHashMap<String, Mutex>()
+    private val databaseErrorClassifier: ErrorClassifier = mockk()
+    private val networkErrorClassifier: ErrorClassifier = mockk()
 
     @Before
     fun setUp() {
@@ -49,6 +52,8 @@ class EntryRepositorySyncEntriesTest {
                 reminderStore = reminderStore,
                 dbSemaphore = dbSemaphore,
                 entryLocks = entryLocks,
+                databaseErrorClassifier,
+                networkErrorClassifier,
                 dispatcherProvider = dispatcherProvider,
             )
     }
@@ -167,6 +172,8 @@ class EntryRepositorySyncEntriesTest {
                     reminderStore = reminderStore,
                     dbSemaphore = singlePermitSemaphore,
                     entryLocks = entryLocks,
+                    databaseErrorClassifier,
+                    networkErrorClassifier,
                     dispatcherProvider = dispatcherProvider,
                 )
 
