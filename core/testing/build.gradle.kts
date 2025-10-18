@@ -61,5 +61,5 @@ dependencies {
     debugApi(libs.test.compose.ui.manifest)
     api(libs.test.robolectric)
     api(libs.guava)
-    api(libs.androidx.work.testing)
+    api(libs.test.androidx.work)
 }
