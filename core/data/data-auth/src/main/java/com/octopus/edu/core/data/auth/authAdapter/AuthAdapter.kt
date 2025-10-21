@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.tasks.await
 
-interface FirebaseAuthAdapter {
+interface AuthAdapter {
     suspend fun getIdToken(forceRefresh: Boolean): String?
 
     suspend fun signInWithCredentials(token: String): AuthResult
@@ -21,9 +21,9 @@ interface FirebaseAuthAdapter {
     fun signOut()
 }
 
-class FirebaseAuthAdapterImpl(
+class FirebaseAuthAdapter(
     private val firebaseAuth: FirebaseAuth
-) : FirebaseAuthAdapter {
+) : AuthAdapter {
     override suspend fun getIdToken(forceRefresh: Boolean): String? {
         val user = firebaseAuth.currentUser
         return try {
