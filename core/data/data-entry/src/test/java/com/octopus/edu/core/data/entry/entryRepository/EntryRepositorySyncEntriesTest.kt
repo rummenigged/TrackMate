@@ -1,9 +1,11 @@
 package com.octopus.edu.core.data.entry.entryRepository
 
 import com.google.firebase.Timestamp
+import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
+import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
@@ -12,6 +14,7 @@ import com.octopus.edu.core.domain.utils.ErrorClassifier
 import com.octopus.edu.core.network.utils.NetworkResponse
 import com.octopus.edu.core.testing.TestDispatchers
 import io.mockk.coEvery
+import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
@@ -23,6 +26,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -44,6 +48,13 @@ class EntryRepositorySyncEntriesTest {
         // Mocks for successful operations by default
         coEvery { entryStore.upsertIfNewest(any()) } just runs
         coEvery { entryStore.updateEntrySyncState(any(), any()) } just runs
+        coJustRun { entryStore.deleteEntry(any(), any()) }
+        coJustRun { entryStore.updateDeletedEntrySyncState(any(), any()) }
+        coEvery { entryStore.getEntryById(any()) } returns null
+
+        // Mock API calls to return empty lists by default to isolate tests
+        coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(emptyList())
+        coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Success(emptyList())
 
         entryRepository =
             EntryRepositoryImpl(
@@ -72,35 +83,22 @@ class EntryRepositorySyncEntriesTest {
             assertTrue(result is ResultOperation.Success)
             coVerify(exactly = 1) { entryStore.upsertIfNewest(match { it.id == "1" }) }
             coVerify(exactly = 1) { entryStore.upsertIfNewest(match { it.id == "2" }) }
+            coVerify(exactly = 0) { entryStore.deleteEntry(any(), any()) }
         }
 
     @Test
-    fun `syncEntries should not upsert entries when api returns error`() =
+    fun `syncEntries should skip all processing when fetchEntries fails`() =
         runTest {
             // Given
-            val exception = Exception("Network error")
-            coEvery { entryApi.fetchEntries() } returns NetworkResponse.Error(exception)
+            coEvery { entryApi.fetchEntries() } returns NetworkResponse.Error(IOException())
+            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Success(listOf(createDeletedEntryDto("d1")))
 
             // When
-            val result = entryRepository.syncEntries()
+            entryRepository.syncEntries()
 
             // Then
-            assertTrue(result is ResultOperation.Success) // The outer safeCall contains the operation
             coVerify(exactly = 0) { entryStore.upsertIfNewest(any()) }
-        }
-
-    @Test
-    fun `syncEntries should not upsert entries when api returns empty list`() =
-        runTest {
-            // Given
-            coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(emptyList())
-
-            // When
-            val result = entryRepository.syncEntries()
-
-            // Then
-            assertTrue(result is ResultOperation.Success)
-            coVerify(exactly = 0) { entryStore.upsertIfNewest(any()) }
+            coVerify(exactly = 0) { entryStore.deleteEntry(any(), any()) }
         }
 
     @Test
@@ -112,10 +110,9 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryStore.upsertIfNewest(any()) } throws Exception("Database write failed")
 
             // When
-            val result = entryRepository.syncEntries()
+            entryRepository.syncEntries()
 
             // Then
-            assertTrue(result is ResultOperation.Success)
             coVerify(exactly = 1) { entryStore.updateEntrySyncState("1", SyncStateEntity.CONFLICT) }
         }
 
@@ -126,15 +123,121 @@ class EntryRepositorySyncEntriesTest {
             val remoteEntries = listOf(createEntryDto("1"), createEntryDto("2"))
             coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(remoteEntries)
             coEvery { entryStore.upsertIfNewest(match { it.id == "1" }) } throws Exception("DB error")
-            coEvery { entryStore.upsertIfNewest(match { it.id == "2" }) } just runs
 
             // When
-            val result = entryRepository.syncEntries()
+            entryRepository.syncEntries()
 
             // Then
-            assertTrue(result is ResultOperation.Success)
             coVerify(exactly = 1) { entryStore.updateEntrySyncState("1", SyncStateEntity.CONFLICT) }
             coVerify(exactly = 1) { entryStore.upsertIfNewest(match { it.id == "2" }) }
+        }
+
+    @Test
+    fun `syncEntries should delete local entry when remote deleted entry is found`() =
+        runTest {
+            // Given
+            val deletedDto = createDeletedEntryDto("deleted-1")
+            val localEntry = createEntryEntity("deleted-1")
+            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Success(listOf(deletedDto))
+            coEvery { entryStore.getEntryById("deleted-1") } returns localEntry
+
+            // When
+            entryRepository.syncEntries()
+
+            // Then
+            coVerify(exactly = 1) { entryStore.deleteEntry("deleted-1", SyncStateEntity.SYNCED) }
+            coVerify(exactly = 0) { entryStore.updateDeletedEntrySyncState(any(), any()) }
+        }
+
+    @Test
+    fun `syncEntries should update remote deleted entry state if not found locally`() =
+        runTest {
+            // Given
+            val deletedDto = createDeletedEntryDto("deleted-1")
+            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Success(listOf(deletedDto))
+            coEvery { entryStore.getEntryById("deleted-1") } returns null
+
+            // When
+            entryRepository.syncEntries()
+
+            // Then
+            coVerify(exactly = 1) { entryStore.updateDeletedEntrySyncState("deleted-1", SyncStateEntity.SYNCED) }
+            coVerify(exactly = 0) { entryStore.deleteEntry(any(), any()) }
+        }
+
+    @Test
+    fun `syncEntries should skip all processing when fetchDeletedEntry fails`() =
+        runTest {
+            // Given
+            coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(listOf(createEntryDto("1")))
+            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Error(IOException())
+
+            // When
+            entryRepository.syncEntries()
+
+            // Then
+            coVerify(exactly = 0) { entryStore.upsertIfNewest(any()) }
+            coVerify(exactly = 0) { entryStore.deleteEntry(any(), any()) }
+        }
+
+    @Test
+    fun `syncEntries continues deleting other entries if one fails`() =
+        runTest {
+            // Given
+            val deletedDtos = listOf(createDeletedEntryDto("d1"), createDeletedEntryDto("d2"))
+            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Success(deletedDtos)
+            coEvery { entryStore.getEntryById(any()) } returns createEntryEntity("any")
+            coEvery { entryStore.deleteEntry("d1", SyncStateEntity.SYNCED) } throws IOException()
+
+            // When
+            entryRepository.syncEntries()
+
+            // Then
+            coVerify(exactly = 1) { entryStore.deleteEntry("d1", SyncStateEntity.SYNCED) } // attempted
+            coVerify(exactly = 1) { entryStore.deleteEntry("d2", SyncStateEntity.SYNCED) } // still runs
+        }
+
+    @Test
+    fun `syncEntries should handle both new and deleted entries in one run`() =
+        runTest {
+            // Given
+            val newEntryDto = createEntryDto("new-1")
+            val deletedEntryDto = createDeletedEntryDto("deleted-1")
+            val localEntryForDeletion = createEntryEntity("deleted-1")
+
+            coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(listOf(newEntryDto))
+            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Success(listOf(deletedEntryDto))
+            coEvery { entryStore.getEntryById("deleted-1") } returns localEntryForDeletion
+
+            // When
+            entryRepository.syncEntries()
+
+            // Then
+            coVerify(exactly = 1) { entryStore.upsertIfNewest(match { it.id == "new-1" }) }
+            coVerify(exactly = 1) { entryStore.deleteEntry("deleted-1", SyncStateEntity.SYNCED) }
+        }
+
+    @Test
+    fun `syncEntries should not sync entry that is also marked as deleted`() =
+        runTest {
+            // Given
+            val conflictingId = "conflict-id"
+            val newEntryDto = createEntryDto("new-1")
+            val conflictingEntryDto = createEntryDto(conflictingId)
+            val deletedEntryDto = createDeletedEntryDto(conflictingId)
+            val localEntryForDeletion = createEntryEntity(conflictingId)
+
+            coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(listOf(newEntryDto, conflictingEntryDto))
+            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Success(listOf(deletedEntryDto))
+            coEvery { entryStore.getEntryById(conflictingId) } returns localEntryForDeletion
+
+            // When
+            entryRepository.syncEntries()
+
+            // Then
+            coVerify(exactly = 1) { entryStore.upsertIfNewest(match { it.id == "new-1" }) }
+            coVerify(exactly = 0) { entryStore.upsertIfNewest(match { it.id == conflictingId }) }
+            coVerify(exactly = 1) { entryStore.deleteEntry(conflictingId, SyncStateEntity.SYNCED) }
         }
 
     @Test
@@ -146,7 +249,6 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(listOf(remoteEntry))
 
             coEvery { entryStore.upsertIfNewest(any()) } coAnswers {
-                // Check that the lock is held during the operation
                 assertTrue(entryLocks.containsKey(entryId))
                 val mutex = entryLocks[entryId]
                 assertTrue(mutex?.isLocked == true, "Mutex for entry $entryId should be locked.")
@@ -217,4 +319,20 @@ class EntryRepositorySyncEntriesTest {
             createdAt = Timestamp.now(),
             updatedAt = updatedAt,
         )
+
+    private fun createDeletedEntryDto(id: String) = DeletedEntryDto(id, Timestamp.now())
+
+    private fun createEntryEntity(
+        id: String,
+        syncState: SyncStateEntity = SyncStateEntity.SYNCED
+    ) = EntryEntity(
+        id = id,
+        type = EntryEntity.EntryType.TASK,
+        title = "Test",
+        description = "",
+        isDone = false,
+        dueDate = 1L,
+        createdAt = 1L,
+        syncState = syncState,
+    )
 }

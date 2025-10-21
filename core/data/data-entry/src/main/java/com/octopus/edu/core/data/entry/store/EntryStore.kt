@@ -5,6 +5,7 @@ import com.octopus.edu.core.data.database.dao.DeletedEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
+import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -19,18 +20,21 @@ interface EntryStore {
 
     suspend fun getEntryById(id: String): EntryEntity?
 
-    suspend fun deleteEntry(entryId: String)
+    suspend fun deleteEntry(
+        entryId: String,
+        state: SyncStateEntity
+    )
 
     suspend fun getDeletedEntry(entryId: String): DeletedEntryEntity?
 
     suspend fun updateEntrySyncState(
         entryId: String,
-        syncStateEntity: EntryEntity.SyncStateEntity
+        syncStateEntity: SyncStateEntity
     )
 
     suspend fun updateDeletedEntrySyncState(
         entryId: String,
-        syncState: EntryEntity.SyncStateEntity
+        syncState: SyncStateEntity
     )
 
     suspend fun getPendingEntries(): List<EntryEntity>
@@ -65,23 +69,27 @@ internal class EntryStoreImpl
 
         override suspend fun updateEntrySyncState(
             entryId: String,
-            syncStateEntity: EntryEntity.SyncStateEntity
+            syncStateEntity: SyncStateEntity
         ) = entryDao.updateSyncState(entryId, syncStateEntity)
 
         override suspend fun updateDeletedEntrySyncState(
             entryId: String,
-            syncState: EntryEntity.SyncStateEntity
+            syncState: SyncStateEntity
         ) {
             deletedEntryDao.updateSyncState(entryId, syncState)
         }
 
-        override suspend fun deleteEntry(entryId: String) {
+        override suspend fun deleteEntry(
+            entryId: String,
+            state: SyncStateEntity
+        ) {
             roomTransactionRunner.run {
                 entryDao.delete(entryId)
                 deletedEntryDao.save(
                     DeletedEntryEntity(
                         id = entryId,
                         deletedAt = System.currentTimeMillis(),
+                        syncState = state,
                     ),
                 )
             }

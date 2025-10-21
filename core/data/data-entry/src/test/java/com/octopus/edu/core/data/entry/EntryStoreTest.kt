@@ -276,9 +276,10 @@ class EntryStoreTest {
         }
 
     @Test
-    fun `deleteEntry should run delete and save in a transaction`() =
+    fun `deleteEntry should save deleted entry with correct ID and State`() =
         runTest {
             // Given
+            val stateToSave = EntryEntity.SyncStateEntity.PENDING
             coEvery { roomTransactionRunner.run<Unit>(any()) } coAnswers {
                 val block = it.invocation.args[0] as suspend () -> Unit
                 block.invoke()
@@ -289,14 +290,16 @@ class EntryStoreTest {
             coJustRun { deletedEntryDao.save(capture(deletedEntrySlot)) }
 
             // When
-            entryStore.deleteEntry(testEntryId)
+            entryStore.deleteEntry(testEntryId, stateToSave)
 
             // Then
             coVerify(exactly = 1) { roomTransactionRunner.run<Unit>(any()) }
             coVerify(exactly = 1) { entryDao.delete(testEntryId) }
             coVerify(exactly = 1) { deletedEntryDao.save(any()) }
 
+            // Verify the captured entity
             assertEquals(testEntryId, deletedEntrySlot.captured.id)
+            assertEquals(stateToSave, deletedEntrySlot.captured.syncState)
         }
 
     @Test
@@ -314,7 +317,7 @@ class EntryStoreTest {
             // When & Then
             val thrownException =
                 assertFailsWith<RuntimeException> {
-                    entryStore.deleteEntry(testEntryId)
+                    entryStore.deleteEntry(testEntryId, EntryEntity.SyncStateEntity.PENDING)
                 }
             assertEquals(exception, thrownException)
             coVerify(exactly = 1) { entryDao.delete(testEntryId) }

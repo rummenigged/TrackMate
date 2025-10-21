@@ -5,7 +5,10 @@ import com.octopus.edu.core.common.Logger
 import com.octopus.edu.core.common.toEpocMilliseconds
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.CONFLICT
+import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.PENDING
+import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.SYNCED
 import com.octopus.edu.core.data.entry.api.EntryApi
+import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.di.DatabaseErrorClassifierQualifier
 import com.octopus.edu.core.data.entry.di.NetworkErrorClassifierQualifier
@@ -31,6 +34,7 @@ import com.octopus.edu.core.network.utils.NetworkResponse
 import jakarta.inject.Inject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
@@ -143,7 +147,7 @@ internal class EntryRepositoryImpl
             safeCall(
                 dispatcher = dispatcherProvider.io,
             ) {
-                entryStore.deleteEntry(entryId)
+                entryStore.deleteEntry(entryId, PENDING)
             }
 
         override suspend fun pushEntry(entry: Entry): ResultOperation<Unit> =
@@ -168,15 +172,25 @@ internal class EntryRepositoryImpl
             safeCall(
                 dispatcher = dispatcherProvider.io,
             ) {
-                when (val result = entryApi.fetchEntries()) {
-                    is NetworkResponse.Error -> {
-                        Logger.e(message = "Error to fetch entries", throwable = result.exception)
-                    }
-                    is NetworkResponse.Success -> {
-                        result.data
-                            .map { entry ->
-                                async { syncEntrySafely(entry) }
-                            }.awaitAll()
+                coroutineScope {
+                    val entriesDeferred = async { entryApi.fetchEntries() }
+                    val deletedEntriesDeferred = async { entryApi.fetchDeletedEntry() }
+
+                    val entries = entriesDeferred.await()
+                    val deletedEntries = deletedEntriesDeferred.await()
+                    if (entries is NetworkResponse.Success &&
+                        deletedEntries is NetworkResponse.Success
+                    ) {
+                        val deletedIds = deletedEntries.data.map { it.id }.toSet()
+
+                        entries.data
+                            .filterNot { it.id in deletedIds }
+                            .map { entry -> async { syncEntrySafely(entry) } }
+                            .awaitAll()
+
+                        deletedEntries.data
+                            .map { entry -> async { syncDeletedEntrySafely(entry) } }
+                            .awaitAll()
                     }
                 }
             }
@@ -226,6 +240,26 @@ internal class EntryRepositoryImpl
                             message = "Error to save entry ${entry.id}",
                             throwable = e,
                         )
+                    } finally {
+                        entryLocks.remove(entry.id)
+                    }
+                }
+            }
+        }
+
+        private suspend fun syncDeletedEntrySafely(entry: DeletedEntryDto) {
+            dbSemaphore.withPermit {
+                val mutex = entryLocks.computeIfAbsent(entry.id) { Mutex() }
+                mutex.withLock {
+                    try {
+                        val localEntry = entryStore.getEntryById(entry.id)
+                        if (localEntry != null) {
+                            entryStore.deleteEntry(entry.id, SYNCED)
+                        } else {
+                            entryStore.updateDeletedEntrySyncState(entry.id, SYNCED)
+                        }
+                    } catch (e: Exception) {
+                        Logger.e(message = "Error syncing deleted entry ${entry.id}", throwable = e)
                     } finally {
                         entryLocks.remove(entry.id)
                     }

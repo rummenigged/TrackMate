@@ -170,4 +170,36 @@ class EntryApiTest {
                 entryApi.pushDeletedEntry(deletedEntry)
             }
         }
+
+    @Test
+    fun `fetchDeletedEntry returns Success on successful fetch`() =
+        runTest {
+            // Given
+            val mockSnapshot = mockk<QuerySnapshot>()
+            val expectedDeletedEntries = listOf(DeletedEntryDto(id = "1"), DeletedEntryDto(id = "2"))
+            every { mockSnapshot.toObjects<DeletedEntryDto>() } returns expectedDeletedEntries
+            every { mockDeletedEntriesCollection.get() } returns Tasks.forResult(mockSnapshot)
+
+            // When
+            val response = entryApi.fetchDeletedEntry()
+
+            // Then
+            assertIs<NetworkResponse.Success<List<DeletedEntryDto>>>(response)
+            assertEquals(expectedDeletedEntries, response.data)
+        }
+
+    @Test
+    fun `fetchDeletedEntry returns Error on fetch failure`() =
+        runTest {
+            // Given
+            val exception = FirebaseFirestoreException("Unavailable", FirebaseFirestoreException.Code.UNAVAILABLE)
+            every { mockDeletedEntriesCollection.get() } returns Tasks.forException(exception)
+
+            // When
+            val response = entryApi.fetchDeletedEntry()
+
+            // Then
+            assertIs<NetworkResponse.Error>(response)
+            assertEquals(exception, response.exception)
+        }
 }

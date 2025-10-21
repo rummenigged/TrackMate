@@ -407,24 +407,26 @@ class EntryRepositoryTest {
     fun `deleteEntry returns Unit when successful`() =
         runTest {
             val entryId = "testId"
-            coJustRun { entryStore.deleteEntry(entryId) }
+            coJustRun { entryStore.deleteEntry(entryId, SyncStateEntity.PENDING) }
 
             val result = repository.deleteEntry(entryId)
 
             assertTrue(result is ResultOperation.Success)
-            coVerify(exactly = 1) { entryStore.deleteEntry(entryId) }
+            coVerify(exactly = 1) { entryStore.deleteEntry(entryId, SyncStateEntity.PENDING) }
         }
 
     @Test
     fun `deleteEntry returns error when deleteEntry fails`() =
         runTest {
             val entryId = "testId"
-            coEvery { entryStore.deleteEntry(entryId) } throws RuntimeException()
+            coEvery {
+                entryStore.deleteEntry(entryId, SyncStateEntity.PENDING)
+            } throws RuntimeException()
 
             val result = repository.deleteEntry(entryId)
 
             assertTrue(result is ResultOperation.Error)
-            coVerify(exactly = 1) { entryStore.deleteEntry(entryId) }
+            coVerify(exactly = 1) { entryStore.deleteEntry(entryId, SyncStateEntity.PENDING) }
         }
 
     // --- Tests for updateEntrySyncState ---

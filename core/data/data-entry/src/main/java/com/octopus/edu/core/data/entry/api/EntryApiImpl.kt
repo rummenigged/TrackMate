@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.entry.api
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObjects
+import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.utils.toDTO
 import com.octopus.edu.core.data.entry.utils.toDto
@@ -48,4 +49,13 @@ class EntryApiImpl
                 .set(entryDto)
                 .await()
         }
+
+        override suspend fun fetchDeletedEntry(): NetworkResponse<List<DeletedEntryDto>> =
+            try {
+                val querySnapshot = api.collection(COLLECTION_DELETED_ENTRIES).get().await()
+                val deletedEntries = querySnapshot.toObjects<DeletedEntryDto>()
+                NetworkResponse.Success(deletedEntries)
+            } catch (e: Exception) {
+                NetworkResponse.Error(e)
+            }
     }
