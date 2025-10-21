@@ -31,7 +31,7 @@ android {
         }
 
         debug {
-            buildConfigField("String", "FIREBASE_EMULATOR_HOST", "\"192.168.0.4\"")
+            buildConfigField("String", "FIREBASE_EMULATOR_HOST", "\"192.168.0.3\"")
         }
     }
 
@@ -63,5 +63,7 @@ dependencies {
     implementation(libs.moshi.converter)
     ksp(libs.moshi.kotlinCodeGen)
 
+    implementation(platform(libs.firebase.bom))
     api(libs.firebase.firestore)
+    api(libs.firebase.auth)
 }
