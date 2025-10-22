@@ -29,6 +29,14 @@ internal class HomeViewModel
 
         override fun getInitialState(): UiState = UiState()
 
+        /**
+         * Dispatches a UI event to the appropriate handler.
+         *
+         * @param event The UI event to process. Handles:
+         *  - `UiEvent.Entry.Delete`: deletes the entry with the given id.
+         *  - `UiEvent.SetCurrentDateAs`: loads entries visible on the provided date.
+         *  - `UiEvent.Refresh`: triggers a data refresh/synchronization.
+         */
         override fun processEvent(event: UiEvent) {
             when (event) {
                 is UiEvent.Entry.Delete -> {
@@ -40,6 +48,13 @@ internal class HomeViewModel
             }
         }
 
+        /**
+         * Synchronizes entries with the repository and updates UI state accordingly.
+         *
+         * Sets the state's `isRefreshing` flag to true while synchronization is in progress
+         * and clears it when finished. If synchronization fails, emits `UiEffect.ShowError`
+         * with the throwable message or `"Unknown Error"`.
+         */
         private fun refreshData() {
             viewModelScope.launch {
                 setState { copy(isRefreshing = true) }

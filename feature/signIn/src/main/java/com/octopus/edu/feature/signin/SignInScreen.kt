@@ -119,6 +119,17 @@ private fun SignInInContent(
     }
 }
 
+/**
+ * Displays a Google sign-in button or a circular loading indicator based on the loading state.
+ *
+ * When `isLoading` is false, shows a primary Google sign-in button that invokes `onEvent` with
+ * `UiEvent.OnGoogleSignIn(context)` using the current `Context`. When `isLoading` is true,
+ * shows a `CircularProgressIndicator`.
+ *
+ * @param isLoading Whether the loading indicator should be shown. When `false`, the sign-in button is shown.
+ * @param onEvent Callback invoked to emit `UiEvent` values (e.g. `UiEvent.OnGoogleSignIn(context)` on button click).
+ * @param modifier Modifier to be applied to the visibility containers.
+ */
 @Composable
 private fun SigInInButtonWithLoading(
     isLoading: Boolean,

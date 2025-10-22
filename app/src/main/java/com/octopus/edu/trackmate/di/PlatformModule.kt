@@ -32,11 +32,23 @@ interface PlatformModule {
     @Named("TaskAlarmReminderScheduler")
     fun bindTaskAlarmReminderScheduler(reminderScheduler: TaskAlarmReminderScheduler): ReminderScheduler
 
+    /**
+     * Binds the HabitAlarmReminderScheduler as the ReminderScheduler with the "HabitAlarmReminderScheduler" qualifier.
+     *
+     * @param reminderScheduler The HabitAlarmReminderScheduler instance to bind.
+     * @return The bound ReminderScheduler implementation.
+     */
     @Binds
     @Singleton
     @Named("HabitAlarmReminderScheduler")
     fun bindHabitAlarmReminderScheduler(reminderScheduler: HabitAlarmReminderScheduler): ReminderScheduler
 
+    /**
+     * Binds an EntrySyncWorkScheduler as the EntrySyncScheduler implementation in the DI graph.
+     *
+     * @param entrySyncWorkScheduler The concrete EntrySyncWorkScheduler to provide where EntrySyncScheduler is required.
+     * @return The EntrySyncScheduler bound to the provided implementation.
+     */
     @Binds
     @Singleton
     fun bindEntrySyncScheduler(entrySyncWorkScheduler: EntrySyncWorkScheduler): EntrySyncScheduler

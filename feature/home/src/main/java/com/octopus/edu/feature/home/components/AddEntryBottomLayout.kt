@@ -20,6 +20,17 @@ import com.octopus.edu.feature.home.createEntry.AddEntryViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Hosts the bottom layout for creating an entry, rendering the main content, conditional pickers,
+ * and handling one-shot UI effects from the provided view model.
+ *
+ * Collects the view model's UI state to drive shown content and pickers; forwards user actions to
+ * the view model and routes effect outcomes to the provided callbacks.
+ *
+ * @param onSuccess Called when an entry-related success effect occurs. Receives an optional
+ * message resource id and a list of formatting arguments to present to the caller.
+ * @param onError Called when an error effect occurs. Receives a human-readable error message.
+ */
 @Composable
 fun AddEntryBottomLayout(
     onSuccess: (
@@ -98,6 +109,17 @@ fun AddEntryBottomLayout(
     )
 }
 
+/**
+ * Observes one-shot UI effects and dispatches corresponding success or error callbacks.
+ *
+ * Observes effects from [effectFlow], invokes `onSuccess` when an `EntrySuccessfullyCreated` effect is received
+ * and `onError` when a `ShowError` effect is received, and signals effect consumption by calling `onEvent(UiEvent.MarkEffectAsConsumed)`.
+ *
+ * @param effectFlow Flow emitting one-shot `UiEffect` instances.
+ * @param onEvent Callback used to send `UiEvent`s (used here to mark effects as consumed).
+ * @param onSuccess Called with the nullable message resource ID and its arguments when an entry is created successfully.
+ * @param onError Called with the error message when a show-error effect is received.
+ */
 @Composable
 private fun EffectHandler(
     effectFlow: Flow<UiEffect?>,
@@ -121,6 +143,11 @@ private fun EffectHandler(
     }
 }
 
+/**
+ * Preview showing the AddEntryBottomLayout inside TrackMateTheme in both light and dark modes.
+ *
+ * Uses placeholder callbacks for success and error to render the composable in the preview.
+ */
 @PreviewLightDark
 @Composable
 private fun EntryCreationBottomLayoutPreview() {

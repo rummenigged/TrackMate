@@ -29,6 +29,14 @@ import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 
+/**
+ * Renders a horizontally swipeable week calendar displaying seven days per page, highlighting today and the selected date.
+ *
+ * @param selectedDate The currently selected date shown in the calendar.
+ * @param onDateSelected Callback invoked with the date when a day is tapped.
+ * @param pagerState PagerState controlling the horizontal pager (uses a large page range to simulate infinite week scrolling).
+ * @param modifier Optional Modifier for layout customization.
+ */
 @Composable
 fun WeekCalendar(
     selectedDate: LocalDate,

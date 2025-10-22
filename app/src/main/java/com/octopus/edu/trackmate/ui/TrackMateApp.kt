@@ -43,6 +43,15 @@ import com.octopus.edu.feature.signin.SignInScreen
 import com.octopus.edu.trackmate.navigation.TrackMateNavigationWrapper
 import kotlinx.coroutines.launch
 
+/**
+ * Hosts the app's top-level navigation and selects the start destination based on authentication state.
+ *
+ * Observes the provided AuthViewModel's UI state and navigates to MainContent when the user is authenticated
+ * or to SignIn when not. Composes a NavHost that provides the SignInScreen and MainAppContent destinations.
+ *
+ * @param viewModel AuthViewModel used to observe authentication UI state and drive top-level navigation.
+ *                  Defaults to the Hilt-provided ViewModel instance.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TrackMateApp(viewModel: AuthViewModel = hiltViewModel()) {
@@ -85,6 +94,14 @@ internal fun TrackMateApp(viewModel: AuthViewModel = hiltViewModel()) {
     }
 }
 
+/**
+ * Hosts the main authenticated app UI: internal navigation, the add-entry bottom sheet, and snackbars.
+ *
+ * When the FAB in Home is tapped this composable shows a modal bottom sheet for creating an entry,
+ * clears the add-entry mode when the sheet is closed, and displays success or error messages in a snackbar.
+ *
+ * @param addEntryViewModel ViewModel that supplies and clears add-entry state and handles entry creation callbacks.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MainAppContent(addEntryViewModel: AddEntryViewModel = hiltViewModel()) {

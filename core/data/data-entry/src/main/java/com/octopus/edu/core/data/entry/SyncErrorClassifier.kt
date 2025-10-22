@@ -12,7 +12,13 @@ class SyncErrorClassifier(
     @field:NetworkErrorClassifierQualifier
     private val networkErrorClassifier: ErrorClassifier
 ) : BaseErrorClassifier() {
-    override fun isTransient(throwable: Throwable): Boolean =
+    /**
+             * Determines whether the given throwable represents a transient error for synchronization.
+             *
+             * @param throwable The error to classify.
+             * @return `true` if either the database or network classifier identifies the throwable as a `TransientError`, `false` otherwise.
+             */
+            override fun isTransient(throwable: Throwable): Boolean =
         databaseErrorClassifier.classify(throwable) is TransientError ||
             networkErrorClassifier.classify(throwable) is TransientError
 }

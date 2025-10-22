@@ -32,6 +32,17 @@ import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
 import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.getRecurrenceAsStringRes
 import kotlinx.collections.immutable.ImmutableList
 
+/**
+ * Shows a dialog that lets the user choose a recurrence option.
+ *
+ * The dialog's initial selection is set from `currentRecurrence` or `Recurrence.None` when null.
+ * Invoking confirm passes the currently selected recurrence to `onConfirm`; invoking dismiss calls `onDismiss`.
+ *
+ * @param currentRecurrence The recurrence to preselect when the dialog opens, or `null` to preselect `Recurrence.None`.
+ * @param onDismiss Callback invoked when the dialog is dismissed without confirming.
+ * @param onConfirm Callback invoked with the selected `Recurrence` when the user confirms.
+ * @param modifier Optional layout modifier applied to the dialog.
+ */
 @Composable
 internal fun RecurrencePicker(
     currentRecurrence: Recurrence?,

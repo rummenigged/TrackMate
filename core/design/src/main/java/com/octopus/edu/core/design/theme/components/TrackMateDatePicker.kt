@@ -44,6 +44,16 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
+/**
+ * Renders a month-based date picker UI with month navigation, weekday headers, and a selectable day grid.
+ *
+ * Displays the currently selected month, allows moving to previous/next months, highlights today and the provided selected date,
+ * and invokes [onDateSelected] when a day is chosen.
+ *
+ * @param onDateSelected Callback invoked with the date the user selects.
+ * @param modifier Modifier applied to the root container.
+ * @param selectedDate The date that should be shown as selected when the picker is displayed.
+ */
 @Composable
 fun TrackMateDatePicker(
     onDateSelected: (LocalDate) -> Unit,

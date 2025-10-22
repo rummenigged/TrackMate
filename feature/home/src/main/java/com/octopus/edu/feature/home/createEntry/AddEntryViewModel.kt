@@ -194,7 +194,12 @@ class AddEntryViewModel
             }
         }
 
-        private fun saveCurrentEntry(entry: Entry) =
+        /**
+             * Persists the given entry, clears the UI on success, schedules its reminder if present, and emits success or error effects.
+             *
+             * @param entry The entry to save; if it contains a reminder, that reminder will be scheduled after a successful save.
+             */
+            private fun saveCurrentEntry(entry: Entry) =
             viewModelScope.launch {
                 when (val result = entryRepository.saveEntry(entry = entry)) {
                     is ResultOperation.Error -> {

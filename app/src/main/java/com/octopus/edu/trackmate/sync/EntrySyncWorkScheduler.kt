@@ -22,6 +22,14 @@ class EntrySyncWorkScheduler
     constructor(
         private val workManager: WorkManager
     ) : EntrySyncScheduler {
+        /**
+         * Schedules a unique one-time background sync for the specified entry.
+         *
+         * The scheduled work requires network connectivity, uses exponential backoff on failures,
+         * is tagged with the entry id, and replaces any existing work with the same unique name.
+         *
+         * @param entryId Identifier of the entry to sync; used to compose the unique work name and tag.
+         */
         override fun scheduleEntrySync(entryId: String) {
             val workData = workDataOf(ENTRY_ID_EXTRA to entryId)
             val work =
@@ -43,6 +51,12 @@ class EntrySyncWorkScheduler
             )
         }
 
+        /**
+         * Schedules a periodic background job to batch-sync pending entries every 30 minutes.
+         *
+         * The work requires network connectivity, uses exponential backoff with a 30-second initial delay,
+         * is tagged for identification, and is enqueued as a unique periodic work that replaces any existing schedule.
+         */
         override fun scheduleBatchSync() {
             val work =
                 PeriodicWorkRequestBuilder<SyncPendingEntriesWorker>(Duration.ofMinutes(30))
@@ -58,6 +72,14 @@ class EntrySyncWorkScheduler
             )
         }
 
+        /**
+         * Schedules a one-time background sync to propagate a deleted entry identified by [entryId].
+         *
+         * The scheduled work requires network connectivity, uses exponential backoff, and is enqueued
+         * as unique work that replaces any existing work for the same entry.
+         *
+         * @param entryId The identifier of the deleted entry to be synced. 
+         */
         override fun scheduleDeletedEntrySync(entryId: String) {
             val data = workDataOf(ENTRY_ID_EXTRA to entryId)
             val work =
@@ -79,6 +101,11 @@ class EntrySyncWorkScheduler
             )
         }
 
+        /**
+         * Cancels any scheduled sync work associated with the specified entry.
+         *
+         * @param entryId The identifier of the entry whose scheduled sync work should be canceled.
+         */
         override fun cancelEntrySync(entryId: String) {
             workManager.cancelUniqueWork(UNIQUE_ENTRY_WORK_NAME_PREFIX + entryId)
         }

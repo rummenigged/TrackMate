@@ -14,7 +14,16 @@ class SyncPendingEntryUseCase
     constructor(
         private val entryRepository: EntryRepository
     ) {
-        suspend operator fun invoke(entryId: String): SyncResult =
+        /**
+             * Synchronizes a pending entry identified by its ID with the remote data source.
+             *
+             * @param entryId The identifier of the entry to synchronize.
+             * @return A SyncResult describing the outcome:
+             *         - `SyncResult.Success` when the entry was pushed and marked SYNCED.
+             *         - `SyncResult.Error(TransientError)` when the operation failed but may be retried.
+             *         - `SyncResult.Error(PermanentError)` when the failure is not retriable; in this case the entry's sync state is updated to FAILED.
+             */
+            suspend operator fun invoke(entryId: String): SyncResult =
             when (val result = entryRepository.getEntryById(entryId)) {
                 is ResultOperation.Error -> {
                     if (result.isRetriable) {
@@ -30,7 +39,14 @@ class SyncPendingEntryUseCase
                 }
             }
 
-        private suspend fun pushEntry(entry: Entry): SyncResult =
+        /**
+             * Pushes the provided entry to the remote store and updates the entry's local sync state accordingly.
+             *
+             * @param entry The entry to push.
+             * @return `SyncResult.Success` if the push succeeds; `SyncResult.Error(TransientError(...))` if the push fails with a retriable error;
+             * `SyncResult.Error(PermanentError(...))` if the push fails with a non-retriable error (the entry's sync state is updated to `FAILED` in this case).
+             */
+            private suspend fun pushEntry(entry: Entry): SyncResult =
             when (val result = entryRepository.pushEntry(entry)) {
                 is ResultOperation.Error -> {
                     if (result.isRetriable) {

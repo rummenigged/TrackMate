@@ -20,12 +20,26 @@ annotation class ApplicationScope
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-    @Singleton
+    /**
+         * Provides the application-wide CoroutineScope for launching top-level coroutines.
+         *
+         * The scope uses a SupervisorJob and the `default` dispatcher from [dispatcherProvider].
+         *
+         * @param dispatcherProvider Supplies the dispatchers; this scope uses its `default` dispatcher.
+         * @return A `CoroutineScope` backed by a `SupervisorJob` and the provider's default dispatcher.
+         */
+        @Singleton
     @ApplicationScope
     @Provides
     fun providesApplicationScope(dispatcherProvider: DispatcherProvider): CoroutineScope =
         CoroutineScope(SupervisorJob() + dispatcherProvider.default)
 
+    /**
+     * Provides the application-level WorkManager instance.
+     *
+     * @param context The application Context used to obtain the WorkManager.
+     * @return The singleton WorkManager associated with the application context.
+     */
     @Singleton
     @Provides
     fun providesWorkManager(

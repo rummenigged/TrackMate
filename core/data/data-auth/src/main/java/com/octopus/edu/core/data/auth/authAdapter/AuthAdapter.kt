@@ -12,18 +12,41 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.tasks.await
 
 interface AuthAdapter {
-    suspend fun getIdToken(forceRefresh: Boolean): String?
+    /**
+ * Retrieves the current user's Firebase ID token.
+ *
+ * @param forceRefresh If `true`, forces fetching a fresh token from the server; if `false`, allows using a cached token.
+ * @return The ID token string if available, or `null` if no user is signed in or the token could not be obtained.
+ */
+suspend fun getIdToken(forceRefresh: Boolean): String?
 
-    suspend fun signInWithCredentials(token: String): AuthResult
+    /**
+ * Signs in using the provided OAuth token.
+ *
+ * @param token The OAuth token (ID or access token) obtained from the identity provider.
+ * @return An AuthResult containing the signed-in user's authentication information and metadata.
+ */
+suspend fun signInWithCredentials(token: String): AuthResult
 
     fun isUserLoggedIn(): Flow<Boolean>
 
-    fun signOut()
+    /**
+ * Signs out the current user from Firebase Authentication.
+ *
+ * Clears the client's authentication state and notifies any registered authentication state listeners.
+ */
+fun signOut()
 }
 
 class FirebaseAuthAdapter(
     private val firebaseAuth: FirebaseAuth
 ) : AuthAdapter {
+    /**
+     * Retrieves the current Firebase user's ID token.
+     *
+     * @param forceRefresh If `true`, forces fetching a fresh token instead of using a cached one.
+     * @return The ID token string if a user is signed in and retrieval succeeds, `null` if there is no user or if token retrieval fails.
+     */
     override suspend fun getIdToken(forceRefresh: Boolean): String? {
         val user = firebaseAuth.currentUser
         return try {

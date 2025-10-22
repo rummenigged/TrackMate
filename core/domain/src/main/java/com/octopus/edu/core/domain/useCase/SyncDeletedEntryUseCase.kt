@@ -13,7 +13,18 @@ class SyncDeletedEntryUseCase
     constructor(
         private val entryRepository: EntryRepository
     ) {
-        suspend operator fun invoke(id: String): SyncResult =
+        /**
+             * Syncs a deleted entry identified by `id` with the remote and updates its local sync state.
+             *
+             * Retrieves the deleted entry, attempts to push the deletion to the remote, and updates the entry's
+             * sync state to `SYNCED` on success or to `FAILED` when a push fails permanently.
+             *
+             * @param id The identifier of the deleted entry to synchronize.
+             * @return `SyncResult.Success` when the entry was successfully synced;
+             *         `SyncResult.Error(TransientError(...))` for retriable failures;
+             *         `SyncResult.Error(PermanentError(...))` for non-retriable failures (in which case the entry's sync state is set to `FAILED`).
+             */
+            suspend operator fun invoke(id: String): SyncResult =
             when (val result = entryRepository.getDeletedEntry(id)) {
                 is ResultOperation.Error -> {
                     if (result.isRetriable) {

@@ -41,6 +41,19 @@ import com.octopus.edu.core.ui.common.extensions.rememberMaxTextWidthDp
 import com.octopus.edu.feature.home.R
 import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.getRecurrenceAsStringRes
 
+/**
+ * Renders a swipable list item for the given Entry with a time label, type icon, connector lines, and content card.
+ *
+ * The composable shows the entry's time (formatted "HH:MM") or a localized "All day" label, an icon that reflects the entry type,
+ * optional connector lines above/below the icon based on position, and a content card that supports swipe actions.
+ *
+ * @param entry The entry to render (e.g., Habit or Task).
+ * @param modifier Modifier applied to the root ConstraintLayout.
+ * @param isFirstItem If true, the top connector line is omitted.
+ * @param isLastItem If true, the bottom connector line is omitted.
+ * @param onItemSwipedFromStartToEnd Callback invoked with the entry when the user swipes from start to end.
+ * @param onItemSwipedFromEndToStart Callback invoked with the entry when the user swipes from end to start.
+ */
 @Composable
 internal fun EntryItem(
     entry: Entry,

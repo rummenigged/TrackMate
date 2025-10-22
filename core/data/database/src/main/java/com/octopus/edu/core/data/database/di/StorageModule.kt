@@ -27,14 +27,31 @@ object StorageModule {
     @Singleton
     fun entryDao(database: TrackMateDatabase): EntryDao = database.entryDao()
 
+    /**
+     * Provides the singleton ReminderDao instance from the TrackMateDatabase.
+     *
+     * @return The ReminderDao retrieved from the provided database.
+     */
     @Provides
     @Singleton
     fun reminderDao(database: TrackMateDatabase): ReminderDao = database.reminderDao()
 
+    /**
+     * Provides the singleton DeletedEntryDao from the given TrackMateDatabase.
+     *
+     * @param database The TrackMateDatabase used to obtain the DAO.
+     * @return The DeletedEntryDao instance.
+     */
     @Provides
     @Singleton
     fun deletedEntryDao(database: TrackMateDatabase): DeletedEntryDao = database.deletedEntryDao()
 
+    /**
+     * Provides a TransactionRunner that executes transactions against the application database.
+     *
+     * @param database The TrackMateDatabase instance used to perform transactions.
+     * @return A TransactionRunner that executes database transactions using the provided database.
+     */
     @Provides
     @Singleton
     fun roomTransactionRunner(database: TrackMateDatabase): TransactionRunner = RoomTransactionRunner(database)

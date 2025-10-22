@@ -33,6 +33,17 @@ import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
 import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.getReminderTypeAsStringRes
 import kotlinx.collections.immutable.ImmutableList
 
+/**
+ * Displays a dialog that lets the user pick a ReminderType.
+ *
+ * The dialog initializes its selection from [currentReminderType] or defaults to `ReminderType.NOTIFICATION`.
+ * When confirmed, it calls [onConfirm] with the selected reminder; when dismissed, it calls [onDismiss].
+ *
+ * @param reminders The list of reminder options to display.
+ * @param onDismiss Callback invoked when the dialog is dismissed without confirmation.
+ * @param onConfirm Callback invoked with the currently selected `ReminderType` when the user confirms.
+ * @param currentReminderType Optional initial selection for the dialog; if `null`, selection defaults to `ReminderType.NOTIFICATION`.
+ */
 @Composable
 internal fun ReminderTypePicker(
     reminders: ImmutableList<ReminderType>,

@@ -7,11 +7,31 @@ import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.network.utils.NetworkResponse
 
 interface EntryApi {
-    suspend fun saveEntry(entry: Entry)
+    /**
+ * Saves the given entry via the API.
+ *
+ * @param entry The domain model Entry to save.
+ */
+suspend fun saveEntry(entry: Entry)
 
-    suspend fun fetchEntries(): NetworkResponse<List<EntryDto>>
+    /**
+ * Fetches the current entries from the remote API.
+ *
+ * @return A NetworkResponse wrapping the list of entries as `EntryDto` objects.
+ */
+suspend fun fetchEntries(): NetworkResponse<List<EntryDto>>
 
-    suspend fun pushDeletedEntry(entry: DeletedEntry)
+    /**
+ * Pushes a deleted entry to the remote API to synchronize deletion state.
+ *
+ * @param entry The deleted entry to be pushed to the server.
+ */
+suspend fun pushDeletedEntry(entry: DeletedEntry)
 
-    suspend fun fetchDeletedEntry(): NetworkResponse<List<DeletedEntryDto>>
+    /**
+ * Retrieves entries that have been marked deleted from the remote service.
+ *
+ * @return A NetworkResponse containing a list of DeletedEntryDto representing deleted entries.
+ */
+suspend fun fetchDeletedEntry(): NetworkResponse<List<DeletedEntryDto>>
 }

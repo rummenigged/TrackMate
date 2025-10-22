@@ -28,6 +28,15 @@ import com.octopus.edu.core.ui.common.extensions.noClickableOverlay
 import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiEvent
 import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
 
+/**
+ * Displays a bottom panel for editing an entry's date, time, and related options when specifications mode is enabled.
+ *
+ * The panel shows confirm/cancel action buttons, a date picker seeded from the draft date or the current entry date, and additional entry options. Panel visibility is controlled by state.isSetEntrySpecificationsModeEnabled.
+ *
+ * @param state UI state containing the current entry data, draft snapshot, and mode flags.
+ * @param onEvent Callback invoked with UI events produced by user interactions (for example ConfirmDateAndTimeSettings, CancelDateAndTimeSettings, UpdateEntryDate).
+ * @param modifier Modifier applied to the root container.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AddEntrySpecifications(

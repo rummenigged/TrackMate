@@ -17,7 +17,15 @@ object FirebaseProvider {
             BuildConfig.FIREBASE_EMULATOR_HOST_PHYSICAL_DEVICE
         }
 
-    fun getFirestore(): FirebaseFirestore =
+    /**
+         * Provides a configured Firestore instance, optionally routed to the local emulator.
+         *
+         * Returns a FirebaseFirestore instance; when `USE_FIREBASE_EMULATOR` is true the instance
+         * will be configured to use the emulator at the resolved host and port 8080 (if configuration is possible).
+         *
+         * @return A configured `FirebaseFirestore` instance.
+         */
+        fun getFirestore(): FirebaseFirestore =
         Firebase.firestore.apply {
             if (USE_FIREBASE_EMULATOR) {
                 try {
@@ -31,7 +39,15 @@ object FirebaseProvider {
             }
         }
 
-    fun getFirebaseAuth(): FirebaseAuth =
+    /**
+         * Provide a FirebaseAuth instance configured to use the Firebase Auth emulator when enabled.
+         *
+         * If the `USE_FIREBASE_EMULATOR` flag is true, the instance is configured to use the emulator at the selected host and port 9099.
+         * If emulator configuration has already been applied, the resulting IllegalStateException is caught and a warning is logged.
+         *
+         * @return A configured `FirebaseAuth` instance.
+         */
+        fun getFirebaseAuth(): FirebaseAuth =
         FirebaseAuth.getInstance().apply {
             if (USE_FIREBASE_EMULATOR) {
                 try {
@@ -45,7 +61,14 @@ object FirebaseProvider {
             }
         }
 
-    private fun isEmulator(): Boolean =
+    /**
+         * Determines whether the app is running on an Android emulator.
+         *
+         * Checks common Android Build properties for known emulator indicators.
+         *
+         * @return `true` if the runtime appears to be an Android emulator, `false` otherwise.
+         */
+        private fun isEmulator(): Boolean =
         (
             Build.FINGERPRINT.startsWith("generic") ||
                 Build.FINGERPRINT.lowercase().contains("vbox") ||

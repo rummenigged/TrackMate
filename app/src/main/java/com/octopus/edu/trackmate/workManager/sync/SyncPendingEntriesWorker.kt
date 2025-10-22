@@ -23,6 +23,15 @@ class SyncPendingEntriesWorker
         private val entryRepository: EntryRepository,
         private val syncPendingEntryUseCase: SyncPendingEntryUseCase
     ) : CoroutineWorker(context, params) {
+        /**
+         * Synchronizes pending entries and yields the appropriate WorkManager Result based on encountered errors.
+         *
+         * Fetches pending entries from the repository and attempts to sync each entry via the sync use case.
+         * If the repository fetch failed and is retriable, the worker requests a retry; if the fetch failed and is not retriable, the worker fails.
+         * After attempting to sync all entries, the worker requests a retry if any transient errors occurred, fails if any permanent errors occurred, and succeeds if all entries synced without error.
+         *
+         * @return `Result.retry()` if the repository fetch was retriable or any entry produced a transient error; `Result.failure()` if the repository fetch was not retriable or any entry produced a permanent error; `Result.success()` if all entries synced without error.
+         */
         override suspend fun doWork(): Result {
             var sawTransientError = false
             var sawPermanentError = false

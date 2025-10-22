@@ -31,24 +31,60 @@ interface EntryDao {
     @Query("SELECT * FROM entries WHERE dueDate = :date OR startDate = :date ORDER BY time IS NOT NULL, time")
     fun getAllEntriesByDateAndOrderedByTimeAsc(date: Long): Flow<List<EntryEntity>>
 
+    /**
+     * Streams entries whose due date equals the given date or whose start date is on or before it,
+     * ordered with entries that have a time first and then by time ascending.
+     *
+     * @param date The date to match, expressed as milliseconds since the Unix epoch.
+     * @return A Flow that emits lists of matching EntryEntity objects in the described order.
+     */
     @Query("SELECT * FROM entries WHERE dueDate = :date OR startDate <= :date ORDER BY time IS NOT NULL, time")
     fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
 
+    /**
+     * Emit lists of entries whose sync state equals the provided state.
+     *
+     * @param pending The sync state to filter entries by. Defaults to `PENDING`.
+     * @return A Flow that emits lists of EntryEntity objects with `syncState` equal to `pending`.
+     */
     @Query("SELECT * FROM entries WHERE syncState = :pending")
     fun streamPendingEntries(pending: SyncStateEntity = PENDING): Flow<List<EntryEntity>>
 
+    /**
+     * Fetches all entries whose sync state equals the provided pending state.
+     *
+     * @param pending The sync state to filter entries by; defaults to `PENDING`.
+     * @return A list of `EntryEntity` objects with `syncState` equal to `pending`.
+     */
     @Query("SELECT * FROM entries WHERE syncState = :pending")
     fun getPendingEntries(pending: SyncStateEntity = PENDING): List<EntryEntity>
 
+    /**
+     * Deletes the entry with the specified id from the database.
+     *
+     * @param entryId The id of the entry to delete.
+     */
     @Query("DELETE from entries WHERE id = :entryId")
     suspend fun delete(entryId: String)
 
+    /**
+     * Set the synchronization state for an entry identified by its id.
+     *
+     * @param entryId The id of the entry to update.
+     * @param syncState The new sync state to store for the entry.
+     */
     @Query("UPDATE entries SET syncState = :syncState WHERE id = :entryId")
     fun updateSyncState(
         entryId: String,
         syncState: SyncStateEntity
     )
 
+    /**
+     * Inserts or replaces the given entry in the database only when no entry exists with the same id
+     * or the provided entry is newer according to its sync metadata and recency.
+     *
+     * @param entry The entry to insert or replace if it is considered newer than the stored entry.
+     */
     @Transaction
     suspend fun upsertIfNewest(entry: EntryEntity) {
         val localEntry = getEntryById(entry.id)

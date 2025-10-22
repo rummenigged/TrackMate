@@ -27,7 +27,14 @@ class CredentialServiceModule {
     @Provides
     fun provideCredentialManager(application: Application): CredentialManager = CredentialManager.create(application)
 
-    @Provides
+    /**
+         * Creates an ICredentialService backed by AndroidCredentialManagerService.
+         *
+         * @param credentialRequest The GetCredentialRequest containing sign-in options to use.
+         * @param credentialManager The CredentialManager used to perform credential operations.
+         * @return An ICredentialService implementation that uses the provided request and manager.
+         */
+        @Provides
     fun provideCredentialService(
         credentialRequest: GetCredentialRequest,
         credentialManager: CredentialManager

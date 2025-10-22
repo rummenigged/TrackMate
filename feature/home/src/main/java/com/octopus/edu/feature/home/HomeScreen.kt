@@ -91,6 +91,12 @@ internal fun HomeScreenInternal(
     }
 }
 
+/**
+ * Displays a FloatingActionButton that triggers adding a new entry.
+ *
+ * @param onClick Invoked when the FAB is clicked.
+ * @param modifier Optional [Modifier] applied to the FAB container.
+ */
 @Composable
 private fun AddEntryFAB(
     onClick: () -> Unit,
@@ -109,6 +115,18 @@ private fun AddEntryFAB(
     }
 }
 
+/**
+ * Renders the home screen content including app bar, week calendar, and the refreshable entries area.
+ *
+ * The content is wrapped in a pull-to-refresh container that dispatches UiEvent.Refresh when triggered.
+ * Displays a loading indicator when uiState.isLoading is true, an empty state when entries are empty,
+ * or the entries list otherwise. The WeekCalendar reflects uiState.currentDate and dispatches
+ * UiEvent.SetCurrentDateAs when a date is selected.
+ *
+ * @param uiState Current UI state driving what is shown (loading, refreshing, current date, and entries).
+ * @param onEvent Callback used to dispatch UiEvent actions originating from user interactions.
+ * @param modifier Optional Modifier for the root PullToRefreshBox.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeContent(
@@ -167,6 +185,16 @@ private fun HomeContent(
     }
 }
 
+/**
+ * Displays a vertically scrolling, animated list of entries with swipe-to-delete support.
+ *
+ * The list renders the provided entries in order, animates item changes, and dispatches UI events
+ * (for example, `UiEvent.Entry.Delete`) via the `onEvent` callback when an item is swiped.
+ *
+ * @param entries Immutable list of entries to display; order is preserved.
+ * @param onEvent Callback invoked for user-driven UI events originating from the list (e.g., delete).
+ * @param modifier Modifier applied to the list container.
+ */
 @Composable
 private fun EntriesList(
     entries: ImmutableList<Entry>,
@@ -197,6 +225,12 @@ private fun EntriesList(
     }
 }
 
+/**
+ * Displays a centered empty-state UI that prompts the user to add entries.
+ *
+ * Shows a circular surface with an illustrative icon, a primary message ("All caught up"),
+ * and a secondary instructional message. The content is centered and fills the available space.
+ */
 @Composable
 private fun EmptyEntries(modifier: Modifier = Modifier) {
     Column(

@@ -7,7 +7,13 @@ import com.octopus.edu.core.domain.utils.BaseErrorClassifier
 import java.sql.SQLTimeoutException
 
 class DatabaseErrorClassifier : BaseErrorClassifier() {
-    override fun isTransient(throwable: Throwable): Boolean =
+    /**
+         * Determines whether the given throwable represents a transient database error.
+         *
+         * @param throwable The throwable to classify.
+         * @return `true` if the throwable is one of: `SQLiteDiskIOException`, `SQLiteFullException`, `SQLTimeoutException`, `NoSuchElementException`, or `SQLiteCantOpenDatabaseException`; `false` otherwise.
+         */
+        override fun isTransient(throwable: Throwable): Boolean =
         when (throwable) {
             is SQLiteDiskIOException,
             is SQLiteFullException,

@@ -20,7 +20,15 @@ class AndroidCredentialManagerService
         private val credentialRequest: GetCredentialRequest,
         private val credentialManager: CredentialManager,
     ) : ICredentialService {
-        override suspend fun initiateGoogleSignIn(context: Context): SignInInitiationResult =
+        /**
+             * Initiates Google sign-in using the provided Context and maps retrieved credentials to a SignInInitiationResult.
+             *
+             * @param context The Android Context used to request credentials from the CredentialManager.
+             * @return `SignInInitiationResult.Authenticated(token)` when a Google ID token credential is found,
+             * `SignInInitiationResult.NoOp` if the credential request was cancelled, or
+             * `SignInInitiationResult.Error(message)` when no Google credentials are available or another error occurs.
+             */
+            override suspend fun initiateGoogleSignIn(context: Context): SignInInitiationResult =
             try {
                 val credential =
                     credentialManager

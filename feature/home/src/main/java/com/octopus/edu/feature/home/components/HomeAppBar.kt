@@ -13,6 +13,13 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.TrackMateTheme
 
+/**
+ * Renders a top app bar displaying the given title.
+ *
+ * @param title The text shown in the app bar.
+ * @param modifier Modifier applied to the TopAppBar layout.
+ * @param background Background color for the app bar; defaults to the current theme's primary color.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeAppBar(

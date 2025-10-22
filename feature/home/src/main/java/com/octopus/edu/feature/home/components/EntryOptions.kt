@@ -33,6 +33,20 @@ import com.octopus.edu.feature.home.R
 import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiEvent
 import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
 
+/**
+ * Renders a vertical panel of entry setting rows (Time, Reminder, Reminder Type, Repeat)
+ * and dispatches corresponding UI events when a row is selected.
+ *
+ * The panel displays:
+ * - Time: shows the resolved time or "none"; opens the time picker when tapped.
+ * - Reminder: shows the selected reminder label; opens the reminder picker when tapped.
+ * - Reminder Type: shown only when a reminder exists and is not `None`; opens the reminder type picker when tapped.
+ * - Repeat: shows the recurrence label; opens the recurrence picker when tapped.
+ *
+ * @param state Current UI state used to populate row titles, trailing text, and visibility.
+ * @param onEvent Callback invoked with a `UiEvent` when a row is clicked.
+ * @param modifier Optional [Modifier] applied to the container.
+ */
 @Composable
 internal fun EntryOptions(
     state: UiState,

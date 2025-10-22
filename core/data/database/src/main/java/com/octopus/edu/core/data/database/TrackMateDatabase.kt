@@ -41,6 +41,9 @@ abstract class TrackMateDatabase : RoomDatabase() {
 
         private val MIGRATION_2_3: Migration =
             object : Migration(2, 3) {
+                /**
+                 * Adds a non-null `type` column to the `reminders` table with a default value of `'NOTIFICATION'`.
+                 */
                 override fun migrate(db: SupportSQLiteDatabase) {
                     db.execSQL(
                         "ALTER TABLE reminders ADD COLUMN type TEXT NOT NULL DEFAULT " +
@@ -51,6 +54,11 @@ abstract class TrackMateDatabase : RoomDatabase() {
 
         private val MIGRATION_3_4: Migration =
             object : Migration(3, 4) {
+                /**
+                 * Adds the non-null `syncState` column (default value `'PENDING'`) to the `entries` table for the migration from database version 3 to 4.
+                 *
+                 * @param db The writable SQLite database on which migration SQL should be executed.
+                 */
                 override fun migrate(db: SupportSQLiteDatabase) {
                     db.execSQL(
                         "ALTER TABLE entries ADD COLUMN syncState TEXT NOT NULL DEFAULT 'PENDING'",
@@ -60,6 +68,13 @@ abstract class TrackMateDatabase : RoomDatabase() {
 
         private val MIGRATION_4_5: Migration =
             object : Migration(4, 5) {
+                /**
+                 * Creates the `deleted_entry` table if it does not already exist.
+                 *
+                 * The table has columns `id` (primary key), `deletedAt` (timestamp as INTEGER), and `syncState` (TEXT).
+                 *
+                 * @param db The SQLite database to apply the migration on.
+                 */
                 override fun migrate(db: SupportSQLiteDatabase) {
                     db.execSQL(
                         "CREATE TABLE IF NOT EXISTS `deleted_entry` " +
@@ -69,7 +84,12 @@ abstract class TrackMateDatabase : RoomDatabase() {
                 }
             }
 
-        fun create(context: Context): TrackMateDatabase =
+        /**
+                 * Builds and returns the TrackMateDatabase instance configured with the app's persistent schema.
+                 *
+                 * @return A TrackMateDatabase configured with migrations for versions 1→2, 2→3, 3→4, and 4→5.
+                 */
+                fun create(context: Context): TrackMateDatabase =
             Room
                 .databaseBuilder(
                     context,
@@ -82,9 +102,24 @@ abstract class TrackMateDatabase : RoomDatabase() {
                 .build()
     }
 
-    abstract fun entryDao(): EntryDao
+    /**
+ * Provides the DAO used to access and manipulate entry records.
+ *
+ * @return The EntryDao for querying, inserting, updating, and deleting entries.
+ */
+abstract fun entryDao(): EntryDao
 
-    abstract fun reminderDao(): ReminderDao
+    /**
+ * Accesses the DAO for reminders.
+ *
+ * @return The ReminderDao used to perform CRUD and query operations on reminder entities.
+ */
+abstract fun reminderDao(): ReminderDao
 
-    abstract fun deletedEntryDao(): DeletedEntryDao
+    /**
+ * Provides the DAO for accessing deleted entry records.
+ *
+ * @return The `DeletedEntryDao` for performing queries and mutations on deleted entries.
+ */
+abstract fun deletedEntryDao(): DeletedEntryDao
 }

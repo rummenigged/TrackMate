@@ -31,6 +31,12 @@ class TrackMateApplication :
                 .setWorkerFactory(workerFactory)
                 .build()
 
+    /**
+     * Initializes application-level services and configuration on process start.
+     *
+     * Creates the entry reminder notification channel, starts the entry synchronization manager,
+     * and configures Timber logging (debug tree in debug builds, crash-reporting tree otherwise).
+     */
     override fun onCreate() {
         super.onCreate()
         createEntryReminderNotificationChannel(this)

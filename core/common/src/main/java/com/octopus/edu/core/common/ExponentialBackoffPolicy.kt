@@ -9,6 +9,13 @@ class ExponentialBackoffPolicy(
     private val initialDelay: Long,
     private val maxDelay: Long
 ) : RetryPolicy {
+    /**
+     * Decides whether to retry for the given error and applies the exponential backoff delay when retrying.
+     *
+     * @param errorType The error classification; permanent errors will not be retried.
+     * @param attempt Zero-based retry attempt index used to compute the backoff delay.
+     * @return `true` if a retry should be attempted (and the function suspends for the computed delay), `false` otherwise.
+     */
     override suspend fun shouldRetry(
         errorType: ErrorType,
         attempt: Long

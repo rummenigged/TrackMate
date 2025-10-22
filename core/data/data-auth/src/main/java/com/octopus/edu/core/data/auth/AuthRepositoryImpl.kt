@@ -17,12 +17,23 @@ class AuthRepositoryImpl
         override val isUserLoggedIn: Flow<Boolean>
             get() = authAdapter.isUserLoggedIn()
 
-        override suspend fun signIn(token: String): ResultOperation<Unit> =
+        /**
+             * Signs in a user using the provided authentication token.
+             *
+             * @param token The authentication token to use for sign-in.
+             * @return `Unit` if sign-in succeeds, error information otherwise wrapped in a `ResultOperation`.
+             */
+            override suspend fun signIn(token: String): ResultOperation<Unit> =
             safeCall(dispatcher = dispatcherProvider.io) {
                 authAdapter.signInWithCredentials(token)
             }
 
-        override suspend fun signOut(): ResultOperation<Unit> =
+        /**
+             * Signs out the currently authenticated user.
+             *
+             * @return `ResultOperation<Unit>` representing the success or failure of the sign-out operation.
+             */
+            override suspend fun signOut(): ResultOperation<Unit> =
             safeCall(dispatcher = dispatcherProvider.io) {
                 authAdapter.signOut()
             }

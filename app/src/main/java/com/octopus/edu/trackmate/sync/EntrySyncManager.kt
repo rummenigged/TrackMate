@@ -33,6 +33,12 @@ class EntrySyncManager
                 Logger.e(tag = "EntrySyncManager", message = "EntrySyncManager failed", throwable = throwable)
             }
 
+        /**
+         * Starts the background synchronization process.
+         *
+         * Launches background coroutines in the provided application scope to schedule a batch sync and concurrently
+         * collect deleted and pending entries so individual sync tasks can be scheduled for them.
+         */
         fun start() {
             scope.launch(dispatcherProvider.io + exceptionHandler) {
                 syncScheduler.scheduleBatchSync()
@@ -47,6 +53,11 @@ class EntrySyncManager
             }
         }
 
+        /**
+         * Observes repository deleted-entry IDs and schedules a sync for each deleted entry.
+         *
+         * Observes `entryRepository.deletedEntryIds`, reacts to changes, and schedules a deleted-entry sync for every emitted ID using `syncScheduler`. On flow errors the failure is logged, and failures to schedule an individual entry sync are logged per entry.
+         */
         private suspend fun collectDeletedEntries() {
             entryRepository.deletedEntryIds
                 .distinctUntilChanged()
@@ -66,6 +77,13 @@ class EntrySyncManager
                 }
         }
 
+        /**
+         * Observes pending entries and schedules a sync for each entry when the pending list changes.
+         *
+         * The observation is retried according to the configured error classifier and retry policy;
+         * errors encountered while collecting are logged. Failures to schedule an individual entry's sync
+         * are logged per entry.
+         */
         private suspend fun collectPendingEntries() {
             entryRepository.pendingEntries
                 .distinctUntilChanged()

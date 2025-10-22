@@ -29,6 +29,11 @@ class AuthViewModel
 
         override fun getInitialState(): AuthUiContract.UiState = AuthUiContract.UiState.Unknown
 
+        /**
+         * Dispatches a UI event to the appropriate authentication-related handler.
+         *
+         * @param event The UI event to handle (e.g., OnSignOut, MarkEffectConsumed, or OnGoogleSignIn with its Context).
+         */
         override fun processEvent(event: UiEvent) {
             when (event) {
                 UiEvent.OnSignOut -> signOut()
@@ -37,7 +42,15 @@ class AuthViewModel
             }
         }
 
-        private fun checkAuthState() =
+        /**
+             * Observes the current authentication status and updates the UI state to Authenticated or Unauthenticated.
+             *
+             * Starts a coroutine that collects values from `authRepository.isUserLoggedIn` and sets the view state
+             * to `AuthUiContract.UiState.Authenticated` when logged in or `AuthUiContract.UiState.Unauthenticated` when not.
+             *
+             * @return The `Job` representing the launched collector coroutine.
+             */
+            private fun checkAuthState() =
             viewModelScope.launch {
                 authRepository.isUserLoggedIn.collectLatest { isLoggedIn ->
                     if (isLoggedIn) {
@@ -48,7 +61,12 @@ class AuthViewModel
                 }
             }
 
-        private fun onGoogleSignIn(context: Context) =
+        /**
+             * Initiates the Google sign-in flow and updates UI state and effects based on the outcome.
+             *
+             * @param context The Android Context used to start the Google sign-in flow.
+             */
+            private fun onGoogleSignIn(context: Context) =
             viewModelScope.launch {
                 setState { AuthUiContract.UiState.Authenticating }
                 when (val result = credentialService.initiateGoogleSignIn(context)) {
@@ -71,6 +89,14 @@ class AuthViewModel
                 }
             }
 
+        /**
+         * Signs in the user using the provided identity token and handles post-sign-in effects.
+         *
+         * On success no UI state change is performed here. On failure the UI state is set to
+         * `UiState.Unauthenticated`, a `ShowError` effect is emitted with the error message, and the error is logged.
+         *
+         * @param idToken The identity token obtained from the identity provider (e.g., Google) to authenticate the user.
+         */
         private suspend fun signIn(idToken: String) {
             when (val result = authRepository.signIn(idToken)) {
                 is ResultOperation.Error -> {

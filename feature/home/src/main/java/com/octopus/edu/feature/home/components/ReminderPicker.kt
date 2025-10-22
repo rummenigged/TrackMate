@@ -32,6 +32,18 @@ import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
 import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.getReminderAsStringRes
 import kotlinx.collections.immutable.ImmutableList
 
+/**
+ * Displays a dialog that lets the user choose a reminder from the provided list.
+ *
+ * The initially selected option is taken from [currentReminder] if non-null, otherwise `Reminder.None`.
+ * Invokes [onConfirm] with the currently selected reminder when the dialog is confirmed, and invokes [onDismiss] when dismissed.
+ *
+ * @param reminders The available reminder options to show.
+ * @param onDismiss Callback invoked when the dialog is dismissed without confirming.
+ * @param onConfirm Callback invoked with the selected [Reminder] when the dialog is confirmed.
+ * @param currentReminder The initially selected reminder, or `null` to default to `Reminder.None`.
+ * @param modifier UI modifier applied to the dialog container.
+ */
 @Composable
 internal fun ReminderPicker(
     reminders: ImmutableList<Reminder>,

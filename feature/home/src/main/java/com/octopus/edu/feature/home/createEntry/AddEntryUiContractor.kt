@@ -246,7 +246,14 @@ object AddEntryUiContractor {
             Reminder.None -> R.string.none
         }
 
-    @OptIn(ExperimentalTime::class)
+    /**
+         * Converts the current UI state into a domain Entry.
+         *
+         * Produces a Habit when the state's recurrence is set and not `Recurrence.None`; otherwise produces a Task.
+         *
+         * @return An Entry: a `Habit` (with `startDate` set to `currentEntryDateOrToday`) when recurrence is present and not `Recurrence.None`, or a `Task` (with `dueDate` set to `currentEntryDateOrToday`) otherwise. The returned entry contains the state's title, description, time, reminder, and reminderType, and has creation/update timestamps and a generated id.
+         */
+        @OptIn(ExperimentalTime::class)
     internal fun UiState.toDomain(): Entry =
         if (data.recurrence != null && data.recurrence !is Recurrence.None) {
             Habit(

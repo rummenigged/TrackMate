@@ -21,6 +21,11 @@ class SyncEntryWorker
         @Assisted val params: WorkerParameters,
         private val syncPendingEntryUseCase: SyncPendingEntryUseCase
     ) : CoroutineWorker(context, params) {
+        /**
+         * Synchronizes a single entry whose ID is read from the worker's inputData and maps the sync outcome to a WorkManager result.
+         *
+         * @return `Result.success()` if synchronization succeeded, `Result.failure()` if the entry ID is missing or a permanent error occurred, and `Result.retry()` if a transient error occurred.
+         */
         override suspend fun doWork(): Result {
             val id = inputData.getString(EntrySyncWorkScheduler.ENTRY_ID_EXTRA) ?: return Result.failure()
 
