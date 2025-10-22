@@ -79,6 +79,10 @@ class AuthViewModel
                         .ShowError(
                             toUserMessage(result.throwable.message),
                         ).send()
+                    Logger.e(
+                        message = "App SignIn Error",
+                        throwable = result.throwable,
+                    )
                 }
                 is ResultOperation.Success -> {}
             }
