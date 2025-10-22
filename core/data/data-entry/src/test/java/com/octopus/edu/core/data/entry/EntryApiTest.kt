@@ -3,6 +3,7 @@ package com.octopus.edu.core.data.entry
 import android.os.Build
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.QuerySnapshot
@@ -11,9 +12,11 @@ import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.api.EntryApiImpl
 import com.octopus.edu.core.data.entry.api.EntryApiImpl.Companion.COLLECTION_DELETED_ENTRIES
 import com.octopus.edu.core.data.entry.api.EntryApiImpl.Companion.COLLECTION_ENTRIES
+import com.octopus.edu.core.data.entry.api.EntryApiImpl.Companion.COLLECTION_USERS
 import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.utils.toDTO
+import com.octopus.edu.core.data.entry.utils.toDto
 import com.octopus.edu.core.domain.model.DeletedEntry
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.mock
@@ -36,22 +39,29 @@ import kotlin.test.assertIs
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
 class EntryApiTest {
+    private val mockFirestore: FirebaseFirestore = mockk()
+    private val mockUserPreferencesProvider: UserPreferencesProvider = mockk()
+
     private val mockEntriesCollection = mockk<CollectionReference>(relaxed = true)
     private val mockDeletedEntriesCollection = mockk<CollectionReference>(relaxed = true)
-
-    private val mockFirestore = mockk<FirebaseFirestore>()
+    private val mockUserDocument = mockk<DocumentReference>(relaxed = true)
 
     private lateinit var entryApi: EntryApi
+    private val testUserId = "test-user-id"
 
     @Before
     fun setUp() {
-        every { mockFirestore.collection(COLLECTION_ENTRIES) } returns mockEntriesCollection
-        every { mockFirestore.collection(COLLECTION_DELETED_ENTRIES) } returns mockDeletedEntriesCollection
-        entryApi = EntryApiImpl(mockFirestore)
+        every { mockUserPreferencesProvider.userId } returns testUserId
+        every { mockFirestore.collection(COLLECTION_USERS).document(testUserId) } returns mockUserDocument
+
+        every { mockUserDocument.collection(COLLECTION_ENTRIES) } returns mockEntriesCollection
+        every { mockUserDocument.collection(COLLECTION_DELETED_ENTRIES) } returns mockDeletedEntriesCollection
+
+        entryApi = EntryApiImpl(mockFirestore, mockUserPreferencesProvider)
     }
 
     @Test
-    fun `saveEntry stores data in firestore`() =
+    fun `saveEntry stores data in correct user collection`() =
         runTest {
             val entry = Task.mock("1")
             val entryDto = entry.toDTO()
@@ -99,7 +109,7 @@ class EntryApiTest {
         }
 
     @Test
-    fun `fetchEntries returns Success on successful fetch`() =
+    fun `fetchEntries returns Success on successful fetch from correct user`() =
         runTest {
             // Given
             val mockSnapshot = mockk<QuerySnapshot>()
@@ -113,6 +123,7 @@ class EntryApiTest {
             // Then
             assertIs<NetworkResponse.Success<List<EntryDto>>>(response)
             assertEquals(expectedEntries, response.data)
+            verify { mockEntriesCollection.get() }
         }
 
     @Test
@@ -131,10 +142,11 @@ class EntryApiTest {
         }
 
     @Test
-    fun `pushDeletedEntry successfully pushes entry to firestore`() =
+    fun `pushDeletedEntry successfully pushes entry to correct user collection`() =
         runTest {
             // Given
             val deletedEntry = DeletedEntry("deleted-id-1", Instant.now())
+            val deletedEntryDto = deletedEntry.toDto()
             val idSlot = slot<String>()
             val dtoSlot = slot<DeletedEntryDto>()
             every {
@@ -149,10 +161,8 @@ class EntryApiTest {
                 mockDeletedEntriesCollection.document(any()).set(any())
             }
 
-            // Assert that the captured ID and DTO are correct
             assertEquals(deletedEntry.id, idSlot.captured)
-            assertEquals(deletedEntry.id, dtoSlot.captured.id)
-            assertEquals(deletedEntry.deletedAt.epochSecond, dtoSlot.captured.deletedAt.seconds)
+            assertEquals(deletedEntryDto, dtoSlot.captured)
         }
 
     @Test
@@ -172,7 +182,7 @@ class EntryApiTest {
         }
 
     @Test
-    fun `fetchDeletedEntry returns Success on successful fetch`() =
+    fun `fetchDeletedEntry returns Success on successful fetch from correct user`() =
         runTest {
             // Given
             val mockSnapshot = mockk<QuerySnapshot>()
@@ -186,6 +196,7 @@ class EntryApiTest {
             // Then
             assertIs<NetworkResponse.Success<List<DeletedEntryDto>>>(response)
             assertEquals(expectedDeletedEntries, response.data)
+            verify { mockDeletedEntriesCollection.get() }
         }
 
     @Test

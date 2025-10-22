@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.entry.api
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObjects
+import com.octopus.edu.core.data.entry.UserPreferencesProvider
 import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.utils.toDTO
@@ -17,15 +18,22 @@ class EntryApiImpl
     @Inject
     constructor(
         private val api: FirebaseFirestore,
+        private val userPreferencesProvider: UserPreferencesProvider
     ) : EntryApi {
+        private val userId
+            get() = userPreferencesProvider.userId
+        private val userCollection
+            get() = api.collection(COLLECTION_USERS).document(userId)
+
         companion object {
+            const val COLLECTION_USERS = "users"
             const val COLLECTION_ENTRIES = "entries"
             const val COLLECTION_DELETED_ENTRIES = "deleted_entries"
         }
 
         override suspend fun saveEntry(entry: Entry) {
             val entryDto = entry.toDTO()
-            api
+            userCollection
                 .collection(COLLECTION_ENTRIES)
                 .document(entryDto.id)
                 .set(entryDto)
@@ -34,7 +42,11 @@ class EntryApiImpl
 
         override suspend fun fetchEntries(): NetworkResponse<List<EntryDto>> =
             try {
-                val querySnapshot = api.collection(COLLECTION_ENTRIES).get().await()
+                val querySnapshot =
+                    userCollection
+                        .collection(COLLECTION_ENTRIES)
+                        .get()
+                        .await()
                 val entries = querySnapshot.toObjects<EntryDto>()
                 NetworkResponse.Success(entries)
             } catch (e: Exception) {
@@ -43,7 +55,7 @@ class EntryApiImpl
 
         override suspend fun pushDeletedEntry(entry: DeletedEntry) {
             val entryDto = entry.toDto()
-            api
+            userCollection
                 .collection(COLLECTION_DELETED_ENTRIES)
                 .document(entryDto.id)
                 .set(entryDto)
@@ -52,7 +64,7 @@ class EntryApiImpl
 
         override suspend fun fetchDeletedEntry(): NetworkResponse<List<DeletedEntryDto>> =
             try {
-                val querySnapshot = api.collection(COLLECTION_DELETED_ENTRIES).get().await()
+                val querySnapshot = userCollection.collection(COLLECTION_DELETED_ENTRIES).get().await()
                 val deletedEntries = querySnapshot.toObjects<DeletedEntryDto>()
                 NetworkResponse.Success(deletedEntries)
             } catch (e: Exception) {

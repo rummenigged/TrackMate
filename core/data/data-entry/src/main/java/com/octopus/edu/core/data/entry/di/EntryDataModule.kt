@@ -1,5 +1,6 @@
 package com.octopus.edu.core.data.entry.di
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.common.TransactionRunner
@@ -8,6 +9,8 @@ import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.dao.ReminderDao
 import com.octopus.edu.core.data.entry.BuildConfig
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
+import com.octopus.edu.core.data.entry.UserPreferencesProvider
+import com.octopus.edu.core.data.entry.UserPreferencesProviderImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.api.EntryApiImpl
 import com.octopus.edu.core.data.entry.store.EntryStore
@@ -30,7 +33,10 @@ import javax.inject.Singleton
 object EntryDataModule {
     @Provides
     @Singleton
-    fun provideEntryApi(api: FirebaseFirestore): EntryApi = EntryApiImpl(api)
+    fun provideEntryApi(
+        api: FirebaseFirestore,
+        userPreferencesProvider: UserPreferencesProvider
+    ): EntryApi = EntryApiImpl(api, userPreferencesProvider)
 
     @Provides
     @Singleton
@@ -74,4 +80,8 @@ object EntryDataModule {
     @Provides
     @Singleton
     fun providesEntryLocks(): ConcurrentHashMap<String, Mutex> = ConcurrentHashMap()
+
+    @Provides
+    @Singleton
+    fun provideUserPreferencesProvider(firebaseAuth: FirebaseAuth): UserPreferencesProvider = UserPreferencesProviderImpl(firebaseAuth)
 }

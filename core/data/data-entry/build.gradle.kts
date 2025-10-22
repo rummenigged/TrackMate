@@ -49,7 +49,6 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(platform(libs.firebase.bom))
 
     testImplementation(project(":core:testing"))
 }
