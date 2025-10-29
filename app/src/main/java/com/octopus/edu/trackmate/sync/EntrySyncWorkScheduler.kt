@@ -39,7 +39,7 @@ class EntrySyncWorkScheduler
             workManager.enqueueUniqueWork(
                 uniqueWorkName = UNIQUE_ENTRY_WORK_NAME_PREFIX + entryId,
                 existingWorkPolicy = ExistingWorkPolicy.REPLACE,
-                work,
+                request = work,
             )
         }
 
@@ -52,9 +52,9 @@ class EntrySyncWorkScheduler
                     .build()
 
             workManager.enqueueUniquePeriodicWork(
-                UNIQUE_BATCH_WORK_NAME,
-                ExistingPeriodicWorkPolicy.REPLACE,
-                work,
+                uniqueWorkName = UNIQUE_BATCH_WORK_NAME,
+                existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE,
+                request = work,
             )
         }
 

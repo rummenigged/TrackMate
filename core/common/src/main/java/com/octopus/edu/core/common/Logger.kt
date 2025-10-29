@@ -4,16 +4,14 @@ import timber.log.Timber
 import java.util.regex.Pattern
 
 object Logger {
+    private val ANONYMOUS_CLASS_PATTERN = Pattern.compile("\\$\\d+$")
+
     private fun getCallerTag(): String {
         val stackTrace = Throwable().stackTrace
         if (stackTrace.size > 3) {
             val callerElement = stackTrace[3]
             var tag = callerElement.className.substringAfterLast('.')
-            val anonymousClassPattern = Pattern.compile("\\$\\d+$")
-            val matcher = anonymousClassPattern.matcher(tag)
-            if (matcher.find()) {
-                tag = matcher.replaceAll("")
-            }
+            ANONYMOUS_CLASS_PATTERN.matcher(tag).replaceAll("")
             tag = tag.substringBefore('$')
             return tag.ifEmpty { "Logger" }
         }

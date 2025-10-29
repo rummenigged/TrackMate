@@ -56,7 +56,7 @@ dependencies {
 
     implementation(libs.room)
     ksp(libs.room.compiler)
-    api(libs.room.kotlinKtx)
+    implementation(libs.room.kotlinKtx)
     implementation(libs.dataStore)
 
     testImplementation(project(":core:testing"))

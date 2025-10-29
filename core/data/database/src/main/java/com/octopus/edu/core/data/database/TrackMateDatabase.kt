@@ -64,7 +64,7 @@ abstract class TrackMateDatabase : RoomDatabase() {
                     db.execSQL(
                         "CREATE TABLE IF NOT EXISTS `deleted_entry` " +
                             "(`id` TEXT NOT NULL, `deletedAt` INTEGER NOT NULL, " +
-                            "`syncState` TEXT NOT NULL, PRIMARY KEY(`id`))",
+                            "`syncState` TEXT NOT NULL DEFAULT 'PENDING', PRIMARY KEY(`id`))",
                     )
                 }
             }

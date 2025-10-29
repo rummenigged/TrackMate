@@ -21,7 +21,7 @@ interface DeletedEntryDao {
     fun streamPendingDeletedEntries(pending: SyncStateEntity = PENDING): Flow<List<DeletedEntryEntity>>
 
     @Query("UPDATE deleted_entry SET syncState = :syncState WHERE id = :id")
-    fun updateSyncState(
+    suspend fun updateSyncState(
         id: String,
         syncState: SyncStateEntity
     )

@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -22,6 +23,7 @@ class RoomTransactionRunnerTest {
     @After
     fun tearDown() {
         clearAllMocks()
+        unmockkAll()
     }
 
     @Test

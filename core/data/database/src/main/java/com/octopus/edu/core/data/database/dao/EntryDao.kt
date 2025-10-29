@@ -38,13 +38,13 @@ interface EntryDao {
     fun streamPendingEntries(pending: SyncStateEntity = PENDING): Flow<List<EntryEntity>>
 
     @Query("SELECT * FROM entries WHERE syncState = :pending")
-    fun getPendingEntries(pending: SyncStateEntity = PENDING): List<EntryEntity>
+    suspend fun getPendingEntries(pending: SyncStateEntity = PENDING): List<EntryEntity>
 
     @Query("DELETE from entries WHERE id = :entryId")
     suspend fun delete(entryId: String)
 
     @Query("UPDATE entries SET syncState = :syncState WHERE id = :entryId")
-    fun updateSyncState(
+    suspend fun updateSyncState(
         entryId: String,
         syncState: SyncStateEntity
     )
