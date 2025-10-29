@@ -36,11 +36,11 @@ class SyncPendingEntriesWorker
                 }
                 is ResultOperation.Success -> {
 //                     TODO: Implement a controlled concurrency to sync entries
-                    result.data.forEach { entry ->
-                        when (val result = syncPendingEntryUseCase(entry.id)) {
+                    for (entry in result.data) {
+                        when (val res = syncPendingEntryUseCase(entry.id)) {
                             Success -> {}
                             is Error -> {
-                                when (result.type) {
+                                when (res.type) {
                                     is PermanentError -> sawPermanentError = true
                                     is TransientError -> sawTransientError = true
                                 }
