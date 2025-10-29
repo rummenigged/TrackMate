@@ -1,6 +1,6 @@
-package com.octopus.edu.core.domain.credentialManager
+package com.octopus.edu.core.common.credentialService
 
-import android.content.Context
+import android.app.Activity
 
 sealed interface AuthResult {
     data class Success(
@@ -28,7 +28,7 @@ sealed interface SignInInitiationResult {
 }
 
 interface ICredentialService {
-    suspend fun initiateGoogleSignIn(context: Context): SignInInitiationResult
+    suspend fun initiateGoogleSignIn(context: Activity): SignInInitiationResult
 
     suspend fun clearUserCredentials(onError: (Throwable) -> Unit)
 }

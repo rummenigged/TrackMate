@@ -1,15 +1,15 @@
 package com.octopus.edu.feature.signin
 
-import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.octopus.edu.core.common.Logger
-import com.octopus.edu.core.domain.credentialManager.ICredentialService
-import com.octopus.edu.core.domain.credentialManager.SignInInitiationResult
+import com.octopus.edu.core.common.credentialService.ICredentialService
+import com.octopus.edu.core.common.credentialService.SignInInitiationResult
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.AuthRepository
 import com.octopus.edu.core.ui.common.AuthErrorMapper.toUserMessage
 import com.octopus.edu.core.ui.common.base.BaseViewModel
 import com.octopus.edu.feature.signin.AuthUiContract.UiEffect
+import com.octopus.edu.feature.signin.AuthUiContract.UiEffect.LaunchGoogleSignIn
 import com.octopus.edu.feature.signin.AuthUiContract.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -24,7 +24,7 @@ class AuthViewModel
         private val authRepository: AuthRepository
     ) : BaseViewModel<AuthUiContract.UiState, UiEffect, UiEvent>() {
         init {
-            checkAuthState()
+            observeAuthState()
         }
 
         override fun getInitialState(): AuthUiContract.UiState = AuthUiContract.UiState.Unknown
@@ -33,11 +33,12 @@ class AuthViewModel
             when (event) {
                 UiEvent.OnSignOut -> signOut()
                 UiEvent.MarkEffectConsumed -> markEffectAsConsumed()
-                is UiEvent.OnGoogleSignIn -> onGoogleSignIn(event.context)
+                UiEvent.OnLaunchGoogleSignIn -> setEffect(LaunchGoogleSignIn)
+                is UiEvent.OnGoogleSignedIn -> onGoogleSignedIn(event.result)
             }
         }
 
-        private fun checkAuthState() =
+        private fun observeAuthState() =
             viewModelScope.launch {
                 authRepository.isUserLoggedIn.collectLatest { isLoggedIn ->
                     if (isLoggedIn) {
@@ -48,10 +49,10 @@ class AuthViewModel
                 }
             }
 
-        private fun onGoogleSignIn(context: Context) =
+        private fun onGoogleSignedIn(result: SignInInitiationResult) =
             viewModelScope.launch {
                 setState { AuthUiContract.UiState.Authenticating }
-                when (val result = credentialService.initiateGoogleSignIn(context)) {
+                when (result) {
                     is SignInInitiationResult.Authenticated -> {
                         signIn(result.idToken)
                     }

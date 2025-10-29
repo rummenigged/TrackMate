@@ -5,7 +5,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.octopus.edu.core.common.credentialService.AndroidCredentialManagerService
-import com.octopus.edu.core.domain.credentialManager.ICredentialService
+import com.octopus.edu.core.common.credentialService.ICredentialService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

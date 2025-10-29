@@ -1,6 +1,6 @@
 package com.octopus.edu.core.common.credentialService
 
-import android.content.Context
+import android.app.Activity
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -10,8 +10,6 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-import com.octopus.edu.core.domain.credentialManager.ICredentialService
-import com.octopus.edu.core.domain.credentialManager.SignInInitiationResult
 import javax.inject.Inject
 
 class AndroidCredentialManagerService
@@ -20,7 +18,7 @@ class AndroidCredentialManagerService
         private val credentialRequest: GetCredentialRequest,
         private val credentialManager: CredentialManager,
     ) : ICredentialService {
-        override suspend fun initiateGoogleSignIn(context: Context): SignInInitiationResult =
+        override suspend fun initiateGoogleSignIn(context: Activity): SignInInitiationResult =
             try {
                 val credential =
                     credentialManager
