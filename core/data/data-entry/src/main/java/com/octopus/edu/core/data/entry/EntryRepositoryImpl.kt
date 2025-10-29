@@ -14,6 +14,7 @@ import com.octopus.edu.core.data.entry.di.DatabaseErrorClassifierQualifier
 import com.octopus.edu.core.data.entry.di.NetworkErrorClassifierQualifier
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
+import com.octopus.edu.core.data.entry.utils.EntryNotFoundException
 import com.octopus.edu.core.data.entry.utils.getReminderAsEntity
 import com.octopus.edu.core.data.entry.utils.toDomain
 import com.octopus.edu.core.data.entry.utils.toEntity
@@ -31,7 +32,6 @@ import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.domain.utils.ErrorClassifier
 import com.octopus.edu.core.domain.utils.safeCall
 import com.octopus.edu.core.network.utils.NetworkResponse
-import jakarta.inject.Inject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -45,6 +45,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 
 internal class EntryRepositoryImpl
     @Inject
@@ -140,7 +141,7 @@ internal class EntryRepositoryImpl
                 entryStore
                     .getEntryById(id)
                     ?.toDomain()
-                    ?: throw NoSuchElementException("Invalid or missing entry with id $id")
+                    ?: throw EntryNotFoundException("Invalid or missing entry with id $id")
             }
 
         override suspend fun deleteEntry(entryId: String): ResultOperation<Unit> =
@@ -205,7 +206,7 @@ internal class EntryRepositoryImpl
                 entryStore
                     .getDeletedEntry(entryId)
                     ?.toDomain()
-                    ?: throw NoSuchElementException("Invalid or missing deleted entry with id $entryId")
+                    ?: throw EntryNotFoundException("Invalid or missing deleted entry with id $entryId")
             }
 
         override suspend fun pushDeletedEntry(deletedEntry: DeletedEntry): ResultOperation<Unit> =
@@ -231,18 +232,18 @@ internal class EntryRepositoryImpl
         private suspend fun syncEntrySafely(entry: EntryDto) {
             dbSemaphore.withPermit {
                 val mutex = entryLocks.computeIfAbsent(entry.id) { Mutex() }
-                mutex.withLock {
-                    try {
+                try {
+                    mutex.withLock {
                         entryStore.upsertIfNewest(entry.toEntity())
-                    } catch (e: Exception) {
-                        entryStore.updateEntrySyncState(entry.id, CONFLICT)
-                        Logger.e(
-                            message = "Error to save entry ${entry.id}",
-                            throwable = e,
-                        )
-                    } finally {
-                        entryLocks.remove(entry.id)
                     }
+                } catch (e: Exception) {
+                    entryStore.updateEntrySyncState(entry.id, CONFLICT)
+                    Logger.e(
+                        message = "Error to save entry ${entry.id}",
+                        throwable = e,
+                    )
+                } finally {
+                    entryLocks.remove(entry.id, mutex)
                 }
             }
         }
@@ -250,19 +251,19 @@ internal class EntryRepositoryImpl
         private suspend fun syncDeletedEntrySafely(entry: DeletedEntryDto) {
             dbSemaphore.withPermit {
                 val mutex = entryLocks.computeIfAbsent(entry.id) { Mutex() }
-                mutex.withLock {
-                    try {
+                try {
+                    mutex.withLock {
                         val localEntry = entryStore.getEntryById(entry.id)
                         if (localEntry != null) {
                             entryStore.deleteEntry(entry.id, SYNCED)
                         } else {
                             entryStore.updateDeletedEntrySyncState(entry.id, SYNCED)
                         }
-                    } catch (e: Exception) {
-                        Logger.e(message = "Error syncing deleted entry ${entry.id}", throwable = e)
-                    } finally {
-                        entryLocks.remove(entry.id)
                     }
+                } catch (e: Exception) {
+                    Logger.e(message = "Error syncing deleted entry ${entry.id}", throwable = e)
+                } finally {
+                    entryLocks.remove(entry.id, mutex)
                 }
             }
         }
