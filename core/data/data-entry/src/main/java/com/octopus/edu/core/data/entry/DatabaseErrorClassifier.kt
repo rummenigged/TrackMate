@@ -3,6 +3,7 @@ package com.octopus.edu.core.data.entry
 import android.database.sqlite.SQLiteCantOpenDatabaseException
 import android.database.sqlite.SQLiteDiskIOException
 import android.database.sqlite.SQLiteFullException
+import com.octopus.edu.core.data.entry.utils.EntryNotFoundException
 import com.octopus.edu.core.domain.utils.BaseErrorClassifier
 import java.sql.SQLTimeoutException
 
@@ -12,7 +13,7 @@ class DatabaseErrorClassifier : BaseErrorClassifier() {
             is SQLiteDiskIOException,
             is SQLiteFullException,
             is SQLTimeoutException,
-            is NoSuchElementException,
+            is EntryNotFoundException,
             is SQLiteCantOpenDatabaseException -> true
             else -> false
         }

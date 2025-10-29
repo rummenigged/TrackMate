@@ -1,6 +1,7 @@
 package com.octopus.edu.core.data.entry.errorClassifier
 
 import com.octopus.edu.core.data.entry.DatabaseErrorClassifier
+import com.octopus.edu.core.data.entry.NetworkErrorClassifier
 import com.octopus.edu.core.data.entry.SyncErrorClassifier
 import com.octopus.edu.core.domain.model.common.ErrorType
 import org.junit.Test
@@ -10,7 +11,7 @@ import kotlin.test.assertIs
 
 class SyncErrorClassifierTest {
     private val databaseErrorClassifier = DatabaseErrorClassifier()
-    private val networkErrorClassifier = DatabaseErrorClassifier()
+    private val networkErrorClassifier = NetworkErrorClassifier()
     private val errorClassifier =
         SyncErrorClassifier(
             databaseErrorClassifier,

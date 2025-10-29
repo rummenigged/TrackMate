@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteCantOpenDatabaseException
 import android.database.sqlite.SQLiteDiskIOException
 import android.database.sqlite.SQLiteFullException
 import com.octopus.edu.core.data.entry.DatabaseErrorClassifier
+import com.octopus.edu.core.data.entry.utils.EntryNotFoundException
 import com.octopus.edu.core.domain.model.common.ErrorType
 import org.junit.Test
 import java.sql.SQLTimeoutException
@@ -49,9 +50,9 @@ class DatabaseErrorClassifierTest {
     }
 
     @Test
-    fun `classify returns TransientError for NoSuchElementException`() {
+    fun `classify returns TransientError for EntryNotFoundException`() {
         // Given
-        val error = NoSuchElementException("Element not found")
+        val error = EntryNotFoundException("Element not found")
 
         // When
         val result = classifier.classify(error)

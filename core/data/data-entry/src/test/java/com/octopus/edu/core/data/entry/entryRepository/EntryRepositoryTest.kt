@@ -8,6 +8,7 @@ import com.octopus.edu.core.data.entry.EntryRepositoryImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
+import com.octopus.edu.core.data.entry.utils.EntryNotFoundException
 import com.octopus.edu.core.data.entry.utils.getReminderAsEntity
 import com.octopus.edu.core.data.entry.utils.toDomain
 import com.octopus.edu.core.data.entry.utils.toEntity
@@ -336,18 +337,18 @@ class EntryRepositoryTest {
         }
 
     @Test
-    fun `getEntryById throws NoSuchElementException when not found`() =
+    fun `getEntryById throws EntryNotFoundException when not found`() =
         runTest {
             val expectedEntryEntity = testTaskDomain.toEntity()
             every {
                 databaseErrorClassifier.classify(any())
-            } returns ErrorType.TransientError(NoSuchElementException())
+            } returns ErrorType.TransientError(EntryNotFoundException())
             coEvery { entryStore.getEntryById(expectedEntryEntity.id) } returns null
 
             val result = repository.getEntryById(expectedEntryEntity.id)
 
             assertTrue(result is ResultOperation.Error)
-            assertTrue((result as ResultOperation.Error).throwable is NoSuchElementException)
+            assertTrue((result as ResultOperation.Error).throwable is EntryNotFoundException)
             coVerify(exactly = 1) { entryStore.getEntryById(expectedEntryEntity.id) }
         }
 
@@ -494,7 +495,7 @@ class EntryRepositoryTest {
             val entryId = "non-existent"
             every {
                 databaseErrorClassifier.classify(any())
-            } returns ErrorType.TransientError(NoSuchElementException())
+            } returns ErrorType.TransientError(EntryNotFoundException())
             coEvery { entryStore.getDeletedEntry(entryId) } returns null
 
             // When
@@ -502,7 +503,7 @@ class EntryRepositoryTest {
 
             // Then
             kotlin.test.assertTrue(result is ResultOperation.Error)
-            kotlin.test.assertTrue(result.throwable is NoSuchElementException)
+            kotlin.test.assertTrue(result.throwable is EntryNotFoundException)
         }
 
     @Test
