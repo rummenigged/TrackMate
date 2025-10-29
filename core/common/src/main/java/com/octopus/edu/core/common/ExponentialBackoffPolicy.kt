@@ -1,7 +1,6 @@
 package com.octopus.edu.core.common
 
 import com.octopus.edu.core.domain.model.common.ErrorType
-import com.octopus.edu.core.domain.utils.RetryPolicy
 import kotlinx.coroutines.delay
 import kotlin.math.min
 
@@ -14,7 +13,9 @@ class ExponentialBackoffPolicy(
         attempt: Long
     ): Boolean {
         if (errorType is ErrorType.PermanentError) return false
-        val delayMs = min(initialDelay * (attempt + 1), maxDelay)
+        val exp = (attempt.coerceAtLeast(0)).coerceAtMost(30)
+        val factor = 1L shl exp.toInt()
+        val delayMs = min(initialDelay * factor, maxDelay)
         delay(delayMs)
         return true
     }

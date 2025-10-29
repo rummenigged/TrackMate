@@ -63,15 +63,14 @@ class ExponentialBackoffPolicyTest {
         runTest {
             // Given
             val initialDelay = 1000L
-            val policy = ExponentialBackoffPolicy(initialDelay = initialDelay, maxDelay = 10000)
+            val policy = ExponentialBackoffPolicy(initialDelay = initialDelay, maxDelay = 30000)
             val error = ErrorType.TransientError(Exception("Temporary failure"))
 
             // When
-            policy.shouldRetry(error, attempt = 2)
+            policy.shouldRetry(error, attempt = 4)
 
             // Then
-            // Delay should be initialDelay * (2 + 1) = 3000
-            assertEquals(3000, currentTime)
+            assertEquals(16000, currentTime)
         }
 
     @Test
