@@ -205,7 +205,7 @@ class EntryStoreTest {
         runTest {
             // Given
             val exception = RuntimeException("Database error")
-            every { entryDao.getPendingEntries() } throws exception
+            coEvery { entryDao.getPendingEntries() } throws exception
 
             // When & Then
             val thrownException =
@@ -213,7 +213,7 @@ class EntryStoreTest {
                     entryStore.getPendingEntries()
                 }
             assertEquals(exception, thrownException)
-            verify(exactly = 1) { entryDao.getPendingEntries() }
+            coVerify(exactly = 1) { entryDao.getPendingEntries() }
         }
 
     @Test
