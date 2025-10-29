@@ -38,10 +38,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.R
 import com.octopus.edu.core.design.theme.TrackMateTheme
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import java.time.temporal.WeekFields
 import java.util.Locale
 
 @Composable
@@ -57,7 +57,9 @@ fun TrackMateDatePicker(
     val firstDayOfMonth = currentMonth.atDay(1)
     val lastDayOfMonth = currentMonth.atEndOfMonth()
     val daysInMonth = (1..lastDayOfMonth.dayOfMonth).map { currentMonth.atDay(it) }
-    val leadingEmptyDays = (firstDayOfMonth.dayOfWeek.value % 7)
+    val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
+    val leadingEmptyDays = (firstDayOfMonth.dayOfWeek.value - firstDayOfWeek.value + 7) % 7
+    val orderedDays = (0..6).map { firstDayOfWeek.plus(it.toLong()) }
     val allDays = List(leadingEmptyDays) { null } + daysInMonth
 
     Column(modifier = modifier.background(color = colorScheme.surface)) {
@@ -68,9 +70,9 @@ fun TrackMateDatePicker(
         )
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            DayOfWeek.entries.forEach {
+            orderedDays.forEach { day ->
                 Text(
-                    text = it.minus(1).getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                    text = day.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = typography.labelMedium,

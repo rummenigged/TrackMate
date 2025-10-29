@@ -36,7 +36,7 @@ fun WeekCalendar(
     pagerState: PagerState,
     modifier: Modifier = Modifier,
 ) = trace("WeekCalendar") {
-    val today = LocalDate.now()
+    val today = remember { LocalDate.now() }
     val startDate =
         remember(today) {
             if (today.dayOfWeek == DayOfWeek.SUNDAY) {
