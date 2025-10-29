@@ -16,33 +16,50 @@ class SyncPendingEntryUseCase
     ) {
         suspend operator fun invoke(entryId: String): SyncResult =
             when (val result = entryRepository.getEntryById(entryId)) {
+                is ResultOperation.Success -> pushEntry(result.data)
+
                 is ResultOperation.Error -> {
                     if (result.isRetriable) {
                         SyncResult.Error(TransientError(result.throwable))
                     } else {
-                        entryRepository.updateEntrySyncState(entryId, SyncState.FAILED)
-                        SyncResult.Error(PermanentError(result.throwable))
+                        updateEntrySyncState(entryId, SyncState.FAILED)
+                            .takeIf { it is SyncResult.Error }
+                            ?: SyncResult.Error(PermanentError(result.throwable))
                     }
-                }
-
-                is ResultOperation.Success -> {
-                    pushEntry(result.data)
                 }
             }
 
         private suspend fun pushEntry(entry: Entry): SyncResult =
             when (val result = entryRepository.pushEntry(entry)) {
+                is ResultOperation.Success -> {
+                    // TODO: Figure out how to log when gets error as it is the domain
+                    updateEntrySyncState(entry.id, SyncState.SYNCED)
+                        .takeIf { it is SyncResult.Success }
+                        ?: SyncResult.Success
+                }
                 is ResultOperation.Error -> {
                     if (result.isRetriable) {
                         SyncResult.Error(TransientError(result.throwable))
                     } else {
-                        entryRepository.updateEntrySyncState(entry.id, SyncState.FAILED)
+                        updateEntrySyncState(entry.id, SyncState.FAILED)
+                            .takeIf { it is SyncResult.Error }
+                            ?: SyncResult.Error(PermanentError(result.throwable))
+                    }
+                }
+            }
+
+        private suspend fun updateEntrySyncState(
+            entryId: String,
+            state: SyncState
+        ): SyncResult =
+            when (val result = entryRepository.updateEntrySyncState(entryId, state)) {
+                is ResultOperation.Error -> {
+                    if (result.isRetriable) {
+                        SyncResult.Error(TransientError(result.throwable))
+                    } else {
                         SyncResult.Error(PermanentError(result.throwable))
                     }
                 }
-                is ResultOperation.Success -> {
-                    entryRepository.updateEntrySyncState(entry.id, SyncState.SYNCED)
-                    SyncResult.Success
-                }
+                is ResultOperation.Success -> SyncResult.Success
             }
     }
