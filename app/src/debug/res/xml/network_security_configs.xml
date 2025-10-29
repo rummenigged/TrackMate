@@ -3,4 +3,6 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">192.168.0.3</domain>
     </domain-config>
+
+    <base-config cleartextTrafficPermitted="false"/>
 </network-security-config>
