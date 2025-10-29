@@ -19,7 +19,11 @@ suspend fun <T : Any> safeCall(
             if (onErrorReturn != null) {
                 ResultOperation.Success(onErrorReturn())
             } else {
-                doOnError?.invoke(e)
+                try {
+                    doOnError?.invoke(e)
+                } catch (errorHandlerException: Exception) {
+                    e.addSuppressed(errorHandlerException)
+                }
                 if (isRetriableWhen?.invoke(e) == true) {
                     ResultOperation.Error(e, true)
                 } else {
