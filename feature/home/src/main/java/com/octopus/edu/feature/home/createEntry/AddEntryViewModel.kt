@@ -16,9 +16,9 @@ import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.toDomain
 import com.octopus.edu.feature.home.models.EntryCreationData
 import com.octopus.edu.feature.home.models.empty
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 import java.time.LocalTime
+import javax.inject.Inject
 
 @HiltViewModel
 class AddEntryViewModel

@@ -1,4 +1,4 @@
-package com.octopus.edu.core.domain.utils
+package com.octopus.edu.core.common
 
 import com.octopus.edu.core.domain.model.common.ErrorType
 

@@ -5,8 +5,8 @@ import com.octopus.edu.core.data.auth.authAdapter.AuthAdapter
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.AuthRepository
 import com.octopus.edu.core.domain.utils.safeCall
-import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 class AuthRepositoryImpl
     @Inject

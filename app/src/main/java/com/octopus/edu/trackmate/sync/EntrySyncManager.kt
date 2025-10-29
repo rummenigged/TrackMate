@@ -2,11 +2,11 @@ package com.octopus.edu.trackmate.sync
 
 import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.common.Logger
+import com.octopus.edu.core.common.RetryPolicy
 import com.octopus.edu.core.data.entry.di.SyncErrorClassifierQualifier
 import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.domain.scheduler.EntrySyncScheduler
 import com.octopus.edu.core.domain.utils.ErrorClassifier
-import com.octopus.edu.core.domain.utils.RetryPolicy
 import com.octopus.edu.trackmate.di.ApplicationScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +34,7 @@ class EntrySyncManager
             }
 
         fun start() {
+            Logger.d("start started")
             scope.launch(dispatcherProvider.io + exceptionHandler) {
                 syncScheduler.scheduleBatchSync()
 

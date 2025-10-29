@@ -10,8 +10,8 @@ import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.ENTRY_ID_E
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_WORK_NAME
 import com.octopus.edu.trackmate.workManager.reminder.ReminderWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
-import jakarta.inject.Inject
 import java.time.Duration
+import javax.inject.Inject
 
 object ReminderConstants {
     const val ENTRY_ID_EXTRA = "entry_id"

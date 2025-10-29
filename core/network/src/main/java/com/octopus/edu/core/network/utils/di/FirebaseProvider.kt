@@ -38,7 +38,7 @@ object FirebaseProvider {
                     useEmulator(host, 9099)
                 } catch (e: IllegalStateException) {
                     Logger.w(
-                        message = "Firestore emulator already configured or instance used",
+                        message = "Firebase Auth emulator already configured or instance used",
                         throwable = e,
                     )
                 }

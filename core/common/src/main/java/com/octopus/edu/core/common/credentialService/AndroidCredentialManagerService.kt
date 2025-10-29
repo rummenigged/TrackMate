@@ -12,7 +12,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.octopus.edu.core.domain.credentialManager.ICredentialService
 import com.octopus.edu.core.domain.credentialManager.SignInInitiationResult
-import jakarta.inject.Inject
+import javax.inject.Inject
 
 class AndroidCredentialManagerService
     @Inject

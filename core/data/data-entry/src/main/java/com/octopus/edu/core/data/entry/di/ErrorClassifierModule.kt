@@ -8,7 +8,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import jakarta.inject.Qualifier
+import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

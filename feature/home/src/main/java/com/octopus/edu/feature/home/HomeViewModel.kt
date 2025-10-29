@@ -9,13 +9,13 @@ import com.octopus.edu.feature.home.HomeUiContract.UiEffect
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import javax.inject.Inject
 
 @HiltViewModel
 internal class HomeViewModel

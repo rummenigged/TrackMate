@@ -1,5 +1,6 @@
 package com.octopus.edu.trackmate
 
+import com.octopus.edu.core.common.RetryPolicy
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.common.ErrorType
@@ -7,7 +8,6 @@ import com.octopus.edu.core.domain.model.mockList
 import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.domain.scheduler.EntrySyncScheduler
 import com.octopus.edu.core.domain.utils.ErrorClassifier
-import com.octopus.edu.core.domain.utils.RetryPolicy
 import com.octopus.edu.core.testing.TestDispatchers
 import com.octopus.edu.trackmate.sync.EntrySyncManager
 import io.mockk.coEvery

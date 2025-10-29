@@ -5,7 +5,7 @@ import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.common.ExponentialBackoffPolicy
 import com.octopus.edu.core.common.ExponentialBackoffPolicy.Companion.DEFAULT_INITIAL_DELAY
 import com.octopus.edu.core.common.ExponentialBackoffPolicy.Companion.DEFAULT_MAX_DELAY
-import com.octopus.edu.core.domain.utils.RetryPolicy
+import com.octopus.edu.core.common.RetryPolicy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,7 +18,7 @@ object CoreModule {
     fun provideDispatcherProvider(): DispatcherProvider = CoroutineDispatcherProvider()
 
     @Provides
-    fun provideRetryPolice(): RetryPolicy =
+    fun provideRetryPolicy(): RetryPolicy =
         ExponentialBackoffPolicy(
             initialDelay = DEFAULT_INITIAL_DELAY,
             maxDelay = DEFAULT_MAX_DELAY,
