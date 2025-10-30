@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.entry
 
 import android.os.Build
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -185,8 +186,13 @@ class EntryApiTest {
     fun `fetchDeletedEntry returns Success on successful fetch from correct user`() =
         runTest {
             // Given
+            val now = Timestamp(Instant.now())
             val mockSnapshot = mockk<QuerySnapshot>()
-            val expectedDeletedEntries = listOf(DeletedEntryDto(id = "1"), DeletedEntryDto(id = "2"))
+            val expectedDeletedEntries =
+                listOf(
+                    DeletedEntryDto(id = "1", deletedAt = now),
+                    DeletedEntryDto(id = "2", deletedAt = now),
+                )
             every { mockSnapshot.toObjects<DeletedEntryDto>() } returns expectedDeletedEntries
             every { mockDeletedEntriesCollection.get() } returns Tasks.forResult(mockSnapshot)
 
