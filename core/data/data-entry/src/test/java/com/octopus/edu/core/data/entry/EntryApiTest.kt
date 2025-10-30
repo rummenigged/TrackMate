@@ -34,7 +34,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.Instant
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 
 @RunWith(RobolectricTestRunner::class)
@@ -82,31 +81,32 @@ class EntryApiTest {
     fun `saveEntry throws FirebaseFirestoreException when permission denied`() =
         runTest {
             val entry = Task.mock("2")
-            every { mockEntriesCollection.document(any()).set(any()) } returns
-                Tasks.forException(
-                    FirebaseFirestoreException(
-                        "Permission Denied",
-                        FirebaseFirestoreException.Code.PERMISSION_DENIED,
-                    ),
+            val expectedException =
+                FirebaseFirestoreException(
+                    "Permission Denied",
+                    FirebaseFirestoreException.Code.PERMISSION_DENIED,
                 )
+            every { mockEntriesCollection.document(any()).set(any()) } returns
+                Tasks.forException(expectedException)
 
-            assertFailsWith<FirebaseFirestoreException> {
-                entryApi.saveEntry(entry)
-            }
+            val response = entryApi.saveEntry(entry)
+
+            assertIs<NetworkResponse.Error>(response)
+            assertEquals(expectedException, response.exception)
         }
 
     @Test
     fun `saveEntry throws generic exception`() =
         runTest {
             val entry = Task.mock("2")
+            val expectedException = IllegalStateException("Something went wrong")
             every { mockEntriesCollection.document(any()).set(any()) } returns
-                Tasks.forException(
-                    IllegalStateException("Unexpected Error"),
-                )
+                Tasks.forException(expectedException)
 
-            assertFailsWith<IllegalStateException> {
-                entryApi.saveEntry(entry)
-            }
+            val response = entryApi.saveEntry(entry)
+
+            assertIs<NetworkResponse.Error>(response)
+            assertEquals(expectedException, response.exception)
         }
 
     @Test
@@ -171,15 +171,17 @@ class EntryApiTest {
         runTest {
             // Given
             val deletedEntry = DeletedEntry("deleted-id-2", Instant.now())
-            val exception = FirebaseFirestoreException("Permission Denied", FirebaseFirestoreException.Code.PERMISSION_DENIED)
+            val expectedException = FirebaseFirestoreException("Permission Denied", FirebaseFirestoreException.Code.PERMISSION_DENIED)
             every {
                 mockDeletedEntriesCollection.document(any()).set(any())
-            } returns Tasks.forException(exception)
+            } returns Tasks.forException(expectedException)
 
-            // When & Then
-            assertFailsWith<FirebaseFirestoreException> {
-                entryApi.pushDeletedEntry(deletedEntry)
-            }
+            // When
+            val response = entryApi.pushDeletedEntry(deletedEntry)
+
+            // Then
+            assertIs<NetworkResponse.Error>(response)
+            assertEquals(expectedException, response.exception)
         }
 
     @Test
