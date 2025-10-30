@@ -40,8 +40,8 @@ import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
 import com.octopus.edu.feature.home.models.EntryCreationData
 import kotlinx.coroutines.delay
 import java.time.LocalDate

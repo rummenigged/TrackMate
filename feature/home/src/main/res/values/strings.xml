@@ -34,4 +34,5 @@
     <string name="current_month_and_day" type="id">%1$s, %2$s</string>
     <string name="task_creation_description_placeholder">Description</string>
     <string name="formatted_time_hh_mm">%1$02d:%2$02d</string>
+    <string name="entry_successfully_created">Task Successfully Created</string>
 </resources>

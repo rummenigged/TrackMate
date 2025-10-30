@@ -14,6 +14,16 @@ sealed class ResultOperation<out T : Any> {
     ) : ResultOperation<Nothing>()
 }
 
+suspend inline fun <T : Any> ResultOperation<T>.doOnSuccess(block: suspend (T) -> Unit): ResultOperation<T> {
+    if (this is ResultOperation.Success) block(data)
+    return this
+}
+
+suspend inline fun <T : Any> ResultOperation<T>.doOnError(block: suspend (Throwable, Boolean) -> Unit): ResultOperation<T> {
+    if (this is ResultOperation.Error) block(throwable, isRetriable)
+    return this
+}
+
 fun <T : Any> Flow<ResultOperation<T>>.retryOnResultError(maxRetries: Int = 3): Flow<ResultOperation<T>> =
     flow {
         var retryCount = 0

@@ -28,8 +28,8 @@ import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateDialog
 import com.octopus.edu.core.domain.model.Recurrence
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.getRecurrenceAsStringRes
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.getRecurrenceAsStringRes
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable

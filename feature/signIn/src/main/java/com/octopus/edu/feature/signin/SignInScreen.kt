@@ -34,6 +34,8 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.PrimaryIconButton
 import com.octopus.edu.core.design.theme.utils.LaunchedEffectAndCollectLatest
+import com.octopus.edu.core.ui.common.compositionLocals.LocalCredentialManager
+import com.octopus.edu.core.ui.common.rememberGoogleSignInLauncher
 import com.octopus.edu.feature.signin.AuthUiContract.UiEffect
 import com.octopus.edu.feature.signin.AuthUiContract.UiEvent
 import com.octopus.edu.feature.signin.AuthUiContract.UiState
@@ -71,6 +73,13 @@ private fun EffectHandler(
     snackBarHostState: SnackbarHostState,
     onEvent: (UiEvent) -> Unit
 ) {
+    val credentialManager = LocalCredentialManager.current
+    val googleSignInLauncher =
+        rememberGoogleSignInLauncher(
+            credentialService = credentialManager,
+            onSignInResult = { result -> onEvent(UiEvent.OnGoogleSignedIn(result)) },
+        )
+
     LaunchedEffectAndCollectLatest(
         uiEffect,
         onEffectConsumed = { onEvent(UiEvent.MarkEffectConsumed) },
@@ -81,6 +90,8 @@ private fun EffectHandler(
                     snackBarHostState.showSnackbar(message)
                 }
             }
+
+            UiEffect.LaunchGoogleSignIn -> googleSignInLauncher.launch()
         }
     }
 }
@@ -142,7 +153,7 @@ private fun SigInInButtonWithLoading(
         PrimaryIconButton(
             text = stringResource(R.string.login_google),
             iconRes = com.octopus.edu.core.design.R.drawable.ic_google_new,
-            onClick = { onEvent(UiEvent.OnGoogleSignIn) },
+            onClick = { onEvent(UiEvent.OnLaunchGoogleSignIn) },
         )
     }
 }
