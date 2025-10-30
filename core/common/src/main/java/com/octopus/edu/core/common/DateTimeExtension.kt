@@ -4,6 +4,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 
 fun LocalDate.isToday(): Boolean = this == LocalDate.now()
 
@@ -15,13 +16,19 @@ fun Long.toLocalDate(): LocalDate = Instant.ofEpochMilli(this).atZone(ZoneId.sys
 
 fun Long.toLocalTime(): LocalTime = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalTime()
 
-fun Long.toInstant(): Instant = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toInstant()
+fun Long.toInstant(): Instant = Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toInstant()
 
-fun LocalDate.toEpocMilliseconds(): Long = this.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+fun LocalDate.toEpochMilli(): Long =
+    this
+        .atStartOfDay(ZoneId.systemDefault())
+        .withZoneSameInstant(ZoneOffset.UTC)
+        .toInstant()
+        .toEpochMilli()
 
 fun LocalTime.toEpochMilli(): Long =
     this
-        .atDate(LocalDate.of(1970, 1, 1)) // reference epoch date
+        .atDate(LocalDate.now()) // reference epoch date
         .atZone(ZoneId.systemDefault())
+        .withZoneSameInstant(ZoneOffset.UTC)
         .toInstant()
         .toEpochMilli()

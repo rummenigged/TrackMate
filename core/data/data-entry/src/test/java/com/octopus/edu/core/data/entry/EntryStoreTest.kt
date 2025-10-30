@@ -2,7 +2,7 @@ package com.octopus.edu.core.data.entry
 
 import app.cash.turbine.test
 import com.octopus.edu.core.common.TransactionRunner
-import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.data.database.dao.DeletedEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
@@ -43,7 +43,7 @@ class EntryStoreTest {
 
     private val testEntryId = "test-id"
     private val testSyncState = EntryEntity.SyncStateEntity.SYNCED
-    private val testDate = LocalDate.now().toEpocMilliseconds()
+    private val testDate = LocalDate.now().toEpochMilli()
     private val testEntry =
         EntryEntity(
             id = testEntryId,
@@ -81,7 +81,7 @@ class EntryStoreTest {
                         dueDate = null,
                         recurrence = EntryEntity.Recurrence.DAILY,
                         streakCount = 3,
-                        lastCompletedDate = LocalDate.now().toEpocMilliseconds(),
+                        lastCompletedDate = LocalDate.now().toEpochMilli(),
                         createdAt = System.currentTimeMillis(),
                         updatedAt = null,
                         syncState = EntryEntity.SyncStateEntity.SYNCED,
@@ -110,7 +110,7 @@ class EntryStoreTest {
                         title = "Submit report",
                         description = "Project summary",
                         isDone = true,
-                        dueDate = LocalDate.now().plusDays(1).toEpocMilliseconds(),
+                        dueDate = LocalDate.now().plusDays(1).toEpochMilli(),
                         recurrence = null,
                         streakCount = null,
                         lastCompletedDate = null,

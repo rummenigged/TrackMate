@@ -2,7 +2,7 @@ package com.octopus.edu.core.data.entry
 
 import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.common.Logger
-import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.CONFLICT
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.PENDING
@@ -103,7 +103,7 @@ internal class EntryRepositoryImpl
 
         override fun getEntriesVisibleOn(date: LocalDate): Flow<ResultOperation<List<Entry>>> =
             entryStore
-                .getEntriesBeforeOrOn(date.toEpocMilliseconds())
+                .getEntriesBeforeOrOn(date.toEpochMilli())
                 .map { entries ->
                     ResultOperation.Success(
                         entries

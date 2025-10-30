@@ -1,6 +1,6 @@
 package com.octopus.edu.core.data.entry.entryRepository
 
-import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
@@ -119,7 +119,7 @@ class EntryRepositoryTest {
                         title = "Task 1",
                         description = "desc",
                         isDone = false,
-                        dueDate = LocalDate.now().toEpocMilliseconds(),
+                        dueDate = LocalDate.now().toEpochMilli(),
                         recurrence = null,
                         streakCount = null,
                         lastCompletedDate = null,
@@ -156,7 +156,7 @@ class EntryRepositoryTest {
                         dueDate = null,
                         recurrence = EntryEntity.Recurrence.DAILY,
                         streakCount = 2,
-                        lastCompletedDate = LocalDate.now().toEpocMilliseconds(),
+                        lastCompletedDate = LocalDate.now().toEpochMilli(),
                         createdAt = System.currentTimeMillis(),
                         updatedAt = null,
                         syncState = SyncStateEntity.SYNCED,
@@ -187,7 +187,7 @@ class EntryRepositoryTest {
                         title = "Valid Task",
                         description = "",
                         isDone = false,
-                        dueDate = LocalDate.now().toEpocMilliseconds(),
+                        dueDate = LocalDate.now().toEpochMilli(),
                         recurrence = null,
                         createdAt = System.currentTimeMillis(),
                         syncState = SyncStateEntity.SYNCED,
@@ -238,7 +238,7 @@ class EntryRepositoryTest {
                         title = "Invalid Task",
                         description = "",
                         isDone = false,
-                        dueDate = LocalDate.now().toEpocMilliseconds(),
+                        dueDate = LocalDate.now().toEpochMilli(),
                         createdAt = System.currentTimeMillis(),
                         syncState = SyncStateEntity.SYNCED,
                     ),

@@ -1,6 +1,6 @@
 package com.octopus.edu.core.data.entry
 
-import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.common.toInstant
 import com.octopus.edu.core.common.toLocalDate
 import com.octopus.edu.core.data.database.entity.EntryEntity
@@ -26,12 +26,12 @@ class EntryMapperTest {
                 title = "Finish report",
                 description = "Due tomorrow",
                 isDone = false,
-                dueDate = LocalDate.of(2025, 6, 30).toEpocMilliseconds(),
+                dueDate = LocalDate.of(2025, 6, 30).toEpochMilli(),
                 recurrence = null,
                 streakCount = null,
                 lastCompletedDate = null,
-                createdAt = LocalDate.of(2025, 6, 30).toEpocMilliseconds(),
-                updatedAt = LocalDate.of(2025, 7, 20).toEpocMilliseconds(),
+                createdAt = LocalDate.of(2025, 6, 30).toEpochMilli(),
+                updatedAt = LocalDate.of(2025, 7, 20).toEpochMilli(),
                 syncState = EntryEntity.SyncStateEntity.SYNCED,
             )
 
@@ -60,7 +60,7 @@ class EntryMapperTest {
                 dueDate = null,
                 recurrence = EntryEntity.Recurrence.DAILY,
                 streakCount = 5,
-                lastCompletedDate = LocalDate.of(2025, 6, 27).toEpocMilliseconds(),
+                lastCompletedDate = LocalDate.of(2025, 6, 27).toEpochMilli(),
                 createdAt = 100L,
                 updatedAt = 200L,
                 syncState = EntryEntity.SyncStateEntity.SYNCED,
@@ -93,7 +93,7 @@ class EntryMapperTest {
                 dueDate = null,
                 recurrence = EntryEntity.Recurrence.DAILY,
                 streakCount = 1,
-                lastCompletedDate = LocalDate.now().toEpocMilliseconds(),
+                lastCompletedDate = LocalDate.now().toEpochMilli(),
                 createdAt = 1,
                 updatedAt = null,
                 syncState = EntryEntity.SyncStateEntity.SYNCED,
@@ -111,7 +111,7 @@ class EntryMapperTest {
                 title = "This is not a habit",
                 description = "fail",
                 isDone = false,
-                dueDate = LocalDate.now().toEpocMilliseconds(),
+                dueDate = LocalDate.now().toEpochMilli(),
                 recurrence = null,
                 streakCount = null,
                 lastCompletedDate = null,

@@ -4,7 +4,6 @@ import com.google.firebase.Timestamp
 import com.octopus.edu.core.common.ReminderTimeCalculator.calculateReminderDelay
 import com.octopus.edu.core.common.ReminderTimeCalculator.defaultTimeIfNull
 import com.octopus.edu.core.common.ReminderTimeCalculator.getHabitInterval
-import com.octopus.edu.core.common.toEpocMilliseconds
 import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.common.toInstant
 import com.octopus.edu.core.common.toLocalDate
@@ -97,13 +96,13 @@ internal fun Entry.toEntity() =
                 title = title,
                 description = description,
                 isDone = isDone,
+                type = EntryType.HABIT,
+                recurrence = recurrence.toEntity(),
+                syncState = syncState.toEntity(),
+                startDate = startDate.toEpochMilli(),
                 time = time?.toEpochMilli(),
                 createdAt = createdAt.toEpochMilli(),
                 updatedAt = updatedAt?.toEpochMilli(),
-                type = EntryType.HABIT,
-                recurrence = recurrence.toEntity(),
-                startDate = startDate.toEpocMilliseconds(),
-                syncState = syncState.toEntity(),
             )
 
         is Task ->
@@ -112,12 +111,12 @@ internal fun Entry.toEntity() =
                 title = title,
                 description = description,
                 isDone = isDone,
-                dueDate = dueDate.toEpocMilliseconds(),
+                type = EntryType.TASK,
+                syncState = syncState.toEntity(),
+                dueDate = dueDate.toEpochMilli(),
                 time = time?.toEpochMilli(),
                 createdAt = createdAt.toEpochMilli(),
                 updatedAt = updatedAt?.toEpochMilli(),
-                type = EntryType.TASK,
-                syncState = syncState.toEntity(),
             )
     }
 
@@ -136,10 +135,10 @@ internal fun Entry.toDTO(): EntryDto =
                 title = title,
                 description = description,
                 isDone = isDone,
-                time = time?.toEpochMilli()?.toInstant()?.let { Timestamp(it) },
                 type = EntryType.HABIT.name,
                 recurrence = recurrence.toDto(),
-                startDate = startDate.toEpocMilliseconds(),
+                time = time?.toEpochMilli()?.toInstant()?.let { Timestamp(it) },
+                startDate = startDate.toEpochMilli(),
                 createdAt = Timestamp(createdAt),
                 updatedAt = updatedAt?.let { Timestamp(it) },
             )
@@ -149,9 +148,9 @@ internal fun Entry.toDTO(): EntryDto =
                 title = title,
                 description = description,
                 isDone = isDone,
-                time = time?.toEpochMilli()?.toInstant()?.let { Timestamp(it) },
                 type = EntryType.TASK.name,
-                dueDate = dueDate.toEpocMilliseconds(),
+                time = time?.toEpochMilli()?.toInstant()?.let { Timestamp(it) },
+                dueDate = dueDate.toEpochMilli(),
                 createdAt = Timestamp(createdAt),
                 updatedAt = updatedAt?.let { Timestamp(it) },
             )
@@ -172,10 +171,6 @@ internal fun EntryDto.toEntity(): EntryEntity =
         title = title,
         description = description,
         isDone = isDone,
-        dueDate = dueDate?.toInstant()?.toEpochMilli(),
-        time = time?.toInstant()?.toEpochMilli(),
-        createdAt = createdAt?.toInstant()?.toEpochMilli() ?: System.currentTimeMillis(),
-        updatedAt = updatedAt?.toInstant()?.toEpochMilli(),
         recurrence =
             when (recurrence) {
                 "Custom" -> EntryEntity.Recurrence.CUSTOM
@@ -183,8 +178,12 @@ internal fun EntryDto.toEntity(): EntryEntity =
                 "Weekly" -> EntryEntity.Recurrence.WEEKLY
                 else -> null
             },
-        startDate = startDate,
         syncState = EntryEntity.SyncStateEntity.SYNCED,
+        startDate = startDate,
+        dueDate = dueDate?.toInstant()?.toEpochMilli(),
+        time = time?.toInstant()?.toEpochMilli(),
+        createdAt = createdAt?.toInstant()?.toEpochMilli() ?: System.currentTimeMillis(),
+        updatedAt = updatedAt?.toInstant()?.toEpochMilli(),
     )
 
 internal fun Entry.getReminderAsEntity(): ReminderEntity =

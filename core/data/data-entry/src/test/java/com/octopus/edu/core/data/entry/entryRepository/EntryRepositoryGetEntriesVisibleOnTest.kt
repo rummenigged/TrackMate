@@ -1,7 +1,7 @@
 package com.octopus.edu.core.data.entry.entryRepository
 
 import app.cash.turbine.test
-import com.octopus.edu.core.common.toEpocMilliseconds
+import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
@@ -43,8 +43,8 @@ class EntryRepositoryGetEntriesVisibleOnTest {
     private val dbSemaphore = Semaphore(Int.MAX_VALUE)
     private val entryLocks = ConcurrentHashMap<String, Mutex>()
 
-    private val testDate = LocalDate.of(2024, 1, 8) // Monday
-    private val testDateMillis = testDate.toEpocMilliseconds()
+    private val testDate = LocalDate.of(2025, 1, 8) // Monday
+    private val testDateMillis = testDate.toEpochMilli()
     private val dayBeforeTestDate = testDate.minusDays(1)
 
     private val taskDueOnTestDateEntity =
@@ -54,7 +54,7 @@ class EntryRepositoryGetEntriesVisibleOnTest {
             title = "Task on Test Date",
             description = "",
             isDone = false,
-            dueDate = testDate.toEpocMilliseconds(),
+            dueDate = testDate.toEpochMilli(),
             recurrence = null,
             streakCount = null,
             lastCompletedDate = null,
@@ -70,7 +70,7 @@ class EntryRepositoryGetEntriesVisibleOnTest {
             title = "Task before Test Date",
             description = "",
             isDone = false,
-            dueDate = dayBeforeTestDate.toEpocMilliseconds(),
+            dueDate = dayBeforeTestDate.toEpochMilli(),
             recurrence = null,
             streakCount = null,
             lastCompletedDate = null,
@@ -94,7 +94,7 @@ class EntryRepositoryGetEntriesVisibleOnTest {
             dueDate = null,
             recurrence = EntryEntity.Recurrence.DAILY,
             streakCount = 0,
-            startDate = dayBeforeTestDate.toEpocMilliseconds(),
+            startDate = dayBeforeTestDate.toEpochMilli(),
             lastCompletedDate = null,
             createdAt = dayBeforeTestDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
             updatedAt = null,
@@ -112,7 +112,7 @@ class EntryRepositoryGetEntriesVisibleOnTest {
             recurrence = EntryEntity.Recurrence.WEEKLY,
             streakCount = 0,
             lastCompletedDate = null,
-            startDate = testDate.minusWeeks(1).toEpocMilliseconds(),
+            startDate = testDate.minusWeeks(1).toEpochMilli(),
             createdAt = dayBeforeTestDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
             updatedAt = null,
             syncState = EntryEntity.SyncStateEntity.PENDING,
@@ -130,7 +130,7 @@ class EntryRepositoryGetEntriesVisibleOnTest {
             recurrence = EntryEntity.Recurrence.WEEKLY,
             streakCount = 0,
             lastCompletedDate = null,
-            startDate = testDate.minusWeeks(1).plusDays(1).toEpocMilliseconds(),
+            startDate = testDate.minusWeeks(1).plusDays(1).toEpochMilli(),
             createdAt = dayBeforeTestDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
             updatedAt = null,
             syncState = EntryEntity.SyncStateEntity.PENDING,

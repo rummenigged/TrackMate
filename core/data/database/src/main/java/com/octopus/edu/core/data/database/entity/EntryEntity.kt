@@ -12,16 +12,16 @@ data class EntryEntity(
     val title: String,
     val description: String?,
     val isDone: Boolean = false,
-    val dueDate: Long? = null,
-    val startDate: Long? = null,
-    val time: Long? = null,
     val recurrence: Recurrence? = null,
     val streakCount: Int? = null,
     val lastCompletedDate: Long? = null,
     val isArchived: Boolean = false,
+    val syncState: SyncStateEntity,
+    val dueDate: Long? = null,
+    val startDate: Long? = null,
+    val time: Long? = null,
     val createdAt: Long,
     val updatedAt: Long? = null,
-    val syncState: SyncStateEntity,
 ) {
     enum class EntryType { TASK, HABIT }
 
