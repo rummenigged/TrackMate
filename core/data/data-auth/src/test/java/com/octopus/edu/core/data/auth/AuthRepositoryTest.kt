@@ -2,7 +2,7 @@ package com.octopus.edu.core.data.auth
 
 import com.google.firebase.auth.AuthResult
 import com.octopus.edu.core.common.DispatcherProvider
-import com.octopus.edu.core.data.auth.authAdapter.FirebaseAuthAdapter
+import com.octopus.edu.core.data.auth.authAdapter.AuthAdapter
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -24,7 +24,7 @@ class AuthRepositoryTest {
     val mockkRule = MockKRule(this)
 
     @MockK
-    private lateinit var mockFirebaseAuthAdapter: FirebaseAuthAdapter
+    private lateinit var mockFirebaseAuthAdapter: AuthAdapter
 
     @MockK
     private lateinit var mockDispatcherProvider: DispatcherProvider

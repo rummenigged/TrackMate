@@ -7,17 +7,18 @@ import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.domain.scheduler.ReminderStrategyFactory
 import com.octopus.edu.core.domain.scheduler.ReminderType.NOTIFICATION
 import com.octopus.edu.core.ui.common.base.BaseViewModel
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEffect
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.emptyState
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.toDomain
+import com.octopus.edu.feature.home.R
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiEffect
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.emptyState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.toDomain
 import com.octopus.edu.feature.home.models.EntryCreationData
 import com.octopus.edu.feature.home.models.empty
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 import java.time.LocalTime
+import javax.inject.Inject
 
 @HiltViewModel
 class AddEntryViewModel
@@ -207,7 +208,7 @@ class AddEntryViewModel
                             scheduleReminder(entry)
                         }
 
-                        setEffect(UiEffect.ShowEntrySuccessfullyCreated)
+                        setEffect(UiEffect.EntrySuccessfullyCreated(R.string.entry_successfully_created))
                     }
                 }
             }

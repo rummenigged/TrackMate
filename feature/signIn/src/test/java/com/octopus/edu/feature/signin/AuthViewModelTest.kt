@@ -2,8 +2,8 @@ package com.octopus.edu.feature.signin
 
 import app.cash.turbine.test
 import com.octopus.edu.core.common.Logger
-import com.octopus.edu.core.domain.credentialManager.ICredentialService
-import com.octopus.edu.core.domain.credentialManager.SignInInitiationResult
+import com.octopus.edu.core.common.credentialService.ICredentialService
+import com.octopus.edu.core.common.credentialService.SignInInitiationResult
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.AuthRepository
 import com.octopus.edu.core.ui.common.AuthErrorMapper
@@ -69,10 +69,11 @@ class AuthViewModelTest {
         isUserLoggedInFlow = MutableStateFlow(false)
         every { mockAuthRepository.isUserLoggedIn } returns isUserLoggedInFlow
 
-        coEvery { mockCredentialService.clearUserCredentials(onError = capture(clearCredentialsOnErrorSlot)) } coAnswers {
-            // In a success scenario, the onError lambda is not invoked by the service.
-            // If the test needs to simulate an error from clearUserCredentials, this mock will be overridden.
-        }
+        coEvery {
+            mockCredentialService.clearUserCredentials(
+                onError = capture(clearCredentialsOnErrorSlot),
+            )
+        } coAnswers {}
 
         viewModel = AuthViewModel(mockCredentialService, mockAuthRepository)
         testScheduler.advanceUntilIdle()
@@ -85,13 +86,13 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun `initial state is Unknown then Unauthenticated via checkAuthState`() =
+    fun `initial state is Unknown then Unauthenticated via observeAuthState`() =
         runTest(testDispatcher.scheduler) {
             assertEquals(UiState.Unauthenticated, viewModel.uiState.value)
         }
 
     @Test
-    fun `checkAuthState updates uiState to Authenticated when isUserLoggedIn emits true`() =
+    fun `observeAuthState updates uiState to Authenticated when isUserLoggedIn emits true`() =
         runTest(testDispatcher.scheduler) {
             isUserLoggedInFlow.value = true
             testScheduler.advanceUntilIdle()
@@ -99,7 +100,7 @@ class AuthViewModelTest {
         }
 
     @Test
-    fun `checkAuthState updates uiState to Unauthenticated when isUserLoggedIn emits false`() =
+    fun `observeAuthState updates uiState to Unauthenticated when isUserLoggedIn emits false`() =
         runTest(testDispatcher.scheduler) {
             isUserLoggedInFlow.value = true
             testScheduler.advanceUntilIdle()
@@ -111,14 +112,22 @@ class AuthViewModelTest {
         }
 
     @Test
+    fun `LaunchGoogleSignIn effect should be send when OnLaunchGoogleSignIn event is received`() =
+        runTest {
+            viewModel.processEvent(UiEvent.OnLaunchGoogleSignIn)
+            viewModel.effect.test {
+                assertEquals(AuthUiContract.UiEffect.LaunchGoogleSignIn, awaitItem())
+            }
+        }
+
+    @Test
     fun `OnGoogleSignIn when initiateGoogleSignIn is Authenticated and signIn success`() =
         runTest(testDispatcher.scheduler) {
             val testToken = "google_auth_token"
-            val initiationResult = SignInInitiationResult.Authenticated(testToken)
-            coEvery { mockCredentialService.initiateGoogleSignIn() } returns initiationResult
+            val result = SignInInitiationResult.Authenticated(testToken)
             coEvery { mockAuthRepository.signIn(testToken) } returns ResultOperation.Success(Unit)
 
-            viewModel.processEvent(UiEvent.OnGoogleSignIn)
+            viewModel.processEvent(UiEvent.OnGoogleSignedIn(result))
             testScheduler.advanceUntilIdle()
 
             assertEquals(UiState.Authenticating, viewModel.uiState.value)
@@ -127,7 +136,6 @@ class AuthViewModelTest {
             testScheduler.advanceUntilIdle()
             assertEquals(UiState.Authenticated, viewModel.uiState.value)
 
-            coVerify(exactly = 1) { mockCredentialService.initiateGoogleSignIn() }
             coVerify(exactly = 1) { mockAuthRepository.signIn(testToken) }
         }
 
@@ -135,16 +143,15 @@ class AuthViewModelTest {
     fun `OnGoogleSignIn when initiateGoogleSignIn is Authenticated and signIn fails`() =
         runTest(testDispatcher.scheduler) {
             val testToken = "google_auth_token"
-            val initiationResult = SignInInitiationResult.Authenticated(testToken)
             val signInException = RuntimeException("Firebase Sign-In Failed")
             val mappedErrorMessage = "Firebase Sign-In Failed User Message"
+            val result = SignInInitiationResult.Authenticated(testToken)
 
-            coEvery { mockCredentialService.initiateGoogleSignIn() } returns initiationResult
             coEvery { mockAuthRepository.signIn(testToken) } returns ResultOperation.Error(signInException)
             every { AuthErrorMapper.toUserMessage(signInException.message) } returns mappedErrorMessage
 
             viewModel.effect.test {
-                viewModel.processEvent(UiEvent.OnGoogleSignIn)
+                viewModel.processEvent(UiEvent.OnGoogleSignedIn(result))
                 testScheduler.advanceUntilIdle()
 
                 assertEquals(UiState.Unauthenticated, viewModel.uiState.value)
@@ -159,16 +166,15 @@ class AuthViewModelTest {
             val errorMessage = "Credential service init error"
             val mappedErrorMessage = "Credential service init error User Message"
             val initiationResult = SignInInitiationResult.Error(errorMessage)
+            val result = SignInInitiationResult.Error(errorMessage)
 
-            coEvery { mockCredentialService.initiateGoogleSignIn() } returns initiationResult
+            coEvery { mockCredentialService.initiateGoogleSignIn(any()) } returns initiationResult
             every { AuthErrorMapper.toUserMessage(errorMessage) } returns mappedErrorMessage
 
             viewModel.effect.test {
-                viewModel.processEvent(UiEvent.OnGoogleSignIn)
+                viewModel.processEvent(UiEvent.OnGoogleSignedIn(result))
                 testScheduler.advanceUntilIdle()
 
-                println("effect is ${awaitItem()}")
-                println("ui state is ${viewModel.uiState.value}")
                 assertEquals(UiState.Unauthenticated, viewModel.uiState.value)
                 verify { Logger.e(message = "initiateGoogleSignIn Error: $errorMessage") }
                 cancelAndConsumeRemainingEvents()
@@ -179,9 +185,11 @@ class AuthViewModelTest {
     fun `OnGoogleSignIn when initiateGoogleSignIn is NoOp`() =
         runTest(testDispatcher.scheduler) {
             val initiationResult = SignInInitiationResult.NoOp
-            coEvery { mockCredentialService.initiateGoogleSignIn() } returns initiationResult
+            val result = SignInInitiationResult.NoOp
 
-            viewModel.processEvent(UiEvent.OnGoogleSignIn)
+            coEvery { mockCredentialService.initiateGoogleSignIn(any()) } returns initiationResult
+
+            viewModel.processEvent(UiEvent.OnGoogleSignedIn(result))
             testScheduler.advanceUntilIdle()
 
             assertEquals(UiState.Unauthenticated, viewModel.uiState.value)

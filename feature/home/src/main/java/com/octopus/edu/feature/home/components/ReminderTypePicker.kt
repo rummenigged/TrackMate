@@ -29,8 +29,8 @@ import com.octopus.edu.core.design.theme.components.TrackMateDialog
 import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.domain.scheduler.ReminderType
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.getReminderTypeAsStringRes
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.getReminderTypeAsStringRes
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable

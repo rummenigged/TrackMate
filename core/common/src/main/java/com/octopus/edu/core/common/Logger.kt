@@ -3,12 +3,27 @@ package com.octopus.edu.core.common
 import timber.log.Timber
 
 object Logger {
+    private val ANONYMOUS_CLASS_PATTERN = Regex("\\$\\d+$")
+
+    private fun getCallerTag(): String {
+        val stackTrace = Throwable().stackTrace
+        if (stackTrace.size > 3) {
+            val callerElement = stackTrace[3]
+            val tag = callerElement.className.substringAfterLast('.')
+            return tag
+                .replace(ANONYMOUS_CLASS_PATTERN, "")
+                .substringBefore('$')
+                .ifEmpty { "Logger" }
+        }
+        return "Logger"
+    }
+
     fun d(
         message: String,
         tag: String? = null,
     ) {
-        val log = tag?.let { Timber.tag(it) } ?: Timber
-        log.d(message)
+        val finalTag = tag ?: getCallerTag()
+        Timber.tag(finalTag).d(message)
     }
 
     fun w(
@@ -16,11 +31,11 @@ object Logger {
         tag: String? = null,
         throwable: Throwable? = null
     ) {
-        val log = tag?.let { Timber.tag(it) } ?: Timber
+        val finalTag = tag ?: getCallerTag()
         if (throwable != null) {
-            log.w(throwable, message)
+            Timber.tag(finalTag).w(throwable, message)
         } else {
-            log.w(message)
+            Timber.tag(finalTag).w(message)
         }
     }
 
@@ -29,11 +44,11 @@ object Logger {
         tag: String? = null,
         throwable: Throwable? = null
     ) {
-        val log = tag?.let { Timber.tag(it) } ?: Timber
+        val finalTag = tag ?: getCallerTag()
         if (throwable != null) {
-            log.e(throwable, message)
+            Timber.tag(finalTag).e(throwable, message)
         } else {
-            log.e(message)
+            Timber.tag(finalTag).e(message)
         }
     }
 }
