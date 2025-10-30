@@ -174,7 +174,7 @@ internal fun EntryDto.toEntity(): EntryEntity =
         isDone = isDone,
         dueDate = dueDate?.toInstant()?.toEpochMilli(),
         time = time?.toInstant()?.toEpochMilli(),
-        createdAt = createdAt.toInstant().toEpochMilli(),
+        createdAt = createdAt?.toInstant()?.toEpochMilli() ?: System.currentTimeMillis(),
         updatedAt = updatedAt?.toInstant()?.toEpochMilli(),
         recurrence =
             when (recurrence) {
