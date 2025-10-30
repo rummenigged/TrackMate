@@ -17,7 +17,8 @@ internal object HomeUiContract {
     data class UiState(
         val entries: ImmutableList<Entry> = persistentListOf(),
         val currentDate: LocalDate = LocalDate.now(),
-        val isLoading: Boolean = false
+        val isLoading: Boolean = false,
+        val isRefreshing: Boolean = false
     ) : ViewState {
         val currentMonth: String
             get() = currentDate.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
@@ -35,6 +36,8 @@ internal object HomeUiContract {
     }
 
     sealed interface UiEvent : ViewEvent {
+        data object Refresh : UiEvent
+
         data class SetCurrentDateAs(
             val date: LocalDate
         ) : UiEvent
