@@ -1,6 +1,7 @@
 package com.octopus.edu.core.data.entry.api.dto
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.ServerTimestamp
 
 data class EntryDto(
     val id: String = "",
@@ -12,6 +13,6 @@ data class EntryDto(
     val startDate: Long? = null,
     val dueDate: Long? = null,
     val recurrence: String? = null,
-    val createdAt: Timestamp = Timestamp.now(),
+    @ServerTimestamp val createdAt: Timestamp? = null,
     val updatedAt: Timestamp? = null
 )
