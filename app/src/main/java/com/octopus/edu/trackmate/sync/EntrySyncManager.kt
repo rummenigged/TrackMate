@@ -11,7 +11,6 @@ import com.octopus.edu.trackmate.di.ApplicationScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
@@ -56,7 +55,7 @@ class EntrySyncManager
                     retryPolicy.shouldRetry(errorType, attempt)
                 }.catch {
                     Logger.e("Error collecting deleted entries", throwable = it)
-                }.collectLatest { deletedEntries ->
+                }.collect { deletedEntries ->
                     deletedEntries.forEach { entryId ->
                         runCatching {
                             syncScheduler.scheduleDeletedEntrySync(entryId)
@@ -75,7 +74,7 @@ class EntrySyncManager
                     retryPolicy.shouldRetry(errorType, attempt)
                 }.catch {
                     Logger.e("Error collecting pending entries", throwable = it)
-                }.collectLatest { entries ->
+                }.collect { entries ->
                     entries.forEach { entry ->
                         runCatching {
                             syncScheduler.scheduleEntrySync(entry.id)
