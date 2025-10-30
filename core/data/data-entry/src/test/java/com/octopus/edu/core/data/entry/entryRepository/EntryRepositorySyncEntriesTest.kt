@@ -9,6 +9,7 @@ import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
+import com.octopus.edu.core.domain.model.common.ErrorType
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.utils.ErrorClassifier
 import com.octopus.edu.core.network.utils.NetworkResponse
@@ -16,6 +17,7 @@ import com.octopus.edu.core.testing.TestDispatchers
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
@@ -91,13 +93,16 @@ class EntryRepositorySyncEntriesTest {
     fun `syncEntries returns Error when fetchEntries fails`() =
         runTest {
             // Given
-            coEvery { entryApi.fetchEntries() } returns NetworkResponse.Error(IOException())
+            val apiException = IOException()
+            coEvery { entryApi.fetchEntries() } returns NetworkResponse.Error(apiException)
+            every { networkErrorClassifier.classify(any()) } returns ErrorType.TransientError(apiException)
 
             // When
             val result = entryRepository.syncEntries()
 
             // Then
             assertTrue(result is ResultOperation.Error)
+            assertTrue(result.isRetriable)
             coVerify(exactly = 0) { entryStore.upsertIfNewest(any()) }
             coVerify(exactly = 0) { entryStore.deleteEntry(any(), any()) }
         }
@@ -190,14 +195,17 @@ class EntryRepositorySyncEntriesTest {
     fun `syncEntries returns Error when fetchDeletedEntry fails`() =
         runTest {
             // Given
+            val apiException = IOException()
             coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(listOf(createEntryDto("1")))
-            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Error(IOException())
+            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Error(apiException)
+            every { networkErrorClassifier.classify(any()) } returns ErrorType.TransientError(apiException)
 
             // When
             val result = entryRepository.syncEntries()
 
             // Then
             assertTrue(result is ResultOperation.Error)
+            assertTrue(result.isRetriable)
             coVerify(exactly = 0) { entryStore.upsertIfNewest(any()) }
             coVerify(exactly = 0) { entryStore.deleteEntry(any(), any()) }
         }

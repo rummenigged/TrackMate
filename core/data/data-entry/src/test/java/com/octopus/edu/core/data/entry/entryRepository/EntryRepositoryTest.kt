@@ -295,11 +295,14 @@ class EntryRepositoryTest {
             val expectedEntryEntity = testTaskDomain.toEntity()
             val storeException = RuntimeException("EntryStore failed")
             coEvery { entryStore.saveEntry(expectedEntryEntity) } throws storeException
+            every { databaseErrorClassifier.classify(any()) } returns
+                ErrorType.TransientError(storeException)
 
             val result = repository.saveEntry(testTaskDomain)
 
             assertTrue(result is ResultOperation.Error)
             assertEquals(storeException, (result as ResultOperation.Error).throwable)
+            assertTrue(result.isRetriable)
             coVerify(exactly = 1) { entryStore.saveEntry(expectedEntryEntity) }
             coVerify(exactly = 0) { reminderStore.saveReminder(any()) } // Using any() as ReminderEntity is not defined in context
         }
@@ -319,11 +322,13 @@ class EntryRepositoryTest {
 
             coJustRun { entryStore.saveEntry(expectedEntryEntity) }
             coEvery { reminderStore.saveReminder(expectedReminderEntity) } throws reminderException
+            every { databaseErrorClassifier.classify(any()) } returns ErrorType.TransientError(reminderException)
 
             val result = repository.saveEntry(testTaskDomain)
 
             assertTrue(result is ResultOperation.Error)
             assertEquals(reminderException, (result as ResultOperation.Error).throwable)
+            kotlin.test.assertTrue(result.isRetriable)
             coVerify(exactly = 1) { entryStore.saveEntry(expectedEntryEntity) }
             coVerify(exactly = 1) { reminderStore.saveReminder(expectedReminderEntity) }
         }
@@ -426,13 +431,17 @@ class EntryRepositoryTest {
     fun `deleteEntry returns error when deleteEntry fails`() =
         runTest {
             val entryId = "testId"
+            val exception = RuntimeException()
             coEvery {
                 entryStore.deleteEntry(entryId, SyncStateEntity.PENDING)
-            } throws RuntimeException()
+            } throws exception
+            every { databaseErrorClassifier.classify(any()) } returns
+                ErrorType.TransientError(exception)
 
             val result = repository.deleteEntry(entryId)
 
             assertTrue(result is ResultOperation.Error)
+            assertTrue((result as ResultOperation.Error).isRetriable)
             coVerify(exactly = 1) { entryStore.deleteEntry(entryId, SyncStateEntity.PENDING) }
         }
 
@@ -465,7 +474,10 @@ class EntryRepositoryTest {
             val storeException = RuntimeException("Store failed to update sync state")
 
             // Mock the store to throw an exception
-            coEvery { entryStore.updateEntrySyncState(entryId, expectedSyncStateEntity) } throws storeException
+            coEvery { entryStore.updateEntrySyncState(entryId, expectedSyncStateEntity) } throws
+                storeException
+            every { databaseErrorClassifier.classify(any()) } returns
+                ErrorType.TransientError(storeException)
 
             // Call the repository method
             val result = repository.updateEntrySyncState(entryId, syncStateToSet)
@@ -473,6 +485,7 @@ class EntryRepositoryTest {
             // Assert error and verify store interaction
             assertTrue(result is ResultOperation.Error)
             assertEquals(storeException, (result as ResultOperation.Error).throwable)
+            assertTrue(result.isRetriable)
             coVerify(exactly = 1) { entryStore.updateEntrySyncState(entryId, expectedSyncStateEntity) }
         }
 

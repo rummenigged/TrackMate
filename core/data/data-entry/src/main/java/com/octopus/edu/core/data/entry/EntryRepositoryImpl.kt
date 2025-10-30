@@ -124,6 +124,9 @@ internal class EntryRepositoryImpl
             val result =
                 safeCall(
                     dispatcher = dispatcherProvider.io,
+                    isRetriableWhen = { exception ->
+                        databaseErrorClassifier.classify(exception) is TransientError
+                    },
                 ) {
                     entryStore.saveEntry(entry.toEntity())
                     reminderStore.saveReminder(entry.getReminderAsEntity())
@@ -147,6 +150,9 @@ internal class EntryRepositoryImpl
         override suspend fun deleteEntry(entryId: String): ResultOperation<Unit> =
             safeCall(
                 dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    databaseErrorClassifier.classify(exception) is TransientError
+                },
             ) {
                 entryStore.deleteEntry(entryId, PENDING)
             }
@@ -165,13 +171,22 @@ internal class EntryRepositoryImpl
             entryId: String,
             syncState: SyncState
         ): ResultOperation<Unit> =
-            safeCall(dispatcher = dispatcherProvider.io) {
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    databaseErrorClassifier.classify(exception) is TransientError
+                },
+            ) {
                 entryStore.updateEntrySyncState(entryId, syncState.toEntity())
             }
 
         override suspend fun syncEntries(): ResultOperation<Unit> =
             safeCall(
                 dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    networkErrorClassifier.classify(exception) is TransientError ||
+                        databaseErrorClassifier.classify(exception) is TransientError
+                },
             ) {
                 coroutineScope {
                     val entriesDeferred = async { entryApi.fetchEntries() }
@@ -231,6 +246,9 @@ internal class EntryRepositoryImpl
         ): ResultOperation<Unit> =
             safeCall(
                 dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    databaseErrorClassifier.classify(exception) is TransientError
+                },
             ) {
                 entryStore.updateDeletedEntrySyncState(entryId, syncState.toEntity())
             }
@@ -240,14 +258,16 @@ internal class EntryRepositoryImpl
                 val mutex = entryLocks.computeIfAbsent(entry.id) { Mutex() }
                 try {
                     mutex.withLock {
-                        entryStore.upsertIfNewest(entry.toEntity())
+                        try {
+                            entryStore.upsertIfNewest(entry.toEntity())
+                        } catch (e: Exception) {
+                            entryStore.updateEntrySyncState(entry.id, CONFLICT)
+                            Logger.e(
+                                message = "Error to save entry ${entry.id}",
+                                throwable = e,
+                            )
+                        }
                     }
-                } catch (e: Exception) {
-                    entryStore.updateEntrySyncState(entry.id, CONFLICT)
-                    Logger.e(
-                        message = "Error to save entry ${entry.id}",
-                        throwable = e,
-                    )
                 } finally {
                     entryLocks.remove(entry.id, mutex)
                 }
