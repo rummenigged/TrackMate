@@ -7,6 +7,8 @@ import kotlinx.coroutines.withContext
 suspend fun <T : Any> safeCall(
     dispatcher: CoroutineDispatcher,
     onErrorReturn: (() -> T)? = null,
+    isRetriableWhen: ((Throwable) -> Boolean)? = null,
+    doOnError: (suspend (Throwable) -> Unit)? = null,
     block: suspend () -> T,
 ): ResultOperation<T> =
     withContext(dispatcher) {
@@ -16,7 +18,16 @@ suspend fun <T : Any> safeCall(
             if (onErrorReturn != null) {
                 ResultOperation.Success(onErrorReturn())
             } else {
-                ResultOperation.Error(e)
+                try {
+                    doOnError?.invoke(e)
+                } catch (errorHandlerException: Throwable) {
+                    e.addSuppressed(errorHandlerException)
+                }
+                if (isRetriableWhen?.invoke(e) == true) {
+                    ResultOperation.Error(e, true)
+                } else {
+                    ResultOperation.Error(e)
+                }
             }
         }
     }

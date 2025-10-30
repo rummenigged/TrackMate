@@ -25,8 +25,8 @@ import androidx.compose.ui.util.trace
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateDatePicker
 import com.octopus.edu.core.ui.common.extensions.noClickableOverlay
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

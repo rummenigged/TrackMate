@@ -17,8 +17,8 @@ import com.octopus.edu.core.design.theme.TrackMateTheme
 @Composable
 internal fun HomeAppBar(
     title: String,
+    modifier: Modifier = Modifier,
     background: Color = colorScheme.primary,
-    modifier: Modifier = Modifier
 ) = trace("HomeAppBar") {
     TopAppBar(
         modifier = modifier.background(color = background),
