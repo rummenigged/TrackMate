@@ -27,7 +27,7 @@ fun LocalDate.toEpochMilli(): Long =
 
 fun LocalTime.toEpochMilli(): Long =
     this
-        .atDate(LocalDate.now()) // reference epoch date
+        .atDate(LocalDate.ofEpochDay(0))
         .atZone(ZoneId.systemDefault())
         .withZoneSameInstant(ZoneOffset.UTC)
         .toInstant()

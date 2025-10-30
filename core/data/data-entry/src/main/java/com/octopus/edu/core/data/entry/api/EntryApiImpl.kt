@@ -21,14 +21,19 @@ class EntryApiImpl
         private val api: FirebaseFirestore,
         private val userPreferencesProvider: UserPreferencesProvider
     ) : EntryApi {
-        override suspend fun saveEntry(entry: Entry) {
+        override suspend fun saveEntry(entry: Entry): NetworkResponse<Unit> {
             val entryDto = entry.toDTO()
-            withUserCollection { ref ->
-                ref
-                    .collection(COLLECTION_ENTRIES)
-                    .document(entryDto.id)
-                    .set(entryDto)
-                    .await()
+            return try {
+                withUserCollection { ref ->
+                    ref
+                        .collection(COLLECTION_ENTRIES)
+                        .document(entryDto.id)
+                        .set(entryDto)
+                        .await()
+                }
+                NetworkResponse.Success(Unit)
+            } catch (e: Exception) {
+                NetworkResponse.Error(e)
             }
         }
 
@@ -47,14 +52,19 @@ class EntryApiImpl
                 NetworkResponse.Error(e)
             }
 
-        override suspend fun pushDeletedEntry(entry: DeletedEntry) {
+        override suspend fun pushDeletedEntry(entry: DeletedEntry): NetworkResponse<Unit> {
             val entryDto = entry.toDto()
-            withUserCollection { ref ->
-                ref
-                    .collection(COLLECTION_DELETED_ENTRIES)
-                    .document(entryDto.id)
-                    .set(entryDto)
-                    .await()
+            return try {
+                withUserCollection { ref ->
+                    ref
+                        .collection(COLLECTION_DELETED_ENTRIES)
+                        .document(entryDto.id)
+                        .set(entryDto)
+                        .await()
+                }
+                NetworkResponse.Success(Unit)
+            } catch (e: Exception) {
+                NetworkResponse.Error(e)
             }
         }
 
@@ -71,10 +81,12 @@ class EntryApiImpl
 
         private suspend inline fun <T> withUserCollection(block: suspend (DocumentReference) -> T): T {
             val userId =
-                userPreferencesProvider.userId ?: throw FirebaseFirestoreException(
-                    "User not authenticated",
-                    FirebaseFirestoreException.Code.UNAUTHENTICATED,
-                )
+                userPreferencesProvider.userId
+                    ?.takeIf { it.isNotBlank() }
+                    ?: throw FirebaseFirestoreException(
+                        "User not authenticated",
+                        FirebaseFirestoreException.Code.UNAUTHENTICATED,
+                    )
 
             val userDoc = api.collection(COLLECTION_USERS).document(userId)
             return block(userDoc)

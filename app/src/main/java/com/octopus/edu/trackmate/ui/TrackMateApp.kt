@@ -161,7 +161,7 @@ internal fun MainAppContent(addEntryViewModel: AddEntryViewModel = hiltViewModel
                     closeEntryCreationSheet()
                     scope.launch {
                         messageRes?.let {
-                            snackBarHostState.showSnackbar(context.getString(it, args))
+                            snackBarHostState.showSnackbar(context.getString(it, *args.toTypedArray()))
                         }
                     }
                 },

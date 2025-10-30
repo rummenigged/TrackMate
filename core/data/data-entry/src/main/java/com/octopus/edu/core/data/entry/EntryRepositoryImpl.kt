@@ -179,19 +179,25 @@ internal class EntryRepositoryImpl
 
                     val entries = entriesDeferred.await()
                     val deletedEntries = deletedEntriesDeferred.await()
-                    if (entries is NetworkResponse.Success &&
-                        deletedEntries is NetworkResponse.Success
-                    ) {
-                        val deletedIds = deletedEntries.data.map { it.id }.toSet()
+                    when {
+                        entries !is NetworkResponse.Success ->
+                            throw Exception("Error fetching entries")
 
-                        entries.data
-                            .filterNot { it.id in deletedIds }
-                            .map { entry -> async { syncEntrySafely(entry) } }
-                            .awaitAll()
+                        deletedEntries !is NetworkResponse.Success ->
+                            throw Exception("Error fetching deleted entries")
 
-                        deletedEntries.data
-                            .map { entry -> async { syncDeletedEntrySafely(entry) } }
-                            .awaitAll()
+                        else -> {
+                            val deletedIds = deletedEntries.data.map { it.id }.toSet()
+
+                            entries.data
+                                .filterNot { it.id in deletedIds }
+                                .map { entry -> async { syncEntrySafely(entry) } }
+                                .awaitAll()
+
+                            deletedEntries.data
+                                .map { entry -> async { syncDeletedEntrySafely(entry) } }
+                                .awaitAll()
+                        }
                     }
                 }
             }
@@ -254,7 +260,14 @@ internal class EntryRepositoryImpl
                 try {
                     mutex.withLock {
                         val localEntry = entryStore.getEntryById(entry.id)
-                        if (localEntry != null) {
+                        if (localEntry != null && localEntry.syncState == PENDING) {
+                            entryStore.updateEntrySyncState(entry.id, CONFLICT)
+                            Logger.w(
+                                message =
+                                    "Entry ${entry.id} has pending changes but was " +
+                                        "deleted remotely. Marked as CONFLICT",
+                            )
+                        } else if (localEntry != null) {
                             entryStore.deleteEntry(entry.id, SYNCED)
                         } else {
                             entryStore.updateDeletedEntrySyncState(entry.id, SYNCED)

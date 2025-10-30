@@ -180,7 +180,7 @@ internal fun EntryDto.toEntity(): EntryEntity =
             },
         syncState = EntryEntity.SyncStateEntity.SYNCED,
         startDate = startDate,
-        dueDate = dueDate?.toInstant()?.toEpochMilli(),
+        dueDate = dueDate,
         time = time?.toInstant()?.toEpochMilli(),
         createdAt = createdAt?.toInstant()?.toEpochMilli() ?: System.currentTimeMillis(),
         updatedAt = updatedAt?.toInstant()?.toEpochMilli(),

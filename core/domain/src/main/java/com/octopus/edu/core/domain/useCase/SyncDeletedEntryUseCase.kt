@@ -52,7 +52,7 @@ class SyncDeletedEntryUseCase
             entryId: String,
             state: SyncState
         ): SyncResult =
-            when (val result = entryRepository.updateEntrySyncState(entryId, state)) {
+            when (val result = entryRepository.updateDeletedEntrySyncState(entryId, state)) {
                 is ResultOperation.Error -> {
                     if (result.isRetriable) {
                         SyncResult.Error(TransientError(result.throwable))

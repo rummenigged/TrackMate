@@ -33,6 +33,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -105,6 +106,11 @@ class EntryRepositoryTest {
 
         defaultRandomId = UUID.randomUUID().toString()
         defaultDateNow = LocalDateTime.of(2025, 9, 15, 8, 0)
+    }
+
+    @After
+    fun tearDown() {
+        io.mockk.unmockkAll()
     }
 
     @Test

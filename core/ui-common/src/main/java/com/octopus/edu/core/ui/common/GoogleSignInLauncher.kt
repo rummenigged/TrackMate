@@ -41,7 +41,7 @@ fun rememberGoogleSignInLauncher(
     val scope = rememberCoroutineScope()
     val latestOnSignInResult by rememberUpdatedState(onSignInResult)
 
-    return remember(activity, credentialService, latestOnSignInResult) {
+    return remember(activity, credentialService) {
         GoogleSignInLauncher(activity, credentialService, scope) { result ->
             latestOnSignInResult(result)
         }

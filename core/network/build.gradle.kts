@@ -31,7 +31,7 @@ android {
         }
 
         debug {
-            buildConfigField("String", "FIREBASE_EMULATOR_HOST_PHYSICAL_DEVICE", "\"192.168.0.3\"")
+            buildConfigField("String", "FIREBASE_EMULATOR_HOST_PHYSICAL_DEVICE", "\"192.168.0.5\"")
             buildConfigField("String", "FIREBASE_EMULATOR_HOST_VIRTUAL_DEVICE", "\"10.0.2.2\"")
         }
     }

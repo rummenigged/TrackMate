@@ -7,11 +7,11 @@ import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.network.utils.NetworkResponse
 
 interface EntryApi {
-    suspend fun saveEntry(entry: Entry)
+    suspend fun saveEntry(entry: Entry): NetworkResponse<Unit>
 
     suspend fun fetchEntries(): NetworkResponse<List<EntryDto>>
 
-    suspend fun pushDeletedEntry(entry: DeletedEntry)
+    suspend fun pushDeletedEntry(entry: DeletedEntry): NetworkResponse<Unit>
 
     suspend fun fetchDeletedEntry(): NetworkResponse<List<DeletedEntryDto>>
 }

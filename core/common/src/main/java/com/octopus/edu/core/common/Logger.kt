@@ -1,19 +1,19 @@
 package com.octopus.edu.core.common
 
 import timber.log.Timber
-import java.util.regex.Pattern
 
 object Logger {
-    private val ANONYMOUS_CLASS_PATTERN = Pattern.compile("\\$\\d+$")
+    private val ANONYMOUS_CLASS_PATTERN = Regex("\\$\\d+$")
 
     private fun getCallerTag(): String {
         val stackTrace = Throwable().stackTrace
         if (stackTrace.size > 3) {
             val callerElement = stackTrace[3]
-            var tag = callerElement.className.substringAfterLast('.')
-            ANONYMOUS_CLASS_PATTERN.matcher(tag).replaceAll("")
-            tag = tag.substringBefore('$')
-            return tag.ifEmpty { "Logger" }
+            val tag = callerElement.className.substringAfterLast('.')
+            return tag
+                .replace(ANONYMOUS_CLASS_PATTERN, "")
+                .substringBefore('$')
+                .ifEmpty { "Logger" }
         }
         return "Logger"
     }

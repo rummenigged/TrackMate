@@ -69,6 +69,7 @@ class EntryRepositorySyncEntriesTest {
             )
     }
 
+    // region Sync Remote Entries Tests
     @Test
     fun `syncEntries should upsert entries when api returns success`() =
         runTest {
@@ -87,16 +88,16 @@ class EntryRepositorySyncEntriesTest {
         }
 
     @Test
-    fun `syncEntries should skip all processing when fetchEntries fails`() =
+    fun `syncEntries returns Error when fetchEntries fails`() =
         runTest {
             // Given
             coEvery { entryApi.fetchEntries() } returns NetworkResponse.Error(IOException())
-            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Success(listOf(createDeletedEntryDto("d1")))
 
             // When
-            entryRepository.syncEntries()
+            val result = entryRepository.syncEntries()
 
             // Then
+            assertTrue(result is ResultOperation.Error)
             coVerify(exactly = 0) { entryStore.upsertIfNewest(any()) }
             coVerify(exactly = 0) { entryStore.deleteEntry(any(), any()) }
         }
@@ -131,7 +132,9 @@ class EntryRepositorySyncEntriesTest {
             coVerify(exactly = 1) { entryStore.updateEntrySyncState("1", SyncStateEntity.CONFLICT) }
             coVerify(exactly = 1) { entryStore.upsertIfNewest(match { it.id == "2" }) }
         }
+    // endregion
 
+    // region Sync Remote Deleted Entries Tests
     @Test
     fun `syncEntries should delete local entry when remote deleted entry is found`() =
         runTest {
@@ -146,6 +149,24 @@ class EntryRepositorySyncEntriesTest {
 
             // Then
             coVerify(exactly = 1) { entryStore.deleteEntry("deleted-1", SyncStateEntity.SYNCED) }
+            coVerify(exactly = 0) { entryStore.updateDeletedEntrySyncState(any(), any()) }
+        }
+
+    @Test
+    fun `syncEntries should mark local entry as CONFLICT if it has PENDING changes`() =
+        runTest {
+            // Given
+            val deletedDto = createDeletedEntryDto("conflict-id")
+            val localPendingEntry = createEntryEntity("conflict-id", syncState = SyncStateEntity.PENDING)
+            coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Success(listOf(deletedDto))
+            coEvery { entryStore.getEntryById("conflict-id") } returns localPendingEntry
+
+            // When
+            entryRepository.syncEntries()
+
+            // Then
+            coVerify(exactly = 1) { entryStore.updateEntrySyncState("conflict-id", SyncStateEntity.CONFLICT) }
+            coVerify(exactly = 0) { entryStore.deleteEntry(any(), any()) }
             coVerify(exactly = 0) { entryStore.updateDeletedEntrySyncState(any(), any()) }
         }
 
@@ -166,16 +187,17 @@ class EntryRepositorySyncEntriesTest {
         }
 
     @Test
-    fun `syncEntries should skip all processing when fetchDeletedEntry fails`() =
+    fun `syncEntries returns Error when fetchDeletedEntry fails`() =
         runTest {
             // Given
             coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(listOf(createEntryDto("1")))
             coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Error(IOException())
 
             // When
-            entryRepository.syncEntries()
+            val result = entryRepository.syncEntries()
 
             // Then
+            assertTrue(result is ResultOperation.Error)
             coVerify(exactly = 0) { entryStore.upsertIfNewest(any()) }
             coVerify(exactly = 0) { entryStore.deleteEntry(any(), any()) }
         }
@@ -196,7 +218,9 @@ class EntryRepositorySyncEntriesTest {
             coVerify(exactly = 1) { entryStore.deleteEntry("d1", SyncStateEntity.SYNCED) } // attempted
             coVerify(exactly = 1) { entryStore.deleteEntry("d2", SyncStateEntity.SYNCED) } // still runs
         }
+    // endregion
 
+    // region Combined Sync Logic Tests
     @Test
     fun `syncEntries should handle both new and deleted entries in one run`() =
         runTest {
@@ -235,11 +259,16 @@ class EntryRepositorySyncEntriesTest {
             entryRepository.syncEntries()
 
             // Then
+            // It should sync the new entry
             coVerify(exactly = 1) { entryStore.upsertIfNewest(match { it.id == "new-1" }) }
+            // It should NOT sync the conflicting entry because it's in the deleted list
             coVerify(exactly = 0) { entryStore.upsertIfNewest(match { it.id == conflictingId }) }
+            // It should process the deletion for the conflicting entry
             coVerify(exactly = 1) { entryStore.deleteEntry(conflictingId, SyncStateEntity.SYNCED) }
         }
+    // endregion
 
+    // region Concurrency Tests
     @Test
     fun `syncEntrySafely locks access to same entry and releases lock`() =
         runTest {
@@ -301,7 +330,9 @@ class EntryRepositorySyncEntriesTest {
             val expectedEvents = listOf("start 1", "end 1", "start 2", "end 2")
             assertEquals(expectedEvents, executionEvents)
         }
+    // endregion
 
+    // region Helpers
     private fun createEntryDto(
         id: String,
         updatedAt: Timestamp = Timestamp.now()
@@ -335,4 +366,5 @@ class EntryRepositorySyncEntriesTest {
         createdAt = 1L,
         syncState = syncState,
     )
+    // endregion
 }
