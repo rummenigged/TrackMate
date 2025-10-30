@@ -13,6 +13,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField("int", "DB_SYNC_CONCURRENCY", "4")
     }
 
     buildTypes {
@@ -33,11 +35,16 @@ android {
     kotlin {
         jvmToolchain(rootProject.ext["kotlinOptionsJVMTarget"].toString().toInt())
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:common"))
+    implementation(project(":core:network"))
     implementation(project(":core:data:database"))
 
     implementation(libs.hilt.android)

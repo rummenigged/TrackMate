@@ -13,16 +13,20 @@ import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateTimePicker
 import com.octopus.edu.core.design.theme.utils.LaunchedEffectAndCollectLatest
 import com.octopus.edu.core.domain.scheduler.ReminderType
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEffect
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiEffect
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
 import com.octopus.edu.feature.home.createEntry.AddEntryViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun AddEntryBottomLayout(
-    onFinished: () -> Unit,
+    onSuccess: (
+        messageRes: Int?,
+        args: List<Any>
+    ) -> Unit,
+    onError: (message: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AddEntryViewModel = hiltViewModel(),
 ) {
@@ -87,9 +91,10 @@ fun AddEntryBottomLayout(
     }
 
     EffectHandler(
-        viewModel.effect,
+        effectFlow = viewModel.effect,
         onEvent = viewModel::processEvent,
-        onFinished = onFinished,
+        onSuccess = onSuccess,
+        onError = onError,
     )
 }
 
@@ -97,18 +102,20 @@ fun AddEntryBottomLayout(
 private fun EffectHandler(
     effectFlow: Flow<UiEffect?>,
     onEvent: (UiEvent) -> Unit,
-    onFinished: () -> Unit
+    onSuccess: (messageArgs: Int?, args: List<Any>) -> Unit,
+    onError: (String) -> Unit
 ) {
     LaunchedEffectAndCollectLatest(
         effectFlow,
         onEffectConsumed = { onEvent(UiEvent.MarkEffectAsConsumed) },
     ) { effect ->
         when (effect) {
-            UiEffect.ShowEntrySuccessfullyCreated -> {
-                onFinished()
+            is UiEffect.EntrySuccessfullyCreated -> {
+                onSuccess(effect.messageRes, effect.args)
             }
 
             is UiEffect.ShowError -> {
+                onError(effect.message)
             }
         }
     }
@@ -118,6 +125,9 @@ private fun EffectHandler(
 @Composable
 private fun EntryCreationBottomLayoutPreview() {
     TrackMateTheme {
-        AddEntryBottomLayout(onFinished = {})
+        AddEntryBottomLayout(
+            onError = {},
+            onSuccess = { _, _ -> },
+        )
     }
 }
