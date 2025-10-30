@@ -1,8 +1,9 @@
 package com.octopus.edu.core.data.entry.api.dto
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.ServerTimestamp
 
 data class DeletedEntryDto(
     val id: String = "",
-    val deletedAt: Timestamp = Timestamp.now()
+    @ServerTimestamp val deletedAt: Timestamp? = null
 )
