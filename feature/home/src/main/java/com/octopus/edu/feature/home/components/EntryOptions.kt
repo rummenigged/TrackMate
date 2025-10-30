@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.domain.model.Reminder.None
 import com.octopus.edu.feature.home.R
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiEvent
-import com.octopus.edu.feature.home.createEntry.AddEntryUiScreen.UiState
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiEvent
+import com.octopus.edu.feature.home.createEntry.AddEntryUiContractor.UiState
 
 @Composable
 internal fun EntryOptions(

@@ -6,8 +6,10 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.octopus.edu.core.common.Logger
 import com.octopus.edu.trackmate.logger.CrashReportingTree
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_NOTIFICATION_CHANNEL_ID_EXTRA
+import com.octopus.edu.trackmate.sync.EntrySyncManager
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 import javax.inject.Inject
@@ -18,6 +20,9 @@ class TrackMateApplication :
     Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject
+    lateinit var syncManager: EntrySyncManager
 
     override val workManagerConfiguration: Configuration
         get() =
@@ -35,6 +40,15 @@ class TrackMateApplication :
             Timber.plant(Timber.DebugTree())
         } else {
             Timber.plant(CrashReportingTree())
+        }
+
+        try {
+            syncManager.start()
+        } catch (e: Exception) {
+            Logger.e(
+                message = "Failed to start EntrySyncManager",
+                throwable = e,
+            )
         }
     }
 
