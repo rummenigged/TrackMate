@@ -28,7 +28,7 @@ jobs:
         run: ./gradlew lintDebug
 
       - name: "Upload Ktlint report"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Ktlint Report
           path: app/build/reports/ktlint
