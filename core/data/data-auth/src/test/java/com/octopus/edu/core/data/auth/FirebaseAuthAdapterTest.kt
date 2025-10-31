@@ -4,7 +4,7 @@ import app.cash.turbine.test
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.octopus.edu.core.data.auth.authAdapter.FirebaseAuthAdapterImpl
+import com.octopus.edu.core.data.auth.authAdapter.FirebaseAuthAdapter
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
@@ -34,7 +34,7 @@ class FirebaseAuthAdapterTest {
     @MockK
     private lateinit var mockFirebaseUser: FirebaseUser
 
-    private lateinit var firebaseAuthAdapter: FirebaseAuthAdapterImpl
+    private lateinit var firebaseAuthAdapter: FirebaseAuthAdapter
 
     private var authStateListenerSlot = slot<FirebaseAuth.AuthStateListener>()
 
@@ -45,7 +45,7 @@ class FirebaseAuthAdapterTest {
         every { mockFirebaseAuth.addAuthStateListener(capture(authStateListenerSlot)) } just runs
         every { mockFirebaseAuth.removeAuthStateListener(any()) } just runs
 
-        firebaseAuthAdapter = FirebaseAuthAdapterImpl(mockFirebaseAuth)
+        firebaseAuthAdapter = FirebaseAuthAdapter(mockFirebaseAuth)
     }
 
     @Test

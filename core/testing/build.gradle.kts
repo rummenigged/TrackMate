@@ -50,6 +50,7 @@ dependencies {
     implementation(project(":core:common"))
 
     api(libs.test.junit)
+    api(libs.test.kotlin.junit)
     api(libs.test.androidx.junit)
     api(libs.test.androidx.espresso.core)
     api(libs.test.coroutines)
@@ -58,4 +59,7 @@ dependencies {
     implementation(platform(libs.compose.bom))
     api(libs.test.compose.ui.junit4)
     debugApi(libs.test.compose.ui.manifest)
+    api(libs.test.robolectric)
+    api(libs.guava)
+    api(libs.test.androidx.work)
 }

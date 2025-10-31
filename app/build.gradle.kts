@@ -59,12 +59,16 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            manifestPlaceholders["usesClearTextTraffic"] = false
         }
 
         debug {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             isDebuggable = true
+
+            manifestPlaceholders["usesClearTextTraffic"] = true
         }
     }
 
