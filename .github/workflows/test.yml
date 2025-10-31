@@ -23,7 +23,11 @@ jobs:
 
       - name: Decode google-services.json
         run: |
-          echo "${{ secrets.DEBUG_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
+          if [ "${{ github.actor }}" = "dependabot[bot]" ]; then
+            echo '{}' > app/google-services.json
+          else
+            echo "${{ secrets.DEBUG_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
+          fi
 
       - name: Unit Test
         run: ./gradlew testDebugUnitTest
