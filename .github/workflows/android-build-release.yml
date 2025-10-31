@@ -14,7 +14,7 @@ jobs:
       - name: Decode google-services.json
         run: |
           mkdir -p app/src/release
-          echo "${{ secrets.RELEASE_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
+          echo "${{ secrets.RELEASE_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/src/release/google-services.json
 
       - name: Setup Java JDK
         uses: actions/setup-java@v5.0.0
