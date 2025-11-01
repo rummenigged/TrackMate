@@ -35,7 +35,5 @@
       }
     ]
   ],
-  "verifyReleaseCmd": "if [[ $SEMANTIC_RELEASE_NEXT_VERSION == 1* ]]; then echo '❌ Preventing jump to 1.x.x — still pre-release phase'; exit 1; fi",
-  "publishCmd": "echo 'RELEASE_VERSION=${nextRelease.version}' >> $GITHUB_ENV",
   "tagFormat": "${version}"
 }
