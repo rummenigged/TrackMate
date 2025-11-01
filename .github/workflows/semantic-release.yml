@@ -8,7 +8,6 @@ on:
 jobs:
   semantic-release:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
-
     name: Semantic Release
     runs-on: ubuntu-latest
     permissions:
@@ -28,18 +27,22 @@ jobs:
         with:
           ruby-version: '3.3'
 
-      # Step 3 Install the bundler & Fastlane (Create environment for ruby to avoid dependency hell and manage the dependencies versions)
+      # Step 3 Install bundler & Fastlane
       - name: Install bundler
         run: |
           gem install bundler:2.2.27
           bundle config path vendor/bundle
           bundle install --jobs 4 --retry 3
 
-      # Step 4 Decode the Keystore from the Github Secrets
+      # Step 4 Decode the Keystore
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
 
-      # Step 5 Ensure it only exists in CI
+      # Step 5 Export keystore path
+      - name: Export keystore path
+        run: echo "KEYSTORE_PATH=app/keystore.jks" >> $GITHUB_ENV
+
+      # Step 6 Create keystore.properties
       - name: Write keystore.properties
         run: |
           cat <<EOF > keystore.properties
@@ -49,7 +52,7 @@ jobs:
           release.keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
 
-      # Step 6 Execute Semantic Release
+      # Step 7 Execute Semantic Release
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v5
         with:
