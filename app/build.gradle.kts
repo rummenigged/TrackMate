@@ -1,6 +1,7 @@
 import java.util.Properties
 
 plugins {
+    id("kotlin-kapt")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -8,6 +9,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.firebase.appdistribution)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.androidx.baselineprofile)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
@@ -50,17 +53,22 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isProfileable = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            manifestPlaceholders["usesClearTextTraffic"] = false
         }
 
         debug {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             isDebuggable = true
+
+            manifestPlaceholders["usesClearTextTraffic"] = true
         }
     }
 
@@ -82,6 +90,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -104,12 +113,17 @@ dependencies {
 
     implementation(project(":core:design"))
     implementation(project(":core:data:data-entry"))
+    implementation(project(":core:data:database"))
     implementation(project(":core:ui-common"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:common"))
+    implementation(project(":feature:signIn"))
     implementation(project(":feature:home"))
     implementation(project(":feature:history"))
     implementation(project(":feature:analytics"))
 
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.coreKtx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.navigation.fragmentKtx)
     implementation(libs.navigation.ui)
     implementation(libs.material)
@@ -122,11 +136,26 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.navigation.suite.android)
+    implementation(libs.firebase.crashlytics)
     debugImplementation(libs.compose.ui.tooling)
 
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    implementation(libs.test.performance.runtime.tracing)
+    implementation(libs.test.performance.tracingKtx)
 
+    implementation(libs.work.runtime)
+
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.work)
+    implementation(libs.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
+
+    implementation(libs.auto.value.annotations)
+    // TODO: Migrate to KSP when the com.google.auto.value:auto-value becomes compatible with it
+    kapt(libs.auto.value)
+
+    implementation(libs.performance.profileinstaller)
+    baselineProfile(project(":baselineprofile"))
     testImplementation(project(":core:testing"))
     androidTestImplementation(project(":core:testing"))
 }

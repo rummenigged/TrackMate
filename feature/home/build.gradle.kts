@@ -38,17 +38,30 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packaging {
+        resources {
+            excludes.addAll(
+                setOf(
+                    "META-INF/LICENSE.md",
+                    "META-INF/LICENSE-notice.md",
+                ),
+            )
+        }
+    }
 }
 
 dependencies {
 
-    implementation(project(":core:ui-common"))
+    implementation(project(":core:common"))
     implementation(project(":core:design"))
     implementation(project(":core:domain"))
+    implementation(project(":core:ui-common"))
 
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.coreKtx)
     implementation(libs.androidx.appcompat)
     implementation(libs.compose.ui.tooling)
+    implementation(libs.compose.constraintlayout)
 
     implementation(libs.kotlinx.collections.immutable)
 

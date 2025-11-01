@@ -1,60 +1,59 @@
 package com.octopus.edu.feature.home
 
-import com.octopus.edu.core.domain.model.Habit
-import com.octopus.edu.core.domain.model.Recurrence
-import com.octopus.edu.core.domain.model.Task
+import androidx.compose.runtime.Stable
+import com.octopus.edu.core.design.theme.utils.Comparable
+import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.ui.common.base.ViewEffect
 import com.octopus.edu.core.ui.common.base.ViewEvent
 import com.octopus.edu.core.ui.common.base.ViewState
-import com.octopus.edu.feature.home.HomeUiContract.Tab.Habits
-import com.octopus.edu.feature.home.HomeUiContract.Tab.Tasks
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-
-internal fun Habit.getRecurrenceAsText(): String? =
-    when (recurrence) {
-        Recurrence.Custom -> null
-        Recurrence.Daily -> "Daily"
-        Recurrence.Weekly -> "Weekly"
-        null -> null
-    }
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 internal object HomeUiContract {
+    @Stable
     data class UiState(
-        val tasks: ImmutableList<Task> = persistentListOf(),
-        val habits: ImmutableList<Habit> = persistentListOf(),
-        val tabSelected: Tab = Habits(),
+        val entries: ImmutableList<Entry> = persistentListOf(),
+        val currentDate: LocalDate = LocalDate.now(),
         val isLoading: Boolean = false,
+        val isRefreshing: Boolean = false
     ) : ViewState {
-        val tabs: List<Tab> = listOf(Habits(), Tasks())
+        val currentMonth: String
+            get() = currentDate.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
 
-        val tabTitles: List<String>
-            get() = tabs.map { it.title }
-
-        fun getTab(position: Int): Tab = tabs[position]
-    }
-
-    sealed class Tab(
-        open val title: String,
-    ) {
-        data class Habits(
-            override val title: String = "Habit",
-        ) : Tab(title)
-
-        data class Tasks(
-            override val title: String = "Tasks",
-        ) : Tab(title)
+        val currentYear: String
+            get() = currentDate.year.toString()
     }
 
     sealed interface UiEffect : ViewEffect {
         data class ShowError(
             val message: String,
         ) : UiEffect
+
+        data object ShowEntrySuccessfullyDeleted : UiEffect
     }
 
     sealed interface UiEvent : ViewEvent {
-        data class OnTabSelected(
-            val tab: Tab,
+        data object Refresh : UiEvent
+
+        data class SetCurrentDateAs(
+            val date: LocalDate
         ) : UiEvent
+
+        sealed interface Entry {
+            data class Delete(
+                val entryId: String
+            ) : UiEvent
+        }
+    }
+
+    internal class UiEntry(
+        val entry: Entry
+    ) : Comparable<UiEntry> {
+        override fun areItemsTheSame(newItem: UiEntry): Boolean = this.entry.id == newItem.entry.id
+
+        override fun areContentsTheSame(newItem: UiEntry): Boolean = this.entry == newItem.entry
     }
 }

@@ -1,8 +1,12 @@
 package com.octopus.edu.core.data.database.di
 
 import android.content.Context
+import com.octopus.edu.core.common.TransactionRunner
 import com.octopus.edu.core.data.database.TrackMateDatabase
+import com.octopus.edu.core.data.database.dao.DeletedEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
+import com.octopus.edu.core.data.database.dao.ReminderDao
+import com.octopus.edu.core.data.database.utils.RoomTransactionRunner
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,14 +16,26 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class StorageModule {
+object StorageModule {
     @Provides
     @Singleton
     fun database(
         @ApplicationContext context: Context,
-    ) = TrackMateDatabase.create(context)
+    ): TrackMateDatabase = TrackMateDatabase.create(context)
 
     @Provides
     @Singleton
     fun entryDao(database: TrackMateDatabase): EntryDao = database.entryDao()
+
+    @Provides
+    @Singleton
+    fun reminderDao(database: TrackMateDatabase): ReminderDao = database.reminderDao()
+
+    @Provides
+    @Singleton
+    fun deletedEntryDao(database: TrackMateDatabase): DeletedEntryDao = database.deletedEntryDao()
+
+    @Provides
+    @Singleton
+    fun roomTransactionRunner(database: TrackMateDatabase): TransactionRunner = RoomTransactionRunner(database)
 }

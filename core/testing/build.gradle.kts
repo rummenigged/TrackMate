@@ -32,16 +32,34 @@ android {
     kotlin {
         jvmToolchain(rootProject.ext["kotlinOptionsJVMTarget"].toString().toInt())
     }
+
+    packaging {
+        resources {
+            excludes.addAll(
+                setOf(
+                    "META-INF/LICENSE.md",
+                    "META-INF/LICENSE-notice.md",
+                ),
+            )
+        }
+    }
 }
 
 dependencies {
 
+    implementation(project(":core:common"))
+
     api(libs.test.junit)
+    api(libs.test.kotlin.junit)
     api(libs.test.androidx.junit)
     api(libs.test.androidx.espresso.core)
     api(libs.test.coroutines)
     api(libs.test.mockk)
+    api(libs.test.turbine)
     implementation(platform(libs.compose.bom))
     api(libs.test.compose.ui.junit4)
     debugApi(libs.test.compose.ui.manifest)
+    api(libs.test.robolectric)
+    api(libs.guava)
+    api(libs.test.androidx.work)
 }

@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">Track Mate</string>
+    <string name="reminder_channel_name">Task Reminders</string>
+    <string name="reminder_channel_description">Notifications for scheduled task reminders</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="todayReminder">Today %1$s:%2$s</string>
+    <string name="tomorrowReminder">Tomorrow %1$s:%2$s</string>
+    <string name="nextWeekDay">Next %1$s %2$s:%3$s</string>
+    <string name="nextDate">%1$s/%2$s %3$s:%4$s</string>
+    <string name="no_offset">Starts Now</string>
+    <plurals name="hourly_offset">
+        <item quantity="one">Starts in %s hour</item>
+        <item quantity="other">Starts in %s hours</item>
+    </plurals>
+    <plurals name="minutely_offset">
+        <item quantity="one">Starts in %s minute</item>
+        <item quantity="other">Starts in %s minutes</item>
+    </plurals>
 </resources>

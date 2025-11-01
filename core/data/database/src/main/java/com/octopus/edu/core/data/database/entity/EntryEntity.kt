@@ -12,11 +12,14 @@ data class EntryEntity(
     val title: String,
     val description: String?,
     val isDone: Boolean = false,
-    val dueDate: Long? = null,
     val recurrence: Recurrence? = null,
     val streakCount: Int? = null,
     val lastCompletedDate: Long? = null,
     val isArchived: Boolean = false,
+    val syncState: SyncStateEntity,
+    val dueDate: Long? = null,
+    val startDate: Long? = null,
+    val time: Long? = null,
     val createdAt: Long,
     val updatedAt: Long? = null,
 ) {
@@ -27,4 +30,6 @@ data class EntryEntity(
         WEEKLY,
         CUSTOM,
     }
+
+    enum class SyncStateEntity { PENDING, SYNCED, FAILED, CONFLICT }
 }

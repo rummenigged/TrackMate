@@ -7,19 +7,28 @@ import androidx.navigation.NavHostController
 import com.octopus.edu.core.ui.common.R
 import kotlinx.serialization.Serializable
 
-sealed interface Route {
-    @Serializable
-    data object Home : Route
+sealed interface Screen {
+    val name: String
+        get() = this::class.qualifiedName.orEmpty()
 
     @Serializable
-    data object Analytics : Route
+    data object SignIn : Screen
 
     @Serializable
-    data object History : Route
+    data object MainContent : Screen
+
+    @Serializable
+    data object Home : Screen
+
+    @Serializable
+    data object Analytics : Screen
+
+    @Serializable
+    data object History : Screen
 }
 
 data class TrackMateTopLevelDestination(
-    val route: Route,
+    val screen: Screen,
     @param:DrawableRes val selectedIcon: Int,
     @param:DrawableRes val unselectedIcon: Int,
     @param:StringRes val iconTextId: Int,
@@ -29,7 +38,7 @@ class TrackMateNavigationActions(
     private val navController: NavHostController,
 ) {
     fun navigateTo(destination: TrackMateTopLevelDestination) {
-        navController.navigate(destination.route) {
+        navController.navigate(destination.screen) {
             popUpTo(id = navController.graph.findStartDestination().id) {
                 saveState = true
             }
@@ -44,19 +53,19 @@ class TrackMateNavigationActions(
 val TOP_LEVEL_DESTINATIONS =
     listOf(
         TrackMateTopLevelDestination(
-            route = Route.Home,
+            screen = Screen.Home,
             selectedIcon = R.drawable.ic_home,
             unselectedIcon = R.drawable.ic_home,
             iconTextId = R.string.tab_home,
         ),
         TrackMateTopLevelDestination(
-            route = Route.History,
+            screen = Screen.History,
             selectedIcon = R.drawable.ic_history,
             unselectedIcon = R.drawable.ic_history,
             iconTextId = R.string.tab_history,
         ),
         TrackMateTopLevelDestination(
-            route = Route.Analytics,
+            screen = Screen.Analytics,
             selectedIcon = R.drawable.ic_bar_chart,
             unselectedIcon = R.drawable.ic_bar_chart,
             iconTextId = R.string.tab_analytics,

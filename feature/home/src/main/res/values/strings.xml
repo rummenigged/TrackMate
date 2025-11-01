@@ -1,8 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="all_caught_up">You\'re all caught up!</string>
-    <string name="add_new_entries_to_get_started">Add new %s to get started</string>
-    <string name="completed_date">Completed: %s</string>
-    <string name="created_at">Created at: %s</string>
-    <string name="due_date">Due Date: %s</string>
+    <string name="add_new_entries_to_get_started">Add new Tasks to get started</string>
+    <string name="time">Time</string>
+    <string name="reminder">Reminder</string>
+    <string name="reminder_type">Reminder Type</string>
+    <string name="notification">Notification</string>
+    <string name="alarm">Alarm</string>
+    <string name="repeat">Repeat</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="recurrence">Recurrence</string>
+    <string name="none">None</string>
+    <string name="custom">Custom</string>
+    <string name="daily">Daily</string>
+    <string name="weekly">Weekly</string>
+    <string name="task_creation_title_placeholder">What would you like to do?</string>
+    <string name="entry_date_and_time">Entry Date and Time</string>
+    <string name="all_day">All Day</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="days_later">%1$s %2$s, %3$sd left</string>
+    <string name="days_before">%1$s %2$s, %3$sd overdue</string>
+    <string name="on_day">On the day</string>
+    <string name="day_early">1 day early</string>
+    <string name="two_days_early">2 days early</string>
+    <string name="three_days_early">3 days early</string>
+    <string name="on_time">On time</string>
+    <string name="five_minutes_early">5 mins early</string>
+    <string name="thirty_minutes_early">30 mins early</string>
+    <string name="one_hour_early">1 hour early</string>
+    <string name="current_month_and_day" type="id">%1$s, %2$s</string>
+    <string name="task_creation_description_placeholder">Description</string>
+    <string name="formatted_time_hh_mm">%1$02d:%2$02d</string>
+    <string name="entry_successfully_created">Task Successfully Created</string>
 </resources>

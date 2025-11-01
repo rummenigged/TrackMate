@@ -34,9 +34,22 @@ android {
     kotlin {
         jvmToolchain(rootProject.ext["kotlinOptionsJVMTarget"].toString().toInt())
     }
+
+    packaging {
+        resources {
+            excludes.addAll(
+                setOf(
+                    "META-INF/LICENSE.md",
+                    "META-INF/LICENSE-notice.md",
+                ),
+            )
+        }
+    }
 }
 
 dependencies {
+
+    implementation(project(":core:common"))
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
