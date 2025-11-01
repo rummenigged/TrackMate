@@ -40,7 +40,7 @@ jobs:
 
       # Step 5 Export keystore path
       - name: Export keystore path
-        run: echo "KEYSTORE_PATH=app/keystore.jks" >> $GITHUB_ENV
+        run: echo "KEYSTORE_PATH=$GITHUB_WORKSPACE/app/keystore.jks" >> $GITHUB_ENV
 
       # Step 6 Create keystore.properties
       - name: Write keystore.properties
