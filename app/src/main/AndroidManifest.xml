@@ -35,7 +35,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.reminder.ReminderActivity"
+            android:name="com.octopus.edu.core.design.reminder.ReminderActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:launchMode="singleTop"

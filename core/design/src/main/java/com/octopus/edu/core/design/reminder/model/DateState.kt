@@ -1,4 +1,4 @@
-package com.octopus.edu.trackmate.ui.reminder.model
+package com.octopus.edu.core.design.reminder.model
 
 import com.octopus.edu.core.ui.common.StringResource
 import com.octopus.edu.trackmate.R

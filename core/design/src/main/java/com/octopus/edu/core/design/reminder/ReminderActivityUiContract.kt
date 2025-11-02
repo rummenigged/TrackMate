@@ -1,13 +1,13 @@
-package com.octopus.edu.trackmate.ui.reminder
+package com.octopus.edu.core.design.reminder
 
 import com.octopus.edu.core.common.isToday
 import com.octopus.edu.core.common.isTomorrow
+import com.octopus.edu.core.design.reminder.model.DateState
+import com.octopus.edu.core.design.reminder.model.OffsetState
 import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.ui.common.base.ViewEffect
 import com.octopus.edu.core.ui.common.base.ViewEvent
 import com.octopus.edu.core.ui.common.base.ViewState
-import com.octopus.edu.trackmate.ui.reminder.model.DateState
-import com.octopus.edu.trackmate.ui.reminder.model.OffsetState
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.TextStyle

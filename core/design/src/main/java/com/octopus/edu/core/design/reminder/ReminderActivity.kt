@@ -1,4 +1,4 @@
-package com.octopus.edu.trackmate.ui.reminder
+package com.octopus.edu.core.design.reminder
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -26,17 +26,17 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.octopus.edu.core.design.reminder.ReminderActivityUiContract.UiEffect
+import com.octopus.edu.core.design.reminder.ReminderActivityUiContract.UiEffect.Dismiss
+import com.octopus.edu.core.design.reminder.ReminderActivityUiContract.UiEffect.ShowError
+import com.octopus.edu.core.design.reminder.ReminderActivityUiContract.UiEvent
+import com.octopus.edu.core.design.reminder.ReminderActivityUiContract.UiState
+import com.octopus.edu.core.design.reminder.model.OffsetState
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.TrackMateOvalButton
 import com.octopus.edu.core.design.theme.primaryAndSecondaryGradient
 import com.octopus.edu.core.design.theme.utils.LaunchedEffectAndCollectLatest
 import com.octopus.edu.trackmate.R
-import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEffect
-import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEffect.Dismiss
-import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEffect.ShowError
-import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEvent
-import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiState
-import com.octopus.edu.trackmate.ui.reminder.model.OffsetState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime

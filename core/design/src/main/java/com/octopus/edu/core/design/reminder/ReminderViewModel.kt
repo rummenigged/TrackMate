@@ -1,16 +1,16 @@
-package com.octopus.edu.trackmate.ui.reminder
+package com.octopus.edu.core.design.reminder
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.octopus.edu.core.design.reminder.ReminderActivityUiContract.UiEffect
+import com.octopus.edu.core.design.reminder.ReminderActivityUiContract.UiEvent
+import com.octopus.edu.core.design.reminder.ReminderActivityUiContract.UiState
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Task
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.ui.common.base.BaseViewModel
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.ENTRY_ID_EXTRA
-import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEffect
-import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiEvent
-import com.octopus.edu.trackmate.ui.reminder.ReminderActivityUiContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime

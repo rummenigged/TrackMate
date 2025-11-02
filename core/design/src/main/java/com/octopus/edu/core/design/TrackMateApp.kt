@@ -1,4 +1,4 @@
-package com.octopus.edu.trackmate.ui
+package com.octopus.edu.core.design
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
