@@ -10,7 +10,7 @@ platform :android do
     android_set_version_code(gradle_file: "app/build.gradle.kts")
 
     keystore_path = File.expand_path(ENV["KEYSTORE_PATH"] || "app/keystore.jks", Dir.pwd)
-    UI.message("🔑 Using keystore path: #{keystore_path}")
+    UI.message("Using keystore path: #{keystore_path}")
     unless File.exist?(keystore_path)
       UI.user_error!("Keystore not found at #{keystore_path}. Make sure it’s decoded correctly in CI.")
     end
