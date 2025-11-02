@@ -45,7 +45,7 @@ jobs:
       - name: Write keystore.properties
         run: |
           cat <<EOF > keystore.properties
-          release.keyStore=app/keystore.jks
+          release.keyStore=keystore.jks
           release.storePassword=${{ secrets.KEYSTORE_PASSWORD }}
           release.keyAlias=${{ secrets.KEY_ALIAS }}
           release.keyPassword=${{ secrets.KEY_PASSWORD }}
