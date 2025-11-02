@@ -73,7 +73,7 @@ internal object ReminderActivityUiContract {
             date?.let {
                 val offsetInMinutes = Duration.between(LocalDateTime.now(), it).toMinutes()
 
-                if (offsetInMinutes < 0) return@let null // No negative offsets
+                if (offsetInMinutes < 0) return@let null
 
                 when (offsetInMinutes) {
                     0L -> OffsetState.NoOffset
@@ -83,9 +83,9 @@ internal object ReminderActivityUiContract {
                         val remainderMinutes = offsetInMinutes % 60L
 
                         when (remainderMinutes) {
-                            0L -> OffsetState.HourOffset(baseHour) // Exactly X hours
-                            1L -> OffsetState.HourOffset(baseHour) // X hours and 1 minute
-                            59L -> OffsetState.HourOffset(baseHour + 1) // 1 minute to next hour
+                            0L -> OffsetState.HourOffset(baseHour)
+                            1L -> OffsetState.HourOffset(baseHour)
+                            59L -> OffsetState.HourOffset(baseHour + 1)
                             else -> null
                         }
                     }

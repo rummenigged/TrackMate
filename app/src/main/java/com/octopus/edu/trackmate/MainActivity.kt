@@ -11,10 +11,10 @@ import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.octopus.edu.core.common.credentialService.ICredentialService
-import com.octopus.edu.core.design.TrackMateApp
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.ui.common.compositionLocals.LocalCredentialManager
 import com.octopus.edu.feature.signin.AuthViewModel
+import com.octopus.edu.trackmate.ui.TrackMateApp
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

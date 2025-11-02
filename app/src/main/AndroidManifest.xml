@@ -27,8 +27,7 @@
             android:name=".MainActivity"
             android:windowSoftInputMode="adjustResize"
             android:exported="true"
-            android:theme="@style/Theme.TrackMate"
-            android:windowSoftInputMode="adjustResize">
+            android:theme="@style/Theme.TrackMate">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,7 +35,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.octopus.edu.core.design.reminder.ReminderActivity"
+            android:name="com.octopus.edu.trackmate.ui.reminder.ReminderActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:launchMode="singleTop"
@@ -46,16 +45,6 @@
 
         <receiver android:name=".reminder.ReminderAlarmReceiver" />
 
-        <activity
-            android:name=".ui.reminder.ReminderActivity"
-            android:theme="@style/Theme.TrackMate"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
-            android:excludeFromRecents="true"/>
-
-        <receiver android:name=".reminder.ReminderAlarmReceiver"/>
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"

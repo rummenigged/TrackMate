@@ -6,16 +6,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.octopus.edu.core.design.reminder.ReminderActivity
 import com.octopus.edu.trackmate.MainActivity
-import com.octopus.edu.trackmate.R // Assuming R is correctly imported
+import com.octopus.edu.trackmate.R
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.ENTRY_ID_EXTRA
 import com.octopus.edu.trackmate.reminderSchedulers.ReminderConstants.REMINDER_NOTIFICATION_CHANNEL_ID_EXTRA
+import com.octopus.edu.trackmate.ui.reminder.ReminderActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton // Good practice for a helper like this
+@Singleton
 class NotificationHelper
     @Inject
     constructor(
