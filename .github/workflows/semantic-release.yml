@@ -14,35 +14,34 @@ jobs:
       contents: write
 
     steps:
-      # Step 1 Checkout Repository
       - name: Checkout
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      # Step 2 Setup Ruby
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
 
-      # Step 3 Install bundler & Fastlane
-      - name: Install bundler
+      - name: Install bundler & Fastlane
         run: |
           gem install bundler:2.2.27
           bundle config path vendor/bundle
           bundle install --jobs 4 --retry 3
 
-      # Step 4 Decode the Keystore
+      - name: Decode google-services.json
+        run: |
+          mkdir -p app/src/release
+          echo "${{ secrets.RELEASE_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/src/release/google-services.json
+
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
 
-      # Step 5 Export keystore path
       - name: Export keystore path
         run: echo "KEYSTORE_PATH=$GITHUB_WORKSPACE/app/keystore.jks" >> $GITHUB_ENV
 
-      # Step 6 Create keystore.properties
       - name: Write keystore.properties
         run: |
           cat <<EOF > keystore.properties
@@ -52,7 +51,6 @@ jobs:
           release.keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
 
-      # Step 7 Execute Semantic Release
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v5
         with:
