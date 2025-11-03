@@ -13,7 +13,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "bundle exec fastlane android release version:${nextRelease.version} && bundle exec fastlane android firebase notes:'${nextRelease.notes}'"
+        "prepareCmd": "bundle exec fastlane android release version:${nextRelease.version} && RELEASE_NOTES='${nextRelease.notes}' bundle exec fastlane android firebase"
       }
     ],
     [

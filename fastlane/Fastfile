@@ -29,7 +29,7 @@ platform :android do
 
   desc "Distribute the release build to Firebase"
   lane :firebase do |options|
-      release_notes = options[:notes] || "Automated release via semantic-release"
+    release_notes = ENV["RELEASE_NOTES"] || options[:notes] || "Automated release via semantic-release"
     firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID"],
       testers: ENV["FIREBASE_TESTERS"],
