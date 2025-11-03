@@ -45,6 +45,9 @@ jobs:
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
 
+      - name: Export keystore path
+        run: echo "KEYSTORE_PATH=$GITHUB_WORKSPACE/app/keystore.jks" >> $GITHUB_ENV
+
       - name: Write keystore.properties
         run: |
           cat <<EOF > keystore.properties
