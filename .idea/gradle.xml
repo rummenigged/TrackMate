@@ -11,9 +11,11 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/baselineprofile" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core/common" />
             <option value="$PROJECT_DIR$/core/data" />
+            <option value="$PROJECT_DIR$/core/data/data-auth" />
             <option value="$PROJECT_DIR$/core/data/data-entry" />
             <option value="$PROJECT_DIR$/core/data/database" />
             <option value="$PROJECT_DIR$/core/design" />
@@ -25,6 +27,7 @@
             <option value="$PROJECT_DIR$/feature/analytics" />
             <option value="$PROJECT_DIR$/feature/history" />
             <option value="$PROJECT_DIR$/feature/home" />
+            <option value="$PROJECT_DIR$/feature/signIn" />
           </set>
         </option>
       </GradleProjectSettings>

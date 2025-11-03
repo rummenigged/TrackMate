@@ -19,6 +19,9 @@ android {
             "USE_FIREBASE_EMULATOR",
             rootProject.extra["USE_FIREBASE_EMULATOR"].toString(),
         )
+
+        buildConfigField("String", "FIREBASE_EMULATOR_HOST_PHYSICAL_DEVICE", "\"\"")
+        buildConfigField("String", "FIREBASE_EMULATOR_HOST_VIRTUAL_DEVICE", "\"\"")
     }
 
     buildTypes {
