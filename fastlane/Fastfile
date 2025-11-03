@@ -29,13 +29,7 @@ platform :android do
 
   desc "Distribute the release build to Firebase"
   lane :firebase do |options|
-      release_notes = if options[:notes_file] && File.exist?(options[:notes_file])
-                          File.read(options[:notes_file])
-                        elsif options[:notes]
-                          options[:notes]
-                        else
-                          "Automated release via semantic-release"
-                        end
+      release_notes = options[:notes] || "Automated release via semantic-release"
     firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID"],
       testers: ENV["FIREBASE_TESTERS"],
