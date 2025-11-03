@@ -28,12 +28,13 @@ platform :android do
   end
 
   desc "Distribute the release build to Firebase"
-  lane :firebase do
+  lane :firebase do |options|
+      release_notes = options[:notes] || "Automated release via semantic-release"
     firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID"],
       testers: ENV["FIREBASE_TESTERS"],
       firebase_cli_token: ENV["FIREBASE_CLI_TOKEN"],
-      release_notes: "Release via semantic-release",
+      release_notes: release_notes,
       android_artifact_path: "app/build/outputs/apk/release/app-release.apk"
     )
   end
