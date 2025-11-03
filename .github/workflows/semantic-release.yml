@@ -30,7 +30,13 @@ jobs:
           gem install bundler:2.2.27
           bundle config path vendor/bundle
           bundle install --jobs 4 --retry 3
-
+      
+      - name: Who am I?
+        run: |
+          echo "GITHUB_ACTOR=$GITHUB_ACTOR"
+          git --no-pager config user.name || true
+          git --no-pager config user.email || true
+          
       - name: Decode google-services.json
         run: |
           mkdir -p app/src/release
