@@ -217,30 +217,33 @@ class EntryStoreTest {
         }
 
     @Test
-    fun `markEntryAsDone should call dao markEntryAsDone`() = runTest {
-        // Given
-        every { entryDao.markEntryAsDone(testEntryId) } returns Unit
+    fun `markEntryAsDone should call dao markEntryAsDone`() =
+        runTest {
+            // Given
+            every { entryDao.markEntryAsDone(testEntryId) } returns Unit
 
-        // When
-        entryStore.markEntryAsDone(testEntryId)
+            // When
+            entryStore.markEntryAsDone(testEntryId)
 
-        // Then
-        verify(exactly = 1) { entryDao.markEntryAsDone(testEntryId) }
-    }
+            // Then
+            verify(exactly = 1) { entryDao.markEntryAsDone(testEntryId) }
+        }
 
     @Test
-    fun `markEntryAsDone should throw exception when dao throws exception`() = runTest {
-        // Given
-        val exception = RuntimeException("Database error")
-        every { entryDao.markEntryAsDone(testEntryId) } throws exception
+    fun `markEntryAsDone should throw exception when dao throws exception`() =
+        runTest {
+            // Given
+            val exception = RuntimeException("Database error")
+            every { entryDao.markEntryAsDone(testEntryId) } throws exception
 
-        // When & Then
-        val thrownException = assertFailsWith<RuntimeException> {
-            entryStore.markEntryAsDone(testEntryId)
+            // When & Then
+            val thrownException =
+                assertFailsWith<RuntimeException> {
+                    entryStore.markEntryAsDone(testEntryId)
+                }
+            assertEquals(exception, thrownException)
+            verify(exactly = 1) { entryDao.markEntryAsDone(testEntryId) }
         }
-        assertEquals(exception, thrownException)
-        verify(exactly = 1) { entryDao.markEntryAsDone(testEntryId) }
-    }
 
     @Test
     fun `saveEntry should call dao insert`() =
