@@ -32,7 +32,17 @@ internal object HomeUiContract {
             val message: String,
         ) : UiEffect
 
+        data class MarkEntryAsDoneFailed(
+            val entryId: String,
+            val message: String,
+            val isRetriable: Boolean = false
+        ) : UiEffect
+
         data object ShowEntrySuccessfullyDeleted : UiEffect
+
+        data class ShowEntrySuccessfullyMarkedAsDone(
+            val entryId: String
+        ) : UiEffect
     }
 
     sealed interface UiEvent : ViewEvent {
@@ -42,8 +52,14 @@ internal object HomeUiContract {
             val date: LocalDate
         ) : UiEvent
 
+        data object MarkEffectAsConsumed : UiEvent
+
         sealed interface Entry {
             data class Delete(
+                val entryId: String
+            ) : UiEvent
+
+            data class MarkAsDone(
                 val entryId: String
             ) : UiEvent
         }

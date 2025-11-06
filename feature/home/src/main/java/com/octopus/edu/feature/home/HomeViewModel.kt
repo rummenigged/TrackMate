@@ -37,8 +37,34 @@ internal class HomeViewModel
 
                 is UiEvent.SetCurrentDateAs -> getEntriesVisibleOn(event.date)
                 UiEvent.Refresh -> refreshData()
+
+                is UiEvent.Entry.MarkAsDone -> markEntryAsDone(event.entryId)
+
+                UiEvent.MarkEffectAsConsumed -> markEffectAsConsumed()
             }
         }
+
+        private fun markEntryAsDone(entryId: String) =
+            viewModelScope.launch {
+                when (val result = entryRepository.markEntryAsDone(entryId)) {
+                    is ResultOperation.Error -> {
+                        setEffect(
+                            UiEffect.MarkEntryAsDoneFailed(
+                                message =
+                                    result.throwable.message
+                                        ?: "Unknown Error",
+                                isRetriable = result.isRetriable,
+                                entryId = entryId,
+                            ),
+                        )
+                    }
+                    is ResultOperation.Success -> {
+                        setEffect(
+                            UiEffect.ShowEntrySuccessfullyMarkedAsDone(entryId),
+                        )
+                    }
+                }
+            }
 
         private fun refreshData() {
             viewModelScope.launch {

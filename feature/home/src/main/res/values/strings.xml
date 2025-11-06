@@ -35,4 +35,9 @@
     <string name="task_creation_description_placeholder">Description</string>
     <string name="formatted_time_hh_mm">%1$02d:%2$02d</string>
     <string name="entry_successfully_created">Task Successfully Created</string>
+    <string name="retry">Retry</string>
+    <string name="undo">Undo</string>
+    <string name="cant_mark_entry_as_done_retriable">Can\'t Mark the Entry as Done. Try again.</string>
+    <string name="cant_mark_entry_as_done_non_retriable">Can\'t Mark the Entry as Done.</string>
+    <string name="entry_marked_as_done">Entry Has Bee Marked as Done</string>
 </resources>

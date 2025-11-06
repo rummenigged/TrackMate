@@ -1,5 +1,6 @@
 package com.octopus.edu.feature.home
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,14 +28,19 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,17 +52,24 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.octopus.edu.core.design.theme.TrackMateTheme
 import com.octopus.edu.core.design.theme.components.FullScreenCircularProgress
 import com.octopus.edu.core.design.theme.components.WeekCalendar
+import com.octopus.edu.core.design.theme.components.snackBar.SnackBarType
+import com.octopus.edu.core.design.theme.components.snackBar.TrackMateSnackBarHost
+import com.octopus.edu.core.design.theme.components.snackBar.showSnackBar
+import com.octopus.edu.core.design.theme.utils.LaunchedEffectAndCollectLatest
 import com.octopus.edu.core.design.theme.utils.animatedItemIndexed
 import com.octopus.edu.core.design.theme.utils.updateAnimateItemsState
 import com.octopus.edu.core.domain.model.Entry
+import com.octopus.edu.feature.home.HomeUiContract.UiEffect
 import com.octopus.edu.feature.home.HomeUiContract.UiEntry
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
+import com.octopus.edu.feature.home.HomeUiContract.UiEvent.Entry.MarkAsDone
 import com.octopus.edu.feature.home.HomeUiContract.UiState
 import com.octopus.edu.feature.home.components.EntryItem
 import com.octopus.edu.feature.home.components.HomeAppBar
 import com.octopus.edu.feature.home.utils.mockEntryList
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun HomeScreen(
@@ -76,6 +90,8 @@ internal fun HomeScreenInternal(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    val snackBarHostState = remember { SnackbarHostState() }
+
     Surface {
         Box(modifier = modifier.fillMaxSize()) {
             HomeContent(
@@ -83,10 +99,93 @@ internal fun HomeScreenInternal(
                 onEvent = viewModel::processEvent,
             )
 
-            AddEntryFAB(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                onClick = onFabClicked,
-            )
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomEnd),
+            ) {
+                TrackMateSnackBarHost(
+                    snackBarHostState = snackBarHostState,
+                )
+
+                AddEntryFAB(
+                    modifier = Modifier.align(Alignment.End),
+                    onClick = onFabClicked,
+                )
+            }
+        }
+    }
+
+    EffectHandler(
+        effect = viewModel.effect,
+        snackBarHostState = snackBarHostState,
+        onEvent = viewModel::processEvent,
+    )
+}
+
+@Composable
+private fun EffectHandler(
+    effect: Flow<UiEffect?>,
+    snackBarHostState: SnackbarHostState,
+    onEvent: (UiEvent) -> Unit
+) {
+    val context = LocalContext.current
+
+    LaunchedEffectAndCollectLatest(
+        flow = effect,
+        onEffectConsumed = { onEvent(UiEvent.MarkEffectAsConsumed) },
+    ) { event ->
+        when (event) {
+            UiEffect.ShowEntrySuccessfullyDeleted -> {
+            }
+
+            is UiEffect.ShowEntrySuccessfullyMarkedAsDone -> {
+                snackBarHostState
+                    .showSnackBar(
+                        message =
+                            context.getString(
+                                R.string.entry_marked_as_done,
+                            ),
+                        actionLabel = context.getString(R.string.undo),
+                        duration = SnackbarDuration.Short,
+                    ).also { result ->
+                        if (result == SnackbarResult.ActionPerformed) {
+                            Toast
+                                .makeText(
+                                    context,
+                                    "Feature Not Implemented Yet",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
+                    }
+            }
+
+            is UiEffect.ShowError -> {
+            }
+
+            is UiEffect.MarkEntryAsDoneFailed -> {
+                val actionLabel = if (event.isRetriable) context.getString(R.string.retry) else null
+                val message =
+                    if (event.isRetriable) {
+                        context.getString(
+                            R.string.cant_mark_entry_as_done_retriable,
+                        )
+                    } else {
+                        context.getString(R.string.cant_mark_entry_as_done_non_retriable)
+                    }
+                snackBarHostState
+                    .showSnackBar(
+                        message = message,
+                        actionLabel = actionLabel,
+                        duration = SnackbarDuration.Short,
+                        type = SnackBarType.ERROR,
+                    ).also { result ->
+                        if (result == SnackbarResult.ActionPerformed) {
+                            onEvent(MarkAsDone(event.entryId))
+                        }
+                    }
+            }
         }
     }
 }
@@ -187,6 +286,7 @@ private fun EntriesList(
                 entry = item.entry,
                 isFirstItem = index == 0,
                 isLastItem = index == entries.lastIndex,
+                onItemSwipedFromStartToEnd = { entry -> onEvent(MarkAsDone(entry.id)) },
                 onItemSwipedFromEndToStart = { entry -> onEvent(UiEvent.Entry.Delete(entry.id)) },
             )
         }
