@@ -59,6 +59,7 @@ data class SwipeActionsConfig(
     val swipeActionDeactivatedBackground: Color,
     val backgroundShape: Shape = RoundedCornerShape(0.dp),
     val stayDismissed: Boolean,
+    val isEnabled: Boolean,
     val onSwiped: () -> Unit
 )
 
@@ -70,6 +71,7 @@ val DefaultSwipeActionsConfig: SwipeActionsConfig =
         swipeActionActivatedBackground = Color.Transparent,
         swipeActionDeactivatedBackground = Color.Transparent,
         stayDismissed = false,
+        isEnabled = false,
         onSwiped = {},
     )
 
@@ -109,12 +111,16 @@ fun SwipActions(
 
                 willDismissDirection =
                     when {
-                        // Check against positive threshold for StartToEnd
-                        width > 0f && startActionsConfig.threshold > 0f && currentDisplacement > (width * startActionsConfig.threshold) -> {
+                        startActionsConfig.isEnabled &&
+                            width > 0f &&
+                            startActionsConfig.threshold > 0f &&
+                            currentDisplacement > (width * startActionsConfig.threshold) -> {
                             StartToEnd
                         }
-                        // Check against negative threshold for EndToStart
-                        width > 0f && endActionsConfig.threshold > 0f && currentDisplacement < -(width * endActionsConfig.threshold) -> {
+                        endActionsConfig.isEnabled &&
+                            width > 0f &&
+                            endActionsConfig.threshold > 0f &&
+                            currentDisplacement < -(width * endActionsConfig.threshold) -> {
                             EndToStart
                         }
                         else -> {
