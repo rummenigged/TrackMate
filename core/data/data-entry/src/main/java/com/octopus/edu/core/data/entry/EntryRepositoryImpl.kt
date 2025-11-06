@@ -12,6 +12,7 @@ import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.di.DatabaseErrorClassifierQualifier
 import com.octopus.edu.core.data.entry.di.NetworkErrorClassifierQualifier
+import com.octopus.edu.core.data.entry.di.TrackingEntryStoreDecoratorQualifier
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.data.entry.utils.EntryNotFoundException
@@ -50,14 +51,15 @@ import javax.inject.Inject
 internal class EntryRepositoryImpl
     @Inject
     constructor(
+        @param:TrackingEntryStoreDecoratorQualifier
         private val entryStore: EntryStore,
         private val entryApi: EntryApi,
         private val reminderStore: ReminderStore,
         private val dbSemaphore: Semaphore,
         private val entryLocks: ConcurrentHashMap<String, Mutex>,
-        @field:DatabaseErrorClassifierQualifier
+        @param:DatabaseErrorClassifierQualifier
         private val databaseErrorClassifier: ErrorClassifier,
-        @field:NetworkErrorClassifierQualifier
+        @param:NetworkErrorClassifierQualifier
         private val networkErrorClassifier: ErrorClassifier,
         private val dispatcherProvider: DispatcherProvider
     ) : EntryRepository {
@@ -251,6 +253,16 @@ internal class EntryRepositoryImpl
                 },
             ) {
                 entryStore.updateDeletedEntrySyncState(entryId, syncState.toEntity())
+            }
+
+        override suspend fun markEntryAsDone(entryId: String): ResultOperation<Unit> =
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    databaseErrorClassifier.classify(exception) is TransientError
+                },
+            ) {
+                entryStore.markEntryAsDone(entryId)
             }
 
         private suspend fun syncEntrySafely(entry: EntryDto) {

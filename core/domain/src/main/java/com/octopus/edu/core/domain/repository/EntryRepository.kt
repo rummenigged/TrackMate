@@ -45,4 +45,6 @@ interface EntryRepository {
         entryId: String,
         syncState: SyncState
     ): ResultOperation<Unit>
+
+    suspend fun markEntryAsDone(entryId: String): ResultOperation<Unit>
 }

@@ -39,6 +39,8 @@ interface EntryStore {
 
     suspend fun getPendingEntries(): List<EntryEntity>
 
+    suspend fun markEntryAsDone(entryId: String)
+
     fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>>
 
     fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
@@ -60,6 +62,8 @@ internal class EntryStoreImpl
         override suspend fun getTasks(): List<EntryEntity> = entryDao.getTasks()
 
         override suspend fun getPendingEntries(): List<EntryEntity> = entryDao.getPendingEntries()
+
+        override suspend fun markEntryAsDone(entryId: String) = entryDao.markEntryAsDone(entryId)
 
         override suspend fun getEntryById(id: String) = entryDao.getEntryById(id)
 

@@ -49,6 +49,16 @@ interface EntryDao {
         syncState: SyncStateEntity
     )
 
+    @Query("UPDATE entries SET syncState = :state, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun updateSyncMetadata(
+        id: String,
+        state: SyncStateEntity,
+        updatedAt: Long
+    )
+
+    @Query("UPDATE entries SET isDone = 1 WHERE id = :entryId")
+    fun markEntryAsDone(entryId: String)
+
     @Transaction
     suspend fun upsertIfNewest(entry: EntryEntity) {
         val localEntry = getEntryById(entry.id)
