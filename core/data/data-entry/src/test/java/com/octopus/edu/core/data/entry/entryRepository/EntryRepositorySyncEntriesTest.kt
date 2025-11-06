@@ -349,7 +349,7 @@ class EntryRepositorySyncEntriesTest {
             id = id,
             title = "Test DTO $id",
             description = "Description",
-            isDone = false,
+            done = false,
             time = null,
             type = "TASK",
             startDate = null,

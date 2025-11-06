@@ -134,7 +134,7 @@ internal fun Entry.toDTO(): EntryDto =
                 id = id,
                 title = title,
                 description = description,
-                isDone = isDone,
+                done = isDone,
                 type = EntryType.HABIT.name,
                 recurrence = recurrence.toDto(),
                 time = time?.toEpochMilli()?.toInstant()?.let { Timestamp(it) },
@@ -147,7 +147,7 @@ internal fun Entry.toDTO(): EntryDto =
                 id = id,
                 title = title,
                 description = description,
-                isDone = isDone,
+                done = isDone,
                 type = EntryType.TASK.name,
                 time = time?.toEpochMilli()?.toInstant()?.let { Timestamp(it) },
                 dueDate = dueDate.toEpochMilli(),
@@ -170,7 +170,7 @@ internal fun EntryDto.toEntity(): EntryEntity =
         type = if (type == "HABIT") EntryType.HABIT else EntryType.TASK,
         title = title,
         description = description,
-        isDone = isDone,
+        isDone = done,
         recurrence =
             when (recurrence) {
                 "Custom" -> EntryEntity.Recurrence.CUSTOM
