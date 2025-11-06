@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.entry.di
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.octopus.edu.core.common.AppClock
 import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.common.TransactionRunner
 import com.octopus.edu.core.data.database.dao.DeletedEntryDao
@@ -17,6 +18,7 @@ import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.EntryStoreImpl
 import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.data.entry.store.ReminderStoreImpl
+import com.octopus.edu.core.data.entry.store.decorator.TrackingEntryStoreDecorator
 import com.octopus.edu.core.domain.repository.EntryRepository
 import com.octopus.edu.core.domain.utils.ErrorClassifier
 import dagger.Module
@@ -26,7 +28,16 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class TrackingEntryStoreDecoratorQualifier
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class EntryStoreQualifier
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -41,7 +52,7 @@ object EntryDataModule {
     @Provides
     @Singleton
     fun providesEntryRepository(
-        entryStore: EntryStore,
+        @TrackingEntryStoreDecoratorQualifier entryStore: EntryStore,
         entryApi: EntryApi,
         reminderStore: ReminderStore,
         dbSemaphore: Semaphore,
@@ -61,6 +72,7 @@ object EntryDataModule {
             dispatcherProvider,
         )
 
+    @EntryStoreQualifier
     @Provides
     @Singleton
     fun providesEntryStore(
@@ -68,6 +80,16 @@ object EntryDataModule {
         deletedEntryDao: DeletedEntryDao,
         roomTransactionRunner: TransactionRunner
     ): EntryStore = EntryStoreImpl(entryDao, deletedEntryDao, roomTransactionRunner)
+
+    @TrackingEntryStoreDecoratorQualifier
+    @Provides
+    @Singleton
+    fun providesTrackingEntryStoreDecorator(
+        @EntryStoreQualifier entryStore: EntryStore,
+        entryDao: EntryDao,
+        roomTransactionRunner: TransactionRunner,
+        appClock: AppClock
+    ): EntryStore = TrackingEntryStoreDecorator(entryStore, entryDao, roomTransactionRunner, appClock)
 
     @Provides
     @Singleton
