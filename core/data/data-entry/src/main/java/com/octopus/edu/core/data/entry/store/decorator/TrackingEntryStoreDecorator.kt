@@ -16,10 +16,13 @@ class TrackingEntryStoreDecorator
         private val roomTransactionRunner: TransactionRunner,
         private val appClock: AppClock
     ) : DelegatingEntryStoreDecorator(entryStore) {
-        override suspend fun markEntryAsDone(entryId: String) {
+        override suspend fun markEntryAsDone(
+            entryId: String,
+            entryDate: Long
+        ) {
             runCatching {
                 roomTransactionRunner.run {
-                    super.markEntryAsDone(entryId)
+                    super.markEntryAsDone(entryId, entryDate)
                     entryDao.updateSyncMetadata(
                         entryId,
                         PENDING,

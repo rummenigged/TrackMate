@@ -255,14 +255,17 @@ internal class EntryRepositoryImpl
                 entryStore.updateDeletedEntrySyncState(entryId, syncState.toEntity())
             }
 
-        override suspend fun markEntryAsDone(entryId: String): ResultOperation<Unit> =
+        override suspend fun markEntryAsDone(
+            entryId: String,
+            entryDate: LocalDate
+        ): ResultOperation<Unit> =
             safeCall(
                 dispatcher = dispatcherProvider.io,
                 isRetriableWhen = { exception ->
                     databaseErrorClassifier.classify(exception) is TransientError
                 },
             ) {
-                entryStore.markEntryAsDone(entryId)
+                entryStore.markEntryAsDone(entryId, entryDate.toEpochMilli())
             }
 
         private suspend fun syncEntrySafely(entry: EntryDto) {
