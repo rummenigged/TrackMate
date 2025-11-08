@@ -1,6 +1,7 @@
 package com.octopus.edu.feature.home
 
 import androidx.lifecycle.viewModelScope
+import com.octopus.edu.core.common.Logger
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.model.common.retryOnResultError
 import com.octopus.edu.core.domain.repository.EntryRepository
@@ -36,17 +37,24 @@ internal class HomeViewModel
                 }
 
                 is UiEvent.SetCurrentDateAs -> getEntriesVisibleOn(event.date)
-                UiEvent.Refresh -> refreshData()
 
                 is UiEvent.Entry.MarkAsDone -> markEntryAsDone(event.entryId)
 
+                UiEvent.Refresh -> refreshData()
+
                 UiEvent.MarkEffectAsConsumed -> markEffectAsConsumed()
+
+                UiEvent.Entry.GetFromCurrentDate ->
+                    getEntriesVisibleOn(
+                        uiState.value.currentDate,
+                    )
             }
         }
 
         private fun markEntryAsDone(entryId: String) =
             viewModelScope.launch {
-                when (val result = entryRepository.markEntryAsDone(entryId)) {
+                val entryDate = uiState.value.currentDate
+                when (val result = entryRepository.markEntryAsDone(entryId, entryDate)) {
                     is ResultOperation.Error -> {
                         setEffect(
                             UiEffect.MarkEntryAsDoneFailed(
@@ -116,11 +124,16 @@ internal class HomeViewModel
                     }.onEach { result ->
                         when (result) {
                             is ResultOperation.Error -> {
+                                setState { copy(isLoading = false) }
                                 setEffect(
                                     UiEffect.ShowError(
                                         result.throwable.message
                                             ?: "Unknown Error",
                                     ),
+                                )
+                                Logger.e(
+                                    message = result.throwable.message ?: "Unknown Error",
+                                    throwable = result.throwable,
                                 )
                             }
 

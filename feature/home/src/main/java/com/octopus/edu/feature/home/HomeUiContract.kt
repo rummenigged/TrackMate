@@ -30,6 +30,7 @@ internal object HomeUiContract {
     sealed interface UiEffect : ViewEffect {
         data class ShowError(
             val message: String,
+            val isRetriable: Boolean = false
         ) : UiEffect
 
         data class MarkEntryAsDoneFailed(
@@ -62,6 +63,8 @@ internal object HomeUiContract {
             data class MarkAsDone(
                 val entryId: String
             ) : UiEvent
+
+            data object GetFromCurrentDate : UiEvent
         }
     }
 

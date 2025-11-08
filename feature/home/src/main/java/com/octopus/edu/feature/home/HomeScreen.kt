@@ -162,21 +162,31 @@ private fun EffectHandler(
             }
 
             is UiEffect.ShowError -> {
+                val actionLabel = if (event.isRetriable) context.getString(R.string.retry) else null
+                snackBarHostState
+                    .showSnackBar(
+                        message =
+                            context.getString(
+                                R.string.cant_load_entries,
+                            ),
+                        actionLabel = actionLabel,
+                        duration = SnackbarDuration.Short,
+                        type = SnackBarType.ERROR,
+                    ).also { result ->
+                        if (result == SnackbarResult.ActionPerformed) {
+                            onEvent(UiEvent.Entry.GetFromCurrentDate)
+                        }
+                    }
             }
 
             is UiEffect.MarkEntryAsDoneFailed -> {
                 val actionLabel = if (event.isRetriable) context.getString(R.string.retry) else null
-                val message =
-                    if (event.isRetriable) {
-                        context.getString(
-                            R.string.cant_mark_entry_as_done_retriable,
-                        )
-                    } else {
-                        context.getString(R.string.cant_mark_entry_as_done_non_retriable)
-                    }
                 snackBarHostState
                     .showSnackBar(
-                        message = message,
+                        message =
+                            context.getString(
+                                R.string.cant_mark_entry_as_done,
+                            ),
                         actionLabel = actionLabel,
                         duration = SnackbarDuration.Short,
                         type = SnackBarType.ERROR,
