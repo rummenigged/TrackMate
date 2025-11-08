@@ -30,4 +30,15 @@ internal class Converters {
 
     @TypeConverter
     fun toSyncStateEntity(state: String): SyncStateEntity = SyncStateEntity.valueOf(state)
+
+    @TypeConverter
+    fun fromListOfLong(value: List<Long>?): String = value?.joinToString(",") ?: ""
+
+    @TypeConverter
+    fun toListOfLong(value: String): List<Long> =
+        if (value.isEmpty()) {
+            emptyList()
+        } else {
+            value.split(",").map { it.toLong() }
+        }
 }

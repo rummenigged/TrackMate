@@ -1,12 +1,18 @@
 package com.octopus.edu.core.data.entry.store
 
+import com.octopus.edu.core.common.AppClock
 import com.octopus.edu.core.common.TransactionRunner
+import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.data.database.dao.DeletedEntryDao
+import com.octopus.edu.core.data.database.dao.DoneEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
+import com.octopus.edu.core.data.database.entity.DoneEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
+import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.PENDING
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 interface EntryStore {
@@ -39,7 +45,10 @@ interface EntryStore {
 
     suspend fun getPendingEntries(): List<EntryEntity>
 
-    suspend fun markEntryAsDone(entryId: String)
+    suspend fun markEntryAsDone(
+        entryId: String,
+        entryDate: Long
+    )
 
     fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>>
 
@@ -54,7 +63,9 @@ internal class EntryStoreImpl
     @Inject
     constructor(
         private val entryDao: EntryDao,
+        private val doneEntryDao: DoneEntryDao,
         private val deletedEntryDao: DeletedEntryDao,
+        private val appClock: AppClock,
         private val roomTransactionRunner: TransactionRunner
     ) : EntryStore {
         override suspend fun getHabits(): List<EntryEntity> = entryDao.getHabits()
@@ -63,7 +74,20 @@ internal class EntryStoreImpl
 
         override suspend fun getPendingEntries(): List<EntryEntity> = entryDao.getPendingEntries()
 
-        override suspend fun markEntryAsDone(entryId: String) = entryDao.markEntryAsDone(entryId)
+        override suspend fun markEntryAsDone(
+            entryId: String,
+            entryDate: Long
+        ) = roomTransactionRunner.run {
+            entryDao.markEntryAsDone(entryId)
+            doneEntryDao.insert(
+                DoneEntryEntity(
+                    entryId = entryId,
+                    entryDate = entryDate,
+                    doneAt = appClock.nowLocalDate().toEpochMilli(),
+                    syncState = PENDING,
+                ),
+            )
+        }
 
         override suspend fun getEntryById(id: String) = entryDao.getEntryById(id)
 
@@ -108,5 +132,12 @@ internal class EntryStoreImpl
         override fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>> =
             entryDao.getAllEntriesByDateAndOrderedByTimeAsc(date)
 
-        override fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>> = entryDao.getEntriesBeforeOrOn(date)
+        override fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>> =
+            entryDao
+                .getEntriesBeforeOrOn(date)
+                .map { entries ->
+                    entries.map { (entry, doneDates) ->
+                        entry.copy(isDone = date in doneDates)
+                    }
+                }
     }

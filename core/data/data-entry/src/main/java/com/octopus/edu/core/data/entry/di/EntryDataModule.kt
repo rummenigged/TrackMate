@@ -6,6 +6,7 @@ import com.octopus.edu.core.common.AppClock
 import com.octopus.edu.core.common.DispatcherProvider
 import com.octopus.edu.core.common.TransactionRunner
 import com.octopus.edu.core.data.database.dao.DeletedEntryDao
+import com.octopus.edu.core.data.database.dao.DoneEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.dao.ReminderDao
 import com.octopus.edu.core.data.entry.BuildConfig
@@ -77,9 +78,18 @@ object EntryDataModule {
     @Singleton
     fun providesEntryStore(
         entryDao: EntryDao,
+        doneEntryDao: DoneEntryDao,
         deletedEntryDao: DeletedEntryDao,
+        appClock: AppClock,
         roomTransactionRunner: TransactionRunner
-    ): EntryStore = EntryStoreImpl(entryDao, deletedEntryDao, roomTransactionRunner)
+    ): EntryStore =
+        EntryStoreImpl(
+            entryDao,
+            doneEntryDao,
+            deletedEntryDao,
+            appClock,
+            roomTransactionRunner,
+        )
 
     @TrackingEntryStoreDecoratorQualifier
     @Provides
@@ -89,7 +99,13 @@ object EntryDataModule {
         entryDao: EntryDao,
         roomTransactionRunner: TransactionRunner,
         appClock: AppClock
-    ): EntryStore = TrackingEntryStoreDecorator(entryStore, entryDao, roomTransactionRunner, appClock)
+    ): EntryStore =
+        TrackingEntryStoreDecorator(
+            entryStore,
+            entryDao,
+            roomTransactionRunner,
+            appClock,
+        )
 
     @Provides
     @Singleton

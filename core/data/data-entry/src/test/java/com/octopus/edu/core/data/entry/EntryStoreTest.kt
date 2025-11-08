@@ -1,12 +1,16 @@
 package com.octopus.edu.core.data.entry
 
 import app.cash.turbine.test
+import com.octopus.edu.core.common.AppClock
 import com.octopus.edu.core.common.TransactionRunner
 import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.data.database.dao.DeletedEntryDao
+import com.octopus.edu.core.data.database.dao.DoneEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
+import com.octopus.edu.core.data.database.entity.DoneEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
+import com.octopus.edu.core.data.database.entity.databaseView.DoneEntryView
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.EntryStoreImpl
 import com.octopus.edu.core.testing.MainCoroutineRule
@@ -27,6 +31,8 @@ import org.junit.Test
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntryStoreTest {
@@ -38,12 +44,15 @@ class EntryStoreTest {
 
     private val entryDao: EntryDao = mockk()
     private val deletedEntryDao: DeletedEntryDao = mockk()
+    private val doneEntryDao: DoneEntryDao = mockk()
     private val roomTransactionRunner: TransactionRunner = mockk()
+    private val appClock: AppClock = mockk()
     private lateinit var entryStore: EntryStore
 
     private val testEntryId = "test-id"
     private val testSyncState = EntryEntity.SyncStateEntity.SYNCED
     private val testDate = LocalDate.now().toEpochMilli()
+    private val testLocalDate = LocalDate.of(2205, 10, 10)
     private val testEntry =
         EntryEntity(
             id = testEntryId,
@@ -63,7 +72,21 @@ class EntryStoreTest {
 
     @Before
     fun setUp() {
-        entryStore = EntryStoreImpl(entryDao, deletedEntryDao, roomTransactionRunner)
+        entryStore =
+            EntryStoreImpl(
+                entryDao,
+                doneEntryDao,
+                deletedEntryDao,
+                appClock,
+                roomTransactionRunner,
+            )
+
+        coEvery { roomTransactionRunner.run<Unit>(any()) } coAnswers {
+            val block = it.invocation.args[0] as suspend () -> Unit
+            block.invoke()
+        }
+
+        every { appClock.nowLocalDate().toEpochMilli() } returns testLocalDate.toEpochMilli()
     }
 
     @Test
@@ -220,29 +243,48 @@ class EntryStoreTest {
     fun `markEntryAsDone should call dao markEntryAsDone`() =
         runTest {
             // Given
-            every { entryDao.markEntryAsDone(testEntryId) } returns Unit
+            val doneAt = appClock.nowLocalDate().toEpochMilli()
+            val doneEntry =
+                DoneEntryEntity(
+                    testEntryId,
+                    testDate,
+                    doneAt,
+                    EntryEntity.SyncStateEntity.PENDING,
+                )
+            coEvery { entryDao.markEntryAsDone(testEntryId) } returns Unit
+            coEvery { doneEntryDao.insert(doneEntry) } returns Unit
 
             // When
-            entryStore.markEntryAsDone(testEntryId)
+            entryStore.markEntryAsDone(testEntryId, testDate)
 
             // Then
-            verify(exactly = 1) { entryDao.markEntryAsDone(testEntryId) }
+            coVerify(exactly = 1) { entryDao.markEntryAsDone(testEntryId) }
+            coVerify(exactly = 1) { doneEntryDao.insert(doneEntry) }
         }
 
     @Test
     fun `markEntryAsDone should throw exception when dao throws exception`() =
         runTest {
             // Given
+            val doneAt = appClock.nowLocalDate().toEpochMilli()
+            val doneEntry =
+                DoneEntryEntity(
+                    testEntryId,
+                    testDate,
+                    doneAt,
+                    EntryEntity.SyncStateEntity.PENDING,
+                )
             val exception = RuntimeException("Database error")
-            every { entryDao.markEntryAsDone(testEntryId) } throws exception
+            coEvery { entryDao.markEntryAsDone(testEntryId) } throws exception
+            coEvery { doneEntryDao.insert(doneEntry) } returns Unit
 
             // When & Then
             val thrownException =
                 assertFailsWith<RuntimeException> {
-                    entryStore.markEntryAsDone(testEntryId)
+                    entryStore.markEntryAsDone(testEntryId, testDate)
                 }
             assertEquals(exception, thrownException)
-            verify(exactly = 1) { entryDao.markEntryAsDone(testEntryId) }
+            coVerify(exactly = 1) { entryDao.markEntryAsDone(testEntryId) }
         }
 
     @Test
@@ -413,12 +455,71 @@ class EntryStoreTest {
     @Test
     fun `getEntriesBeforeOrOn should return flow of entries from dao`() =
         runTest {
+            val doneEntryList =
+                fakeEntryList.map { entry ->
+                    DoneEntryView(
+                        entry = entry,
+                        doneDates = emptyList(),
+                    )
+                }
             // Given
-            every { entryDao.getEntriesBeforeOrOn(testDate) } returns flowOf(fakeEntryList)
+            every { entryDao.getEntriesBeforeOrOn(testDate) } returns flowOf(doneEntryList)
 
             // When & Then
             entryStore.getEntriesBeforeOrOn(testDate).test {
-                assertEquals(fakeEntryList, awaitItem())
+                val entries = awaitItem()
+                assertEquals(fakeEntryList, entries)
+                awaitComplete()
+            }
+            verify(exactly = 1) { entryDao.getEntriesBeforeOrOn(testDate) }
+        }
+
+    fun `getEntriesBeforeOrOn with task done in same queried date should return flow of entries from dao with done entry`() =
+        runTest {
+            // Given
+            val doneEntryList =
+                fakeEntryList.map { entry ->
+                    DoneEntryView(
+                        entry = entry,
+                        doneDates = listOf(testDate),
+                    )
+                }
+            val expectedList =
+                fakeEntryList
+                    .filter { it.id == testEntryId }
+                    .map { entry -> entry.copy(isDone = true) }
+
+            every { entryDao.getEntriesBeforeOrOn(testDate) } returns flowOf(doneEntryList)
+
+            // When
+            entryStore.getEntriesBeforeOrOn(testDate).test {
+                val entries = awaitItem()
+                assertEquals(expectedList, entries)
+                assertTrue { entries.first { it.id == testEntryId }.isDone }
+                awaitComplete()
+            }
+            verify(exactly = 1) { entryDao.getEntriesBeforeOrOn(testDate) }
+        }
+
+    @Test
+    fun `getEntriesBeforeOrOn with task done in a different queried date should return flow of entries from dao without done entry`() =
+        runTest {
+            // Given
+            val doneEntryList =
+                fakeEntryList.map { entry ->
+                    DoneEntryView(
+                        entry = entry,
+                        doneDates = emptyList(),
+                    )
+                }
+            val fakeEntryListWithoutDoneTask =
+                every { entryDao.getEntriesBeforeOrOn(testDate) } returns flowOf(doneEntryList)
+
+            // When
+            entryStore.getEntriesBeforeOrOn(testDate).test {
+                val entries = awaitItem()
+                assertEquals(fakeEntryList, entries)
+                assertFalse { entries.first { it.id == testEntryId }.isDone }
                 awaitComplete()
             }
             verify(exactly = 1) { entryDao.getEntriesBeforeOrOn(testDate) }

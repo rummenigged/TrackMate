@@ -2,6 +2,7 @@ package com.octopus.edu.core.data.entry
 
 import com.octopus.edu.core.common.AppClock
 import com.octopus.edu.core.common.TransactionRunner
+import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
 import com.octopus.edu.core.data.entry.store.EntryStore
@@ -16,6 +17,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -29,6 +31,7 @@ class TrackingEntryStoreDecoratorTest {
 
     private val testEntryId = "test-id"
     private val testTimestamp = 123456789L
+    private val testDate = LocalDate.now().toEpochMilli()
 
     @Before
     fun setUp() {
@@ -58,16 +61,16 @@ class TrackingEntryStoreDecoratorTest {
     fun `markEntryAsDone should run in transaction and update sync metadata`() =
         runTest {
             // Given
-            coJustRun { decoratedStore.markEntryAsDone(testEntryId) }
+            coJustRun { decoratedStore.markEntryAsDone(testEntryId, any()) }
             coJustRun { entryDao.updateSyncMetadata(any(), any(), any()) }
 
             // When
-            trackingDecorator.markEntryAsDone(testEntryId)
+            trackingDecorator.markEntryAsDone(testEntryId, testDate)
 
             // Then
             coVerify(exactly = 1) { transactionRunner.run(any()) }
             coVerify(ordering = Ordering.SEQUENCE) {
-                decoratedStore.markEntryAsDone(testEntryId)
+                decoratedStore.markEntryAsDone(testEntryId, testDate)
                 entryDao.updateSyncMetadata(
                     testEntryId,
                     SyncStateEntity.PENDING,
@@ -81,19 +84,19 @@ class TrackingEntryStoreDecoratorTest {
         runTest {
             // Given
             val exception = RuntimeException("Decorated store failed")
-            coEvery { decoratedStore.markEntryAsDone(testEntryId) } throws exception
+            coEvery { decoratedStore.markEntryAsDone(testEntryId, any()) } throws exception
 
             // When
             val thrownException =
                 assertFailsWith<RuntimeException> {
-                    trackingDecorator.markEntryAsDone(testEntryId)
+                    trackingDecorator.markEntryAsDone(testEntryId, testDate)
                 }
 
             // Then
             assertEquals(exception, thrownException)
 
             coVerify(exactly = 1) { transactionRunner.run(any()) }
-            coVerify(exactly = 1) { decoratedStore.markEntryAsDone(testEntryId) }
+            coVerify(exactly = 1) { decoratedStore.markEntryAsDone(testEntryId, testDate) }
             coVerify(exactly = 0) { entryDao.updateSyncMetadata(any(), any(), any()) }
         }
 
@@ -102,20 +105,20 @@ class TrackingEntryStoreDecoratorTest {
         runTest {
             // Given
             val exception = RuntimeException("DAO update failed")
-            coJustRun { decoratedStore.markEntryAsDone(testEntryId) }
+            coJustRun { decoratedStore.markEntryAsDone(testEntryId, any()) }
             coEvery { entryDao.updateSyncMetadata(any(), any(), any()) } throws exception
 
             // When
             val thrownException =
                 assertFailsWith<RuntimeException> {
-                    trackingDecorator.markEntryAsDone(testEntryId)
+                    trackingDecorator.markEntryAsDone(testEntryId, testDate)
                 }
 
             assertEquals(exception, thrownException)
 
             // Then
             coVerify(exactly = 1) { transactionRunner.run(any()) }
-            coVerify(exactly = 1) { decoratedStore.markEntryAsDone(testEntryId) }
+            coVerify(exactly = 1) { decoratedStore.markEntryAsDone(testEntryId, testDate) }
             coVerify(
                 exactly = 1,
             ) { entryDao.updateSyncMetadata(testEntryId, SyncStateEntity.PENDING, testTimestamp) }

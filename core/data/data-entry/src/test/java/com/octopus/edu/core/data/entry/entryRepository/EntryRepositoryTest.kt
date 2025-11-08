@@ -307,14 +307,14 @@ class EntryRepositoryTest {
         runTest {
             // Given
             val entryId = "entry-to-mark-done"
-            coJustRun { entryStore.markEntryAsDone(entryId) }
+            coJustRun { entryStore.markEntryAsDone(entryId, any()) }
 
             // When
-            val result = repository.markEntryAsDone(entryId)
+            val result = repository.markEntryAsDone(entryId, testDate)
 
             // Then
             assertTrue(result is ResultOperation.Success)
-            coVerify(exactly = 1) { entryStore.markEntryAsDone(entryId) }
+            coVerify(exactly = 1) { entryStore.markEntryAsDone(entryId, testDate.toEpochMilli()) }
         }
 
     @Test
@@ -323,11 +323,11 @@ class EntryRepositoryTest {
             // Given
             val entryId = "entry-to-mark-done"
             val dbException = SQLTimeoutException("DB operation timed out")
-            coEvery { entryStore.markEntryAsDone(entryId) } throws dbException
+            coEvery { entryStore.markEntryAsDone(entryId, any()) } throws dbException
             every { databaseErrorClassifier.classify(dbException) } returns ErrorType.TransientError(dbException)
 
             // When
-            val result = repository.markEntryAsDone(entryId)
+            val result = repository.markEntryAsDone(entryId, testDate)
 
             // Then
             assertTrue(result is ResultOperation.Error)
@@ -341,11 +341,11 @@ class EntryRepositoryTest {
             // Given
             val entryId = "entry-to-mark-done"
             val dbException = RuntimeException("Permanent DB error")
-            coEvery { entryStore.markEntryAsDone(entryId) } throws dbException
+            coEvery { entryStore.markEntryAsDone(entryId, any()) } throws dbException
             every { databaseErrorClassifier.classify(dbException) } returns ErrorType.PermanentError(dbException)
 
             // When
-            val result = repository.markEntryAsDone(entryId)
+            val result = repository.markEntryAsDone(entryId, testDate)
 
             // Then
             assertTrue(result is ResultOperation.Error)

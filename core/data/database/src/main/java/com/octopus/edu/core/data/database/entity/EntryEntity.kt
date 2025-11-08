@@ -2,27 +2,28 @@ package com.octopus.edu.core.data.database.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.octopus.edu.core.data.database.entity.common.BaseEntryEntity
 
 @Entity(
     tableName = "entries",
 )
 data class EntryEntity(
-    @PrimaryKey val id: String,
-    val type: EntryType,
-    val title: String,
-    val description: String?,
-    val isDone: Boolean = false,
-    val recurrence: Recurrence? = null,
-    val streakCount: Int? = null,
-    val lastCompletedDate: Long? = null,
-    val isArchived: Boolean = false,
-    val syncState: SyncStateEntity,
-    val dueDate: Long? = null,
-    val startDate: Long? = null,
-    val time: Long? = null,
-    val createdAt: Long,
-    val updatedAt: Long? = null,
-) {
+    @PrimaryKey override val id: String,
+    override val type: EntryType,
+    override val title: String,
+    override val description: String?,
+    override val recurrence: Recurrence? = null,
+    override val isDone: Boolean = false,
+    override val streakCount: Int? = null,
+    override val lastCompletedDate: Long? = null,
+    override val isArchived: Boolean = false,
+    override val syncState: SyncStateEntity,
+    override val dueDate: Long? = null,
+    override val startDate: Long? = null,
+    override val time: Long? = null,
+    override val createdAt: Long,
+    override val updatedAt: Long? = null,
+) : BaseEntryEntity {
     enum class EntryType { TASK, HABIT }
 
     enum class Recurrence {

@@ -8,13 +8,16 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.octopus.edu.core.data.database.dao.DeletedEntryDao
+import com.octopus.edu.core.data.database.dao.DoneEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.dao.ReminderDao
 import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
+import com.octopus.edu.core.data.database.entity.DoneEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntrySessionEntity
 import com.octopus.edu.core.data.database.entity.ReminderEntity
 import com.octopus.edu.core.data.database.entity.TagEntity
+import com.octopus.edu.core.data.database.entity.databaseView.DoneEntryView
 import com.octopus.edu.core.data.database.utils.Converters
 
 private const val NAME = "trackmate.db"
@@ -26,8 +29,12 @@ private const val NAME = "trackmate.db"
         TagEntity::class,
         ReminderEntity::class,
         DeletedEntryEntity::class,
+        DoneEntryEntity::class,
     ],
-    version = 5,
+    views = [
+        DoneEntryView::class,
+    ],
+    version = 6,
 )
 @TypeConverters(Converters::class)
 abstract class TrackMateDatabase : RoomDatabase() {
@@ -69,6 +76,25 @@ abstract class TrackMateDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_5_6: Migration =
+            object : Migration(5, 6) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS done_entries " +
+                            "(entryId TEXT NOT NULL, entryDate INTEGER NOT NULL" +
+                            "doneAt INTEGER NOT NULL," +
+                            "syncState TEXT NOT NULL," +
+                            "PRIMARY KEY(entryId, doneAt)," +
+                            "FOREIGN KEY(entryId) " +
+                            "REFERENCES entries(id) ON DELETE CASCADE)",
+                    )
+                    db.execSQL(
+                        "CREATE INDEX IF NOT EXISTS index_done_entries_entryId " +
+                            "ON done_entries(entryId)",
+                    )
+                }
+            }
+
         fun create(context: Context): TrackMateDatabase =
             Room
                 .databaseBuilder(
@@ -79,6 +105,7 @@ abstract class TrackMateDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_2_3)
                 .addMigrations(MIGRATION_3_4)
                 .addMigrations(MIGRATION_4_5)
+                .addMigrations(MIGRATION_5_6)
                 .build()
     }
 
@@ -87,4 +114,6 @@ abstract class TrackMateDatabase : RoomDatabase() {
     abstract fun reminderDao(): ReminderDao
 
     abstract fun deletedEntryDao(): DeletedEntryDao
+
+    abstract fun doneEntryDao(): DoneEntryDao
 }
