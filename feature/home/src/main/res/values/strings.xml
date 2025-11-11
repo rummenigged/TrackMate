@@ -39,5 +39,6 @@
     <string name="undo">Undo</string>
     <string name="cant_mark_entry_as_done">Can\'t Mark the Entry as Done.</string>
     <string name="cant_load_entries">Can\'t Load the Entries.</string>
+    <string name="cant_mark_entry_as_undone">Can\'t Mark Entry as Undone.</string>
     <string name="entry_marked_as_done">Entry Has Bee Marked as Done</string>
 </resources>

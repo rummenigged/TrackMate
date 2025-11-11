@@ -39,6 +39,10 @@ internal object HomeUiContract {
             val isRetriable: Boolean = false
         ) : UiEffect
 
+        data class UnmarkEntryAsDoneFailed(
+            val message: String,
+        ) : UiEffect
+
         data object ShowEntrySuccessfullyDeleted : UiEffect
 
         data class ShowEntrySuccessfullyMarkedAsDone(
@@ -61,6 +65,11 @@ internal object HomeUiContract {
             ) : UiEvent
 
             data class MarkAsDone(
+                val entryId: String,
+                val undoInterval: Long
+            ) : UiEvent
+
+            data class UnmarkAsDone(
                 val entryId: String
             ) : UiEvent
 

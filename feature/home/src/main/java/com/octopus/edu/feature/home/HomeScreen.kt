@@ -1,6 +1,5 @@
 package com.octopus.edu.feature.home
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -55,6 +55,7 @@ import com.octopus.edu.core.design.theme.components.WeekCalendar
 import com.octopus.edu.core.design.theme.components.snackBar.SnackBarType
 import com.octopus.edu.core.design.theme.components.snackBar.TrackMateSnackBarHost
 import com.octopus.edu.core.design.theme.components.snackBar.showSnackBar
+import com.octopus.edu.core.design.theme.components.snackBar.toMillis
 import com.octopus.edu.core.design.theme.utils.LaunchedEffectAndCollectLatest
 import com.octopus.edu.core.design.theme.utils.animatedItemIndexed
 import com.octopus.edu.core.design.theme.utils.updateAnimateItemsState
@@ -63,6 +64,7 @@ import com.octopus.edu.feature.home.HomeUiContract.UiEffect
 import com.octopus.edu.feature.home.HomeUiContract.UiEntry
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent.Entry.MarkAsDone
+import com.octopus.edu.feature.home.HomeUiContract.UiEvent.Entry.UnmarkAsDone
 import com.octopus.edu.feature.home.HomeUiContract.UiState
 import com.octopus.edu.feature.home.components.EntryItem
 import com.octopus.edu.feature.home.components.HomeAppBar
@@ -131,14 +133,14 @@ private fun EffectHandler(
     onEvent: (UiEvent) -> Unit
 ) {
     val context = LocalContext.current
+    val accessibilityManager = LocalAccessibilityManager.current
 
     LaunchedEffectAndCollectLatest(
         flow = effect,
         onEffectConsumed = { onEvent(UiEvent.MarkEffectAsConsumed) },
     ) { event ->
         when (event) {
-            UiEffect.ShowEntrySuccessfullyDeleted -> {
-            }
+            UiEffect.ShowEntrySuccessfullyDeleted -> {}
 
             is UiEffect.ShowEntrySuccessfullyMarkedAsDone -> {
                 snackBarHostState
@@ -151,12 +153,33 @@ private fun EffectHandler(
                         duration = SnackbarDuration.Short,
                     ).also { result ->
                         if (result == SnackbarResult.ActionPerformed) {
-                            Toast
-                                .makeText(
-                                    context,
-                                    "Feature Not Implemented Yet",
-                                    Toast.LENGTH_SHORT,
-                                ).show()
+                            onEvent(UnmarkAsDone(event.entryId))
+                        }
+                    }
+            }
+
+            is UiEffect.MarkEntryAsDoneFailed -> {
+                val actionLabel = if (event.isRetriable) context.getString(R.string.retry) else null
+                snackBarHostState
+                    .showSnackBar(
+                        message =
+                            context.getString(
+                                R.string.cant_mark_entry_as_done,
+                            ),
+                        actionLabel = actionLabel,
+                        duration = SnackbarDuration.Short,
+                        type = SnackBarType.ERROR,
+                    ).also { result ->
+                        if (result == SnackbarResult.ActionPerformed) {
+                            onEvent(
+                                MarkAsDone(
+                                    event.entryId,
+                                    SnackbarDuration.Short.toMillis(
+                                        hasAction = actionLabel != null,
+                                        accessibilityManager = accessibilityManager,
+                                    ),
+                                ),
+                            )
                         }
                     }
             }
@@ -179,22 +202,16 @@ private fun EffectHandler(
                     }
             }
 
-            is UiEffect.MarkEntryAsDoneFailed -> {
-                val actionLabel = if (event.isRetriable) context.getString(R.string.retry) else null
+            is UiEffect.UnmarkEntryAsDoneFailed -> {
                 snackBarHostState
                     .showSnackBar(
                         message =
                             context.getString(
-                                R.string.cant_mark_entry_as_done,
+                                R.string.cant_mark_entry_as_undone,
                             ),
-                        actionLabel = actionLabel,
                         duration = SnackbarDuration.Short,
                         type = SnackBarType.ERROR,
-                    ).also { result ->
-                        if (result == SnackbarResult.ActionPerformed) {
-                            onEvent(MarkAsDone(event.entryId))
-                        }
-                    }
+                    )
             }
         }
     }
@@ -282,6 +299,7 @@ private fun EntriesList(
     onEvent: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) = trace("EntriesList") {
+    val accessibilityManager = LocalAccessibilityManager.current
     val animatedList by updateAnimateItemsState(entries.map { UiEntry(it) })
     LazyColumn(
         modifier = modifier.fillMaxSize().testTag("entry_list"),
@@ -296,7 +314,17 @@ private fun EntriesList(
                 entry = item.entry,
                 isFirstItem = index == 0,
                 isLastItem = index == entries.lastIndex,
-                onItemSwipedFromStartToEnd = { entry -> onEvent(MarkAsDone(entry.id)) },
+                onItemSwipedFromStartToEnd = { entry ->
+                    onEvent(
+                        MarkAsDone(
+                            entry.id,
+                            SnackbarDuration.Short.toMillis(
+                                hasAction = false,
+                                accessibilityManager = accessibilityManager,
+                            ),
+                        ),
+                    )
+                },
                 onItemSwipedFromEndToStart = { entry -> onEvent(UiEvent.Entry.Delete(entry.id)) },
             )
         }

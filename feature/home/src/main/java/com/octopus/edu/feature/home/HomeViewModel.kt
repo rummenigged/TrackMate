@@ -2,6 +2,8 @@ package com.octopus.edu.feature.home
 
 import androidx.lifecycle.viewModelScope
 import com.octopus.edu.core.common.Logger
+import com.octopus.edu.core.common.di.ApplicationScope
+import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.model.common.retryOnResultError
 import com.octopus.edu.core.domain.repository.EntryRepository
@@ -11,8 +13,10 @@ import com.octopus.edu.feature.home.HomeUiContract.UiEvent
 import com.octopus.edu.feature.home.HomeUiContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -22,8 +26,11 @@ import javax.inject.Inject
 internal class HomeViewModel
     @Inject
     constructor(
-        private val entryRepository: EntryRepository
+        private val entryRepository: EntryRepository,
+        @param:ApplicationScope private val applicationScope: CoroutineScope
     ) : BaseViewModel<UiState, UiEffect, UiEvent>() {
+        private val markAsDoneConfirmationJobs = hashMapOf<String, Job>()
+
         init {
             getEntriesVisibleOn(getInitialState().currentDate)
         }
@@ -38,41 +45,84 @@ internal class HomeViewModel
 
                 is UiEvent.SetCurrentDateAs -> getEntriesVisibleOn(event.date)
 
-                is UiEvent.Entry.MarkAsDone -> markEntryAsDone(event.entryId)
+                is UiEvent.Entry.MarkAsDone ->
+                    markEntryAsDone(event.entryId, uiState.value.currentDate, event.undoInterval)
+
+                is UiEvent.Entry.UnmarkAsDone ->
+                    unmarkEntryAsDone(event.entryId, uiState.value.currentDate)
 
                 UiEvent.Refresh -> refreshData()
 
                 UiEvent.MarkEffectAsConsumed -> markEffectAsConsumed()
 
-                UiEvent.Entry.GetFromCurrentDate ->
-                    getEntriesVisibleOn(
-                        uiState.value.currentDate,
-                    )
+                UiEvent.Entry.GetFromCurrentDate -> getEntriesVisibleOn(uiState.value.currentDate)
             }
         }
 
-        private fun markEntryAsDone(entryId: String) =
-            viewModelScope.launch {
-                val entryDate = uiState.value.currentDate
-                when (val result = entryRepository.markEntryAsDone(entryId, entryDate)) {
-                    is ResultOperation.Error -> {
-                        setEffect(
-                            UiEffect.MarkEntryAsDoneFailed(
-                                message =
-                                    result.throwable.message
-                                        ?: "Unknown Error",
-                                isRetriable = result.isRetriable,
-                                entryId = entryId,
-                            ),
-                        )
-                    }
-                    is ResultOperation.Success -> {
-                        setEffect(
-                            UiEffect.ShowEntrySuccessfullyMarkedAsDone(entryId),
-                        )
-                    }
+        private fun markEntryAsDone(
+            entryId: String,
+            entryDate: LocalDate,
+            undoInterval: Long = 0L
+        ) = viewModelScope.launch {
+            when (val result = entryRepository.markEntryAsDone(entryId, entryDate)) {
+                is ResultOperation.Error -> {
+                    setEffect(
+                        UiEffect.MarkEntryAsDoneFailed(
+                            message = result.throwable.message ?: "Unknown Error",
+                            isRetriable = result.isRetriable,
+                            entryId = entryId,
+                        ),
+                    )
+                }
+                is ResultOperation.Success -> {
+                    setEffect(
+                        UiEffect.ShowEntrySuccessfullyMarkedAsDone(entryId),
+                    )
+                    scheduleMarkingEntryAsDoneConfirmation(entryId, entryDate, undoInterval)
                 }
             }
+        }
+
+        private fun scheduleMarkingEntryAsDoneConfirmation(
+            entryId: String,
+            entryDate: LocalDate,
+            delay: Long
+        ) = applicationScope.launch {
+            markAsDoneConfirmationJobs[entryId] =
+                launch {
+                    delay(delay)
+                    when (val result = entryRepository.confirmEntryAsDone(entryId, entryDate)) {
+                        is ResultOperation.Error -> {
+                            Logger.e(
+                                message = "Can't confirm entry $entryId as Done on date ${"$entryDate(${entryDate.toEpochMilli()})"}.",
+                                throwable = result.throwable,
+                            )
+                        }
+                        is ResultOperation.Success -> {}
+                    }
+                }
+        }
+
+        private fun unmarkEntryAsDone(
+            entryId: String,
+            entryDate: LocalDate
+        ) = viewModelScope.launch {
+            markAsDoneConfirmationJobs[entryId]?.cancel()
+            when (val result = entryRepository.unmarkEntryAsDone(entryId, entryDate)) {
+                is ResultOperation.Error -> {
+                    setEffect(
+                        UiEffect.UnmarkEntryAsDoneFailed(
+                            message = result.throwable.message ?: "Unknown Error",
+                        ),
+                    )
+                    Logger.e(
+                        message = "Can't mark entry $entryId as Undone.",
+                        throwable = result.throwable,
+                    )
+                }
+                is ResultOperation.Success -> {}
+            }
+        }
 
         private fun refreshData() {
             viewModelScope.launch {
@@ -121,7 +171,7 @@ internal class HomeViewModel
                     .retryOnResultError(maxRetries = 2)
                     .onStart {
                         setState { copy(currentDate = date, isLoading = true) }
-                    }.onEach { result ->
+                    }.collectLatest { result ->
                         when (result) {
                             is ResultOperation.Error -> {
                                 setState { copy(isLoading = false) }
@@ -146,6 +196,6 @@ internal class HomeViewModel
                                 }
                             }
                         }
-                    }.collect()
+                    }
             }
     }
