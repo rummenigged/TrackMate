@@ -208,6 +208,20 @@ class EntryStoreTest {
         }
 
     @Test
+    fun `getEntryById should return an entry from dao`() =
+        runTest {
+            // Given
+            coEvery { entryDao.getEntryById(testEntryId) } returns testEntry
+
+            // When
+            val result = entryStore.getEntryById(testEntryId)
+
+            // Then
+            assertEquals(testEntry, result)
+            coVerify(exactly = 1) { entryDao.getEntryById(testEntryId) }
+        }
+
+    @Test
     fun `getEntryById should throw exception when dao throws exception`() =
         runTest {
             // Given
@@ -240,6 +254,20 @@ class EntryStoreTest {
         }
 
     @Test
+    fun `getPendingEntries should return a list of entries from dao`() =
+        runTest {
+            // Given
+            coEvery { entryDao.getPendingEntries() } returns fakeEntryList
+
+            // When
+            val result = entryStore.getPendingEntries()
+
+            // Then
+            assertEquals(fakeEntryList, result)
+            coVerify(exactly = 1) { entryDao.getPendingEntries() }
+        }
+
+    @Test
     fun `markEntryAsDone should call dao markEntryAsDone`() =
         runTest {
             // Given
@@ -249,16 +277,15 @@ class EntryStoreTest {
                     testEntryId,
                     testDate,
                     doneAt,
+                    false,
                     EntryEntity.SyncStateEntity.PENDING,
                 )
-            coEvery { entryDao.markEntryAsDone(testEntryId) } returns Unit
             coEvery { doneEntryDao.insert(doneEntry) } returns Unit
 
             // When
-            entryStore.markEntryAsDone(testEntryId, testDate)
+            entryStore.markEntryAsDone(testEntryId, testDate, false)
 
             // Then
-            coVerify(exactly = 1) { entryDao.markEntryAsDone(testEntryId) }
             coVerify(exactly = 1) { doneEntryDao.insert(doneEntry) }
         }
 
@@ -272,19 +299,77 @@ class EntryStoreTest {
                     testEntryId,
                     testDate,
                     doneAt,
+                    false,
                     EntryEntity.SyncStateEntity.PENDING,
                 )
             val exception = RuntimeException("Database error")
-            coEvery { entryDao.markEntryAsDone(testEntryId) } throws exception
-            coEvery { doneEntryDao.insert(doneEntry) } returns Unit
+            coEvery { doneEntryDao.insert(doneEntry) } throws exception
 
             // When & Then
             val thrownException =
                 assertFailsWith<RuntimeException> {
-                    entryStore.markEntryAsDone(testEntryId, testDate)
+                    entryStore.markEntryAsDone(testEntryId, testDate, false)
                 }
             assertEquals(exception, thrownException)
-            coVerify(exactly = 1) { entryDao.markEntryAsDone(testEntryId) }
+            coVerify(exactly = 1) { doneEntryDao.insert(doneEntry) }
+        }
+
+    @Test
+    fun `unmarkEntryAsDone should call dao delete`() =
+        runTest {
+            // Given
+            coEvery { doneEntryDao.delete(testEntryId, testDate) } returns Unit
+
+            // When
+            val result = entryStore.unmarkEntryAsDone(testEntryId, testDate)
+
+            // Then
+            coVerify(exactly = 1) { doneEntryDao.delete(testEntryId, testDate) }
+        }
+
+    @Test
+    fun `unmarkEntryAsDone should throw exception when dao throws exception`() =
+        runTest {
+            // Given
+            val exception = RuntimeException("Database error")
+            coEvery { doneEntryDao.delete(testEntryId, testDate) } throws exception
+
+            // When & Then
+            val thrownException =
+                assertFailsWith<RuntimeException> {
+                    entryStore.unmarkEntryAsDone(testEntryId, testDate)
+                }
+            assertEquals(exception, thrownException)
+            coVerify(exactly = 1) { doneEntryDao.delete(testEntryId, testDate) }
+        }
+
+    @Test
+    fun `confirmEntryAsDone should call dao updateIsConfirmed`() =
+        runTest {
+            // Given
+            coEvery { doneEntryDao.updateIsConfirmed(testEntryId, testDate, true) } returns Unit
+
+            // When
+            val result = entryStore.confirmEntryAsDone(testEntryId, testDate)
+
+            // Then
+            coVerify(exactly = 1) { doneEntryDao.updateIsConfirmed(testEntryId, testDate, true) }
+        }
+
+    @Test
+    fun `confirmEntryAsDone should throw exception when dao throws exception`() =
+        runTest {
+            // Given
+            val exception = RuntimeException("Database error")
+            coEvery { doneEntryDao.delete(testEntryId, testDate) } throws exception
+
+            // When & Then
+            val thrownException =
+                assertFailsWith<RuntimeException> {
+                    entryStore.unmarkEntryAsDone(testEntryId, testDate)
+                }
+            assertEquals(exception, thrownException)
+            coVerify(exactly = 1) { doneEntryDao.delete(testEntryId, testDate) }
         }
 
     @Test
@@ -474,6 +559,7 @@ class EntryStoreTest {
             verify(exactly = 1) { entryDao.getEntriesBeforeOrOn(testDate) }
         }
 
+    @Test
     fun `getEntriesBeforeOrOn with task done in same queried date should return flow of entries from dao with done entry`() =
         runTest {
             // Given
@@ -512,8 +598,7 @@ class EntryStoreTest {
                         doneDates = emptyList(),
                     )
                 }
-            val fakeEntryListWithoutDoneTask =
-                every { entryDao.getEntriesBeforeOrOn(testDate) } returns flowOf(doneEntryList)
+            every { entryDao.getEntriesBeforeOrOn(testDate) } returns flowOf(doneEntryList)
 
             // When
             entryStore.getEntriesBeforeOrOn(testDate).test {
@@ -524,4 +609,18 @@ class EntryStoreTest {
             }
             verify(exactly = 1) { entryDao.getEntriesBeforeOrOn(testDate) }
         }
+
+    private fun createTask(id: String): EntryEntity =
+        EntryEntity(
+            id = id,
+            type = EntryEntity.EntryType.TASK,
+            title = "Test Entry",
+            description = "Test Description",
+            isDone = false,
+            dueDate = 1L,
+            time = 1L,
+            createdAt = System.currentTimeMillis(),
+            updatedAt = null,
+            syncState = EntryEntity.SyncStateEntity.SYNCED,
+        )
 }

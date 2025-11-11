@@ -48,6 +48,17 @@ interface EntryRepository {
 
     suspend fun markEntryAsDone(
         entryId: String,
+        entryDate: LocalDate,
+        isConfirmed: Boolean = false
+    ): ResultOperation<Unit>
+
+    suspend fun unmarkEntryAsDone(
+        entryId: String,
+        entryDate: LocalDate
+    ): ResultOperation<Unit>
+
+    suspend fun confirmEntryAsDone(
+        entryId: String,
         entryDate: LocalDate
     ): ResultOperation<Unit>
 }

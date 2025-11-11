@@ -38,6 +38,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
@@ -112,7 +113,8 @@ internal class EntryRepositoryImpl
                             .mapNotNull { entry -> entry.toDomain() }
                             .filter { entry -> entry is Task || (entry as Habit).appliesTo(date) },
                     ) as ResultOperation<List<Entry>>
-                }.catch { exception ->
+                }.distinctUntilChanged()
+                .catch { exception ->
                     val errorResult =
                         ResultOperation.Error(
                             throwable = exception,
@@ -257,7 +259,8 @@ internal class EntryRepositoryImpl
 
         override suspend fun markEntryAsDone(
             entryId: String,
-            entryDate: LocalDate
+            entryDate: LocalDate,
+            isConfirmed: Boolean,
         ): ResultOperation<Unit> =
             safeCall(
                 dispatcher = dispatcherProvider.io,
@@ -265,7 +268,27 @@ internal class EntryRepositoryImpl
                     databaseErrorClassifier.classify(exception) is TransientError
                 },
             ) {
-                entryStore.markEntryAsDone(entryId, entryDate.toEpochMilli())
+                entryStore.markEntryAsDone(entryId, entryDate.toEpochMilli(), isConfirmed)
+            }
+
+        override suspend fun confirmEntryAsDone(
+            entryId: String,
+            entryDate: LocalDate
+        ): ResultOperation<Unit> =
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+            ) {
+                entryStore.confirmEntryAsDone(entryId, entryDate.toEpochMilli())
+            }
+
+        override suspend fun unmarkEntryAsDone(
+            entryId: String,
+            entryDate: LocalDate
+        ): ResultOperation<Unit> =
+            safeCall(
+                dispatcher = dispatcherProvider.io,
+            ) {
+                entryStore.unmarkEntryAsDone(entryId, entryDate.toEpochMilli())
             }
 
         private suspend fun syncEntrySafely(entry: EntryDto) {

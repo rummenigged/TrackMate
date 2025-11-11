@@ -61,16 +61,16 @@ class TrackingEntryStoreDecoratorTest {
     fun `markEntryAsDone should run in transaction and update sync metadata`() =
         runTest {
             // Given
-            coJustRun { decoratedStore.markEntryAsDone(testEntryId, any()) }
+            coJustRun { decoratedStore.confirmEntryAsDone(testEntryId, any()) }
             coJustRun { entryDao.updateSyncMetadata(any(), any(), any()) }
 
             // When
-            trackingDecorator.markEntryAsDone(testEntryId, testDate)
+            trackingDecorator.confirmEntryAsDone(testEntryId, testDate)
 
             // Then
             coVerify(exactly = 1) { transactionRunner.run(any()) }
             coVerify(ordering = Ordering.SEQUENCE) {
-                decoratedStore.markEntryAsDone(testEntryId, testDate)
+                decoratedStore.confirmEntryAsDone(testEntryId, testDate)
                 entryDao.updateSyncMetadata(
                     testEntryId,
                     SyncStateEntity.PENDING,
@@ -84,19 +84,19 @@ class TrackingEntryStoreDecoratorTest {
         runTest {
             // Given
             val exception = RuntimeException("Decorated store failed")
-            coEvery { decoratedStore.markEntryAsDone(testEntryId, any()) } throws exception
+            coEvery { decoratedStore.confirmEntryAsDone(testEntryId, any()) } throws exception
 
             // When
             val thrownException =
                 assertFailsWith<RuntimeException> {
-                    trackingDecorator.markEntryAsDone(testEntryId, testDate)
+                    trackingDecorator.confirmEntryAsDone(testEntryId, testDate)
                 }
 
             // Then
             assertEquals(exception, thrownException)
 
             coVerify(exactly = 1) { transactionRunner.run(any()) }
-            coVerify(exactly = 1) { decoratedStore.markEntryAsDone(testEntryId, testDate) }
+            coVerify(exactly = 1) { decoratedStore.confirmEntryAsDone(testEntryId, testDate) }
             coVerify(exactly = 0) { entryDao.updateSyncMetadata(any(), any(), any()) }
         }
 
@@ -105,20 +105,20 @@ class TrackingEntryStoreDecoratorTest {
         runTest {
             // Given
             val exception = RuntimeException("DAO update failed")
-            coJustRun { decoratedStore.markEntryAsDone(testEntryId, any()) }
+            coJustRun { decoratedStore.confirmEntryAsDone(testEntryId, any()) }
             coEvery { entryDao.updateSyncMetadata(any(), any(), any()) } throws exception
 
             // When
             val thrownException =
                 assertFailsWith<RuntimeException> {
-                    trackingDecorator.markEntryAsDone(testEntryId, testDate)
+                    trackingDecorator.confirmEntryAsDone(testEntryId, testDate)
                 }
 
             assertEquals(exception, thrownException)
 
             // Then
             coVerify(exactly = 1) { transactionRunner.run(any()) }
-            coVerify(exactly = 1) { decoratedStore.markEntryAsDone(testEntryId, testDate) }
+            coVerify(exactly = 1) { decoratedStore.confirmEntryAsDone(testEntryId, testDate) }
             coVerify(
                 exactly = 1,
             ) { entryDao.updateSyncMetadata(testEntryId, SyncStateEntity.PENDING, testTimestamp) }

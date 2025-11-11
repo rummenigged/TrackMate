@@ -47,6 +47,17 @@ interface EntryStore {
 
     suspend fun markEntryAsDone(
         entryId: String,
+        entryDate: Long,
+        isConfirmed: Boolean
+    )
+
+    suspend fun unmarkEntryAsDone(
+        entryId: String,
+        entryDate: Long
+    )
+
+    suspend fun confirmEntryAsDone(
+        entryId: String,
         entryDate: Long
     )
 
@@ -76,18 +87,27 @@ internal class EntryStoreImpl
 
         override suspend fun markEntryAsDone(
             entryId: String,
+            entryDate: Long,
+            isConfirmed: Boolean
+        ) = doneEntryDao.insert(
+            DoneEntryEntity(
+                entryId = entryId,
+                entryDate = entryDate,
+                doneAt = appClock.nowLocalDate().toEpochMilli(),
+                isConfirmed = isConfirmed,
+                syncState = PENDING,
+            ),
+        )
+
+        override suspend fun unmarkEntryAsDone(
+            entryId: String,
             entryDate: Long
-        ) = roomTransactionRunner.run {
-            entryDao.markEntryAsDone(entryId)
-            doneEntryDao.insert(
-                DoneEntryEntity(
-                    entryId = entryId,
-                    entryDate = entryDate,
-                    doneAt = appClock.nowLocalDate().toEpochMilli(),
-                    syncState = PENDING,
-                ),
-            )
-        }
+        ) = doneEntryDao.delete(entryId, entryDate)
+
+        override suspend fun confirmEntryAsDone(
+            entryId: String,
+            entryDate: Long
+        ) = doneEntryDao.updateIsConfirmed(entryId, entryDate, true)
 
         override suspend fun getEntryById(id: String) = entryDao.getEntryById(id)
 
