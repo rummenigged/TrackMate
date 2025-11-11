@@ -22,5 +22,6 @@ data class DoneEntryEntity(
     val entryId: String,
     val entryDate: Long,
     val doneAt: Long,
+    val isConfirmed: Boolean,
     val syncState: EntryEntity.SyncStateEntity
 )
