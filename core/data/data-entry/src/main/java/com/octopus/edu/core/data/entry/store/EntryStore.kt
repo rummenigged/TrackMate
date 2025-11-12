@@ -2,7 +2,6 @@ package com.octopus.edu.core.data.entry.store
 
 import com.octopus.edu.core.common.AppClock
 import com.octopus.edu.core.common.TransactionRunner
-import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.data.database.dao.DeletedEntryDao
 import com.octopus.edu.core.data.database.dao.DoneEntryDao
 import com.octopus.edu.core.data.database.dao.EntryDao
@@ -61,6 +60,17 @@ interface EntryStore {
         entryDate: Long
     )
 
+    suspend fun getDoneEntry(
+        entryId: String,
+        entryDate: Long
+    ): DoneEntryEntity?
+
+    suspend fun updateDoneEntrySyncState(
+        entryId: String,
+        entryDate: Long,
+        syncState: SyncStateEntity
+    )
+
     fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>>
 
     fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
@@ -68,6 +78,8 @@ interface EntryStore {
     fun streamPendingEntries(): Flow<List<EntryEntity>>
 
     fun streamPendingDeletedEntries(): Flow<List<DeletedEntryEntity>>
+
+    fun streamPendingDoneEntries(): Flow<List<DoneEntryEntity>>
 }
 
 internal class EntryStoreImpl
@@ -93,7 +105,7 @@ internal class EntryStoreImpl
             DoneEntryEntity(
                 entryId = entryId,
                 entryDate = entryDate,
-                doneAt = appClock.nowLocalDate().toEpochMilli(),
+                doneAt = appClock.nowInstant().toEpochMilli(),
                 isConfirmed = isConfirmed,
                 syncState = PENDING,
             ),
@@ -108,6 +120,17 @@ internal class EntryStoreImpl
             entryId: String,
             entryDate: Long
         ) = doneEntryDao.updateIsConfirmed(entryId, entryDate, true)
+
+        override suspend fun getDoneEntry(
+            entryId: String,
+            entryDate: Long
+        ): DoneEntryEntity? = doneEntryDao.getDoneEntry(entryId, entryDate)
+
+        override suspend fun updateDoneEntrySyncState(
+            entryId: String,
+            entryDate: Long,
+            syncState: SyncStateEntity
+        ) = doneEntryDao.updateSyncState(entryId, entryDate, syncState)
 
         override suspend fun getEntryById(id: String) = entryDao.getEntryById(id)
 
@@ -145,10 +168,6 @@ internal class EntryStoreImpl
 
         override suspend fun getDeletedEntry(entryId: String): DeletedEntryEntity? = deletedEntryDao.getDeletedEntry(entryId)
 
-        override fun streamPendingEntries(): Flow<List<EntryEntity>> = entryDao.streamPendingEntries()
-
-        override fun streamPendingDeletedEntries(): Flow<List<DeletedEntryEntity>> = deletedEntryDao.streamPendingDeletedEntries()
-
         override fun getAllEntriesByDateAndOrderedByTime(date: Long): Flow<List<EntryEntity>> =
             entryDao.getAllEntriesByDateAndOrderedByTimeAsc(date)
 
@@ -160,4 +179,10 @@ internal class EntryStoreImpl
                         entry.copy(isDone = date in doneDates)
                     }
                 }
+
+        override fun streamPendingEntries(): Flow<List<EntryEntity>> = entryDao.streamPendingEntries()
+
+        override fun streamPendingDeletedEntries(): Flow<List<DeletedEntryEntity>> = deletedEntryDao.streamPendingDeletedEntries()
+
+        override fun streamPendingDoneEntries(): Flow<List<DoneEntryEntity>> = doneEntryDao.streamPendingEntriesMarkedAsDone()
     }

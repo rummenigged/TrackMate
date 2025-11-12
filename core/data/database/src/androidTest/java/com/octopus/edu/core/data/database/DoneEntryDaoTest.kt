@@ -10,6 +10,7 @@ import com.octopus.edu.core.data.database.entity.DoneEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -17,6 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -113,6 +115,81 @@ class DoneEntryDaoTest {
 
             // Then
             assertNull(dao.getDoneEntry(entryId, entryDate))
+        }
+
+    @Test
+    fun updateSyncState_updatesTheState() =
+        runTest {
+            // Given
+            val entryId = "id_sync"
+            val entryDate = 300L
+            val parentEntry = createEntryEntity(id = entryId)
+            val entry = createDoneEntry(entryId = entryId, entryDate = entryDate, syncState = SyncStateEntity.PENDING)
+            entryDao.insert(parentEntry)
+            dao.insert(entry)
+            assertEquals(SyncStateEntity.PENDING, dao.getDoneEntry(entryId, entryDate)?.syncState)
+
+            // When
+            dao.updateSyncState(entryId, entryDate, SyncStateEntity.SYNCED)
+
+            // Then
+            val updated = dao.getDoneEntry(entryId, entryDate)
+            assertNotNull(updated)
+            assertEquals(SyncStateEntity.SYNCED, updated.syncState)
+        }
+
+    @Test
+    fun streamPendingEntriesMarkedAsDone_returnsOnlyConfirmedAndPending() =
+        runTest {
+            // Given
+            entryDao.insert(createEntryEntity(id = "e1"))
+            entryDao.insert(createEntryEntity(id = "e2"))
+            entryDao.insert(createEntryEntity(id = "e3"))
+            entryDao.insert(createEntryEntity(id = "e4"))
+
+            val pendingAndConfirmed =
+                createDoneEntry(
+                    entryId = "e1",
+                    entryDate = 1L,
+                    isConfirmed = true,
+                    syncState = SyncStateEntity.PENDING,
+                )
+            val syncedAndConfirmed =
+                createDoneEntry(
+                    entryId = "e2",
+                    entryDate = 2L,
+                    isConfirmed = true,
+                    syncState = SyncStateEntity.SYNCED,
+                )
+            val pendingAndNotConfirmed =
+                createDoneEntry(
+                    entryId = "e3",
+                    entryDate = 3L,
+                    isConfirmed = false,
+                    syncState = SyncStateEntity.PENDING,
+                )
+            val anotherPendingAndConfirmed =
+                createDoneEntry(
+                    entryId = "e4",
+                    entryDate = 4L,
+                    isConfirmed = true,
+                    syncState = SyncStateEntity.PENDING,
+                )
+
+            dao.insert(pendingAndConfirmed)
+            dao.insert(syncedAndConfirmed)
+            dao.insert(pendingAndNotConfirmed)
+            dao.insert(anotherPendingAndConfirmed)
+
+            // When
+            val result = dao.streamPendingEntriesMarkedAsDone().first()
+
+            // Then
+            assertEquals(2, result.size)
+            assertTrue(result.any { it.entryId == "e1" })
+            assertTrue(result.any { it.entryId == "e4" })
+            assertFalse(result.any { it.entryId == "e2" })
+            assertFalse(result.any { it.entryId == "e3" })
         }
 
     private fun createEntryEntity(

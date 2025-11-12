@@ -11,8 +11,8 @@ import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.di.DatabaseErrorClassifierQualifier
+import com.octopus.edu.core.data.entry.di.EntryStoreQualifier
 import com.octopus.edu.core.data.entry.di.NetworkErrorClassifierQualifier
-import com.octopus.edu.core.data.entry.di.TrackingEntryStoreDecoratorQualifier
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.data.entry.utils.EntryNotFoundException
@@ -22,6 +22,7 @@ import com.octopus.edu.core.data.entry.utils.toEntity
 import com.octopus.edu.core.data.entry.utils.toHabitOrNull
 import com.octopus.edu.core.data.entry.utils.toTaskOrNull
 import com.octopus.edu.core.domain.model.DeletedEntry
+import com.octopus.edu.core.domain.model.DoneEntry
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.SyncState
@@ -52,7 +53,7 @@ import javax.inject.Inject
 internal class EntryRepositoryImpl
     @Inject
     constructor(
-        @param:TrackingEntryStoreDecoratorQualifier
+        @param:EntryStoreQualifier
         private val entryStore: EntryStore,
         private val entryApi: EntryApi,
         private val reminderStore: ReminderStore,
@@ -68,17 +69,22 @@ internal class EntryRepositoryImpl
             get() =
                 entryStore
                     .streamPendingEntries()
-                    .map {
-                        it.mapNotNull(EntryEntity::toDomain)
-                    }.flowOn(dispatcherProvider.io)
+                    .map { it.mapNotNull(EntryEntity::toDomain) }
+                    .flowOn(dispatcherProvider.io)
 
         override val deletedEntryIds: Flow<List<String>>
             get() =
                 entryStore
                     .streamPendingDeletedEntries()
-                    .map {
-                        it.map { deletedEntry -> deletedEntry.id }
-                    }.flowOn(dispatcherProvider.io)
+                    .map { it.map { deletedEntry -> deletedEntry.id } }
+                    .flowOn(dispatcherProvider.io)
+
+        override val pendingEntriesMarkedAsDone: Flow<List<DoneEntry>>
+            get() =
+                entryStore
+                    .streamPendingDoneEntries()
+                    .map { it.map { entry -> entry.toDomain() } }
+                    .flowOn(dispatcherProvider.io)
 
         override suspend fun getPendingEntries(): ResultOperation<List<Entry>> =
             safeCall(

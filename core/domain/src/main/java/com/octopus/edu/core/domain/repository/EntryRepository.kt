@@ -1,6 +1,7 @@
 package com.octopus.edu.core.domain.repository
 
 import com.octopus.edu.core.domain.model.DeletedEntry
+import com.octopus.edu.core.domain.model.DoneEntry
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.SyncState
@@ -13,6 +14,8 @@ interface EntryRepository {
     val pendingEntries: Flow<List<Entry>>
 
     val deletedEntryIds: Flow<List<String>>
+
+    val pendingEntriesMarkedAsDone: Flow<List<DoneEntry>>
 
     suspend fun getTasks(): ResultOperation<List<Task>>
 

@@ -11,6 +11,7 @@ import com.octopus.edu.core.data.database.dao.EntryDao
 import com.octopus.edu.core.data.database.dao.ReminderDao
 import com.octopus.edu.core.data.entry.BuildConfig
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
+import com.octopus.edu.core.data.entry.EntrySyncRepositoryImpl
 import com.octopus.edu.core.data.entry.UserPreferencesProvider
 import com.octopus.edu.core.data.entry.UserPreferencesProviderImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
@@ -21,6 +22,7 @@ import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.data.entry.store.ReminderStoreImpl
 import com.octopus.edu.core.data.entry.store.decorator.TrackingEntryStoreDecorator
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.domain.repository.EntrySyncRepository
 import com.octopus.edu.core.domain.utils.ErrorClassifier
 import dagger.Module
 import dagger.Provides
@@ -68,6 +70,23 @@ object EntryDataModule {
             reminderStore,
             dbSemaphore,
             entryLocks,
+            databaseErrorClassifier,
+            networkErrorClassifier,
+            dispatcherProvider,
+        )
+
+    @Provides
+    @Singleton
+    fun provideEntrySyncRepository(
+        @EntryStoreQualifier entryStore: EntryStore,
+        entryApi: EntryApi,
+        @DatabaseErrorClassifierQualifier databaseErrorClassifier: ErrorClassifier,
+        @NetworkErrorClassifierQualifier networkErrorClassifier: ErrorClassifier,
+        dispatcherProvider: DispatcherProvider
+    ): EntrySyncRepository =
+        EntrySyncRepositoryImpl(
+            entryStore,
+            entryApi,
             databaseErrorClassifier,
             networkErrorClassifier,
             dispatcherProvider,

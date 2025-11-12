@@ -9,13 +9,16 @@ import com.octopus.edu.core.common.toInstant
 import com.octopus.edu.core.common.toLocalDate
 import com.octopus.edu.core.common.toLocalTime
 import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
+import com.octopus.edu.core.data.database.entity.DoneEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.EntryType
 import com.octopus.edu.core.data.database.entity.ReminderEntity
 import com.octopus.edu.core.data.database.entity.ReminderType
 import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
+import com.octopus.edu.core.data.entry.api.dto.DoneEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.domain.model.DeletedEntry
+import com.octopus.edu.core.domain.model.DoneEntry
 import com.octopus.edu.core.domain.model.Entry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Recurrence
@@ -220,4 +223,18 @@ internal fun DeletedEntry.toDto(): DeletedEntryDto =
     DeletedEntryDto(
         id = id,
         deletedAt = Timestamp(deletedAt),
+    )
+
+internal fun DoneEntryEntity.toDomain(): DoneEntry =
+    DoneEntry(
+        id = entryId,
+        date = entryDate.toLocalDate(),
+        doneAt = doneAt.toInstant(),
+    )
+
+internal fun DoneEntry.toDto(): DoneEntryDto =
+    DoneEntryDto(
+        id = id,
+        date = Timestamp(date.toEpochMilli().toInstant()),
+        doneAt = Timestamp(doneAt),
     )

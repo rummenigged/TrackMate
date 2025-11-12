@@ -57,9 +57,6 @@ interface EntryDao {
         updatedAt: Long
     )
 
-    @Query("UPDATE entries SET isDone = 1 WHERE id = :entryId")
-    suspend fun markEntryAsDone(entryId: String)
-
     @Transaction
     suspend fun upsertIfNewest(entry: EntryEntity) {
         val localEntry = getEntryById(entry.id)
