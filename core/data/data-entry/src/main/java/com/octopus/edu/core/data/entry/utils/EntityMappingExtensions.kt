@@ -238,3 +238,12 @@ internal fun DoneEntry.toDto(): DoneEntryDto =
         date = Timestamp(date.toEpochMilli().toInstant()),
         doneAt = Timestamp(doneAt),
     )
+
+internal fun DoneEntryDto.toEntity() =
+    DoneEntryEntity(
+        entryId = id,
+        entryDate = date?.toInstant()?.toEpochMilli() ?: System.currentTimeMillis(),
+        doneAt = doneAt?.toInstant()?.toEpochMilli() ?: System.currentTimeMillis(),
+        isConfirmed = true,
+        syncState = EntryEntity.SyncStateEntity.SYNCED,
+    )

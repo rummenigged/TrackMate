@@ -60,6 +60,8 @@ interface EntryStore {
         entryDate: Long
     )
 
+    suspend fun upsertDoneEntryIfOldest(doneEntry: DoneEntryEntity)
+
     suspend fun getDoneEntry(
         entryId: String,
         entryDate: Long
@@ -131,6 +133,8 @@ internal class EntryStoreImpl
             entryDate: Long,
             syncState: SyncStateEntity
         ) = doneEntryDao.updateSyncState(entryId, entryDate, syncState)
+
+        override suspend fun upsertDoneEntryIfOldest(doneEntry: DoneEntryEntity) = doneEntryDao.upsertIfOldest(doneEntry)
 
         override suspend fun getEntryById(id: String) = entryDao.getEntryById(id)
 

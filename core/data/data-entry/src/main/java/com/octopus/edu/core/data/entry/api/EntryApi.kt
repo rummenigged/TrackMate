@@ -1,6 +1,7 @@
 package com.octopus.edu.core.data.entry.api
 
 import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
+import com.octopus.edu.core.data.entry.api.dto.DoneEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.domain.model.DeletedEntry
 import com.octopus.edu.core.domain.model.DoneEntry
@@ -14,7 +15,9 @@ interface EntryApi {
 
     suspend fun pushDeletedEntry(entry: DeletedEntry): NetworkResponse<Unit>
 
-    suspend fun fetchDeletedEntry(): NetworkResponse<List<DeletedEntryDto>>
+    suspend fun fetchDeletedEntries(): NetworkResponse<List<DeletedEntryDto>>
 
     suspend fun pushDoneEntry(entry: DoneEntry): NetworkResponse<Unit>
+
+    suspend fun fetchDoneEntries(): NetworkResponse<List<DoneEntryDto>>
 }

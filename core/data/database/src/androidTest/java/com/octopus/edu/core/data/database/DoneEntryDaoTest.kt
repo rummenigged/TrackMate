@@ -148,33 +148,13 @@ class DoneEntryDaoTest {
             entryDao.insert(createEntryEntity(id = "e4"))
 
             val pendingAndConfirmed =
-                createDoneEntry(
-                    entryId = "e1",
-                    entryDate = 1L,
-                    isConfirmed = true,
-                    syncState = SyncStateEntity.PENDING,
-                )
+                createDoneEntry(entryId = "e1", entryDate = 1L, isConfirmed = true, syncState = SyncStateEntity.PENDING)
             val syncedAndConfirmed =
-                createDoneEntry(
-                    entryId = "e2",
-                    entryDate = 2L,
-                    isConfirmed = true,
-                    syncState = SyncStateEntity.SYNCED,
-                )
+                createDoneEntry(entryId = "e2", entryDate = 2L, isConfirmed = true, syncState = SyncStateEntity.SYNCED)
             val pendingAndNotConfirmed =
-                createDoneEntry(
-                    entryId = "e3",
-                    entryDate = 3L,
-                    isConfirmed = false,
-                    syncState = SyncStateEntity.PENDING,
-                )
+                createDoneEntry(entryId = "e3", entryDate = 3L, isConfirmed = false, syncState = SyncStateEntity.PENDING)
             val anotherPendingAndConfirmed =
-                createDoneEntry(
-                    entryId = "e4",
-                    entryDate = 4L,
-                    isConfirmed = true,
-                    syncState = SyncStateEntity.PENDING,
-                )
+                createDoneEntry(entryId = "e4", entryDate = 4L, isConfirmed = true, syncState = SyncStateEntity.PENDING)
 
             dao.insert(pendingAndConfirmed)
             dao.insert(syncedAndConfirmed)
@@ -190,6 +170,88 @@ class DoneEntryDaoTest {
             assertTrue(result.any { it.entryId == "e4" })
             assertFalse(result.any { it.entryId == "e2" })
             assertFalse(result.any { it.entryId == "e3" })
+        }
+
+    @Test
+    fun upsertIfOldest_inserts_whenNoLocalEntryExists() =
+        runTest {
+            // Given
+            val entryId = "upsert_new"
+            val entryDate = 100L
+            entryDao.insert(createEntryEntity(id = entryId))
+            val newDoneEntry = createDoneEntry(entryId = entryId, entryDate = entryDate, doneAt = 500L)
+
+            // When
+            dao.upsertIfOldest(newDoneEntry)
+
+            // Then
+            val retrieved = dao.getDoneEntry(entryId, entryDate)
+            assertNotNull(retrieved)
+            assertEquals(500L, retrieved.doneAt)
+        }
+
+    @Test
+    fun upsertIfOldest_replaces_whenIncomingEntryIsOlder() =
+        runTest {
+            // Given
+            val entryId = "upsert_replace"
+            val entryDate = 100L
+            entryDao.insert(createEntryEntity(id = entryId))
+            val localDoneEntry = createDoneEntry(entryId = entryId, entryDate = entryDate, doneAt = 1000L)
+            dao.insert(localDoneEntry)
+
+            val olderDoneEntry = createDoneEntry(entryId = entryId, entryDate = entryDate, doneAt = 500L)
+
+            // When
+            dao.upsertIfOldest(olderDoneEntry)
+
+            // Then
+            val retrieved = dao.getDoneEntry(entryId, entryDate)
+            assertNotNull(retrieved)
+            assertEquals(500L, retrieved.doneAt)
+        }
+
+    @Test
+    fun upsertIfOldest_doesNotReplace_whenLocalEntryIsOlder() =
+        runTest {
+            // Given
+            val entryId = "upsert_keep"
+            val entryDate = 100L
+            entryDao.insert(createEntryEntity(id = entryId))
+
+            val localDoneEntry = createDoneEntry(entryId = entryId, entryDate = entryDate, doneAt = 500L)
+            dao.insert(localDoneEntry)
+
+            val newerDoneEntry = createDoneEntry(entryId = entryId, entryDate = entryDate, doneAt = 1000L)
+
+            // When
+            dao.upsertIfOldest(newerDoneEntry)
+
+            // Then
+            val retrieved = dao.getDoneEntry(entryId, entryDate)
+            assertNotNull(retrieved)
+            assertEquals(500L, retrieved.doneAt)
+        }
+
+    @Test
+    fun upsertIfOldest_doesNotReplace_whenTimestampsAreEqual() =
+        runTest {
+            // Given
+            val entryId = "upsert_equal"
+            val entryDate = 100L
+            entryDao.insert(createEntryEntity(id = entryId))
+            val localDoneEntry = createDoneEntry(entryId = entryId, entryDate = entryDate, doneAt = 1000L)
+            dao.insert(localDoneEntry)
+
+            val sameTimestampEntry = createDoneEntry(entryId = entryId, entryDate = entryDate, doneAt = 1000L)
+
+            // When
+            dao.upsertIfOldest(sameTimestampEntry)
+
+            // Then
+            val retrieved = dao.getDoneEntry(entryId, entryDate)
+            assertNotNull(retrieved)
+            assertEquals(1000L, retrieved.doneAt)
         }
 
     private fun createEntryEntity(

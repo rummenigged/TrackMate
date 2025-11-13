@@ -9,6 +9,7 @@ import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.PEN
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.SYNCED
 import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
+import com.octopus.edu.core.data.entry.api.dto.DoneEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.di.DatabaseErrorClassifierQualifier
 import com.octopus.edu.core.data.entry.di.EntryStoreQualifier
@@ -86,10 +87,13 @@ class EntrySyncRepositoryImpl
             ) {
                 coroutineScope {
                     val entriesDeferred = async { entryApi.fetchEntries() }
-                    val deletedEntriesDeferred = async { entryApi.fetchDeletedEntry() }
+                    val deletedEntriesDeferred = async { entryApi.fetchDeletedEntries() }
+                    val doneEntriesDeferred = async { entryApi.fetchDoneEntries() }
 
                     val entries = entriesDeferred.await()
                     val deletedEntries = deletedEntriesDeferred.await()
+                    val doneEntries = doneEntriesDeferred.await()
+
                     when {
                         entries !is NetworkResponse.Success ->
                             throw Exception("Error fetching entries")
@@ -97,12 +101,20 @@ class EntrySyncRepositoryImpl
                         deletedEntries !is NetworkResponse.Success ->
                             throw Exception("Error fetching deleted entries")
 
+                        doneEntries !is NetworkResponse.Success ->
+                            throw Exception("Error fetching done entries")
+
                         else -> {
                             val deletedIds = deletedEntries.data.map { it.id }.toSet()
 
                             entries.data
                                 .filterNot { it.id in deletedIds }
                                 .map { entry -> async { syncEntrySafely(entry) } }
+                                .awaitAll()
+
+                            doneEntries.data
+                                .filterNot { it.id in deletedIds }
+                                .map { entry -> async { syncDoneEntriesSafely(entry) } }
                                 .awaitAll()
 
                             deletedEntries.data
@@ -239,6 +251,32 @@ class EntrySyncRepositoryImpl
                             entryStore.updateEntrySyncState(entry.id, CONFLICT)
                             Logger.e(
                                 message = "Error to save entry ${entry.id}",
+                                throwable = e,
+                            )
+                        }
+                    }
+                } finally {
+                    entryLocks.remove(entry.id, mutex)
+                }
+            }
+        }
+
+        private suspend fun syncDoneEntriesSafely(entry: DoneEntryDto) {
+            dbSemaphore.withPermit {
+                val mutex = entryLocks.computeIfAbsent(entry.id) { Mutex() }
+                try {
+                    mutex.withLock {
+                        val doneEntryEntity = entry.toEntity()
+                        try {
+                            entryStore.upsertDoneEntryIfOldest(doneEntryEntity)
+                        } catch (e: Exception) {
+                            entryStore.updateDoneEntrySyncState(
+                                doneEntryEntity.entryId,
+                                doneEntryEntity.entryDate,
+                                CONFLICT,
+                            )
+                            Logger.e(
+                                message = "Error to save done entry ${entry.id}",
                                 throwable = e,
                             )
                         }

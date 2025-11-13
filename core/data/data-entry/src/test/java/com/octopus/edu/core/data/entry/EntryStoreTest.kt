@@ -344,6 +344,17 @@ class EntryStoreTest {
         }
 
     @Test
+    fun `upsertDoneEntryIfOldest calls DAO`() =
+        runTest {
+            val doneEntry = mockk<DoneEntryEntity>()
+            coJustRun { doneEntryDao.upsertIfOldest(doneEntry) }
+
+            entryStore.upsertDoneEntryIfOldest(doneEntry)
+
+            coVerify(exactly = 1) { doneEntryDao.upsertIfOldest(doneEntry) }
+        }
+
+    @Test
     fun `updateDoneEntrySyncState calls DAO with correct parameters`() =
         runTest {
             coJustRun { doneEntryDao.updateSyncState(any(), any(), any()) }

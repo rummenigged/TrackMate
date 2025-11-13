@@ -33,7 +33,6 @@ import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.unmockkAll
-import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -64,7 +63,7 @@ class EntryApiTest {
     @Before
     fun setUp() {
         mockkObject(Logger)
-        every { Logger.e(any(), any(), any()) } just runs
+        every { Logger.e(any(), null, any()) } just runs
 
         every { mockUserPreferencesProvider.userId } returns testUserId
         every { mockFirestore.collection(COLLECTION_USERS).document(testUserId) } returns mockUserDocument
@@ -78,7 +77,6 @@ class EntryApiTest {
 
     @After
     fun tearDown() {
-        unmockkObject(Logger)
         unmockkAll()
     }
 
@@ -115,7 +113,7 @@ class EntryApiTest {
 
             assertIs<NetworkResponse.Error>(response)
             assertEquals(expectedException, response.exception)
-            verify(exactly = 1) { Logger.e("Permission Denied", any(), expectedException) }
+            verify(exactly = 1) { Logger.e("Permission Denied", null, expectedException) }
         }
 
     @Test
@@ -130,7 +128,7 @@ class EntryApiTest {
 
             assertIs<NetworkResponse.Error>(response)
             assertEquals(expectedException, response.exception)
-            verify(exactly = 1) { Logger.e("Something went wrong", any(), expectedException) }
+            verify(exactly = 1) { Logger.e("Something went wrong", null, expectedException) }
         }
 
     @Test
@@ -164,7 +162,7 @@ class EntryApiTest {
             // Then
             assertIs<NetworkResponse.Error>(response)
             assertEquals(exception, response.exception)
-            verify(exactly = 1) { Logger.e("Unavailable", any(), exception) }
+            verify(exactly = 1) { Logger.e("Unavailable", null, exception) }
         }
 
     @Test
@@ -207,7 +205,7 @@ class EntryApiTest {
             // Then
             assertIs<NetworkResponse.Error>(response)
             assertEquals(expectedException, response.exception)
-            verify(exactly = 1) { Logger.e("Permission Denied", any(), expectedException) }
+            verify(exactly = 1) { Logger.e("Permission Denied", null, expectedException) }
         }
 
     @Test
@@ -225,7 +223,7 @@ class EntryApiTest {
             every { mockDeletedEntriesCollection.get() } returns Tasks.forResult(mockSnapshot)
 
             // When
-            val response = entryApi.fetchDeletedEntry()
+            val response = entryApi.fetchDeletedEntries()
 
             // Then
             assertIs<NetworkResponse.Success<List<DeletedEntryDto>>>(response)
@@ -241,12 +239,12 @@ class EntryApiTest {
             every { mockDeletedEntriesCollection.get() } returns Tasks.forException(exception)
 
             // When
-            val response = entryApi.fetchDeletedEntry()
+            val response = entryApi.fetchDeletedEntries()
 
             // Then
             assertIs<NetworkResponse.Error>(response)
             assertEquals(exception, response.exception)
-            verify(exactly = 1) { Logger.e("Unavailable", any(), exception) }
+            verify(exactly = 1) { Logger.e("Unavailable", null, exception) }
         }
 
     @Test
@@ -285,6 +283,45 @@ class EntryApiTest {
             // Then
             assertIs<NetworkResponse.Error>(response)
             assertEquals(expectedException, response.exception)
-            verify(exactly = 1) { Logger.e("Permission Denied", any(), expectedException) }
+            verify(exactly = 1) { Logger.e("Permission Denied", null, expectedException) }
+        }
+
+    @Test
+    fun `fetchDoneEntries returns Success on successful fetch from correct user`() =
+        runTest {
+            // Given
+            val now = Timestamp(Instant.now())
+            val mockSnapshot = mockk<QuerySnapshot>()
+            val expectedDoneEntries =
+                listOf(
+                    DoneEntryDto(id = "1", date = now, doneAt = now),
+                    DoneEntryDto(id = "2", date = now, doneAt = now),
+                )
+            every { mockSnapshot.toObjects<DoneEntryDto>() } returns expectedDoneEntries
+            every { mockDoneEntriesCollection.get() } returns Tasks.forResult(mockSnapshot)
+
+            // When
+            val response = entryApi.fetchDoneEntries()
+
+            // Then
+            assertIs<NetworkResponse.Success<List<DoneEntryDto>>>(response)
+            assertEquals(expectedDoneEntries, response.data)
+            verify { mockDoneEntriesCollection.get() }
+        }
+
+    @Test
+    fun `fetchDoneEntries returns Error on fetch failure`() =
+        runTest {
+            // Given
+            val exception = FirebaseFirestoreException("Unavailable", FirebaseFirestoreException.Code.UNAVAILABLE)
+            every { mockDoneEntriesCollection.get() } returns Tasks.forException(exception)
+
+            // When
+            val response = entryApi.fetchDoneEntries()
+
+            // Then
+            assertIs<NetworkResponse.Error>(response)
+            assertEquals(exception, response.exception)
+            verify(exactly = 1) { Logger.e("Unavailable", null, exception) }
         }
 }
