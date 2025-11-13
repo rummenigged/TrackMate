@@ -155,7 +155,7 @@ class EntrySyncManagerTest {
             // When
             pendingEntriesFlow.value = pending
             advanceUntilIdle()
-            pendingEntriesFlow.value = pending
+            pendingEntriesFlow.value = pending // Emit same list again
             advanceUntilIdle()
 
             // Then
@@ -172,8 +172,8 @@ class EntrySyncManagerTest {
             every {
                 errorClassifier.classify(transientError)
             } returns ErrorType.TransientError(transientError)
-            coEvery { retryPolicy.shouldRetry(any(), 0L) } returns true
-            coEvery { retryPolicy.shouldRetry(any(), 1L) } returns false
+            coEvery { retryPolicy.shouldRetry(any(), 0L) } returns true // Retry on first attempt
+            coEvery { retryPolicy.shouldRetry(any(), 1L) } returns false // Stop on second
 
             // When
             entrySyncManager.start()
@@ -221,7 +221,7 @@ class EntrySyncManagerTest {
 
             // Then (verify all schedule calls were still attempted)
             verify(exactly = 1) { syncScheduler.scheduleEntrySync(entries[0].id) }
-            verify(exactly = 1) { syncScheduler.scheduleEntrySync(entries[1].id) }
+            verify(exactly = 1) { syncScheduler.scheduleEntrySync(entries[1].id) } // The one that failed
             verify(exactly = 1) { syncScheduler.scheduleEntrySync(entries[2].id) }
         }
 
@@ -287,7 +287,7 @@ class EntrySyncManagerTest {
             advanceUntilIdle()
 
             verify(exactly = 1) { syncScheduler.scheduleDeletedEntrySync("del-1") }
-            verify(exactly = 1) { syncScheduler.scheduleDeletedEntrySync("del-2") }
+            verify(exactly = 1) { syncScheduler.scheduleDeletedEntrySync("del-2") } // The one that failed
             verify(exactly = 1) { syncScheduler.scheduleDeletedEntrySync("del-3") }
         }
 
@@ -365,9 +365,9 @@ class EntrySyncManagerTest {
             verify(exactly = 1) {
                 syncScheduler.scheduleEntryMarkedAsDoneSync(doneEntries[0].id, doneEntries[0].date)
             }
-            verify(exactly = 1) {
-                syncScheduler.scheduleEntryMarkedAsDoneSync(doneEntries[1].id, doneEntries[1].date)
-            }
+            verify(
+                exactly = 1,
+            ) { syncScheduler.scheduleEntryMarkedAsDoneSync(doneEntries[1].id, doneEntries[1].date) } // The one that failed
             verify(exactly = 1) {
                 syncScheduler.scheduleEntryMarkedAsDoneSync(doneEntries[2].id, doneEntries[2].date)
             }
