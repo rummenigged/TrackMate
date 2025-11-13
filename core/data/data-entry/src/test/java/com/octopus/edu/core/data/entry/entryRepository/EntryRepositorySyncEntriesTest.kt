@@ -3,14 +3,14 @@ package com.octopus.edu.core.data.entry.entryRepository
 import com.google.firebase.Timestamp
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
-import com.octopus.edu.core.data.entry.EntryRepositoryImpl
+import com.octopus.edu.core.data.entry.EntrySyncRepositoryImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.api.dto.DeletedEntryDto
 import com.octopus.edu.core.data.entry.api.dto.EntryDto
 import com.octopus.edu.core.data.entry.store.EntryStore
-import com.octopus.edu.core.data.entry.store.ReminderStore
 import com.octopus.edu.core.domain.model.common.ErrorType
 import com.octopus.edu.core.domain.model.common.ResultOperation
+import com.octopus.edu.core.domain.repository.EntrySyncRepository
 import com.octopus.edu.core.domain.utils.ErrorClassifier
 import com.octopus.edu.core.network.utils.NetworkResponse
 import com.octopus.edu.core.testing.TestDispatchers
@@ -35,10 +35,9 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntryRepositorySyncEntriesTest {
-    private lateinit var entryRepository: EntryRepositoryImpl
+    private lateinit var syncRepository: EntrySyncRepository
     private val entryStore: EntryStore = mockk()
     private val entryApi: EntryApi = mockk()
-    private val reminderStore: ReminderStore = mockk(relaxed = true)
     private val dispatcherProvider = TestDispatchers()
     private val dbSemaphore = Semaphore(Int.MAX_VALUE)
     private val entryLocks = ConcurrentHashMap<String, Mutex>()
@@ -58,11 +57,10 @@ class EntryRepositorySyncEntriesTest {
         coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(emptyList())
         coEvery { entryApi.fetchDeletedEntry() } returns NetworkResponse.Success(emptyList())
 
-        entryRepository =
-            EntryRepositoryImpl(
+        syncRepository =
+            EntrySyncRepositoryImpl(
                 entryStore = entryStore,
                 entryApi = entryApi,
-                reminderStore = reminderStore,
                 dbSemaphore = dbSemaphore,
                 entryLocks = entryLocks,
                 databaseErrorClassifier,
@@ -80,7 +78,7 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryApi.fetchEntries() } returns NetworkResponse.Success(remoteEntries)
 
             // When
-            val result = entryRepository.syncEntries()
+            val result = syncRepository.syncEntries()
 
             // Then
             assertTrue(result is ResultOperation.Success)
@@ -98,7 +96,7 @@ class EntryRepositorySyncEntriesTest {
             every { networkErrorClassifier.classify(any()) } returns ErrorType.TransientError(apiException)
 
             // When
-            val result = entryRepository.syncEntries()
+            val result = syncRepository.syncEntries()
 
             // Then
             assertTrue(result is ResultOperation.Error)
@@ -116,7 +114,7 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryStore.upsertIfNewest(any()) } throws Exception("Database write failed")
 
             // When
-            entryRepository.syncEntries()
+            syncRepository.syncEntries()
 
             // Then
             coVerify(exactly = 1) { entryStore.updateEntrySyncState("1", SyncStateEntity.CONFLICT) }
@@ -131,7 +129,7 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryStore.upsertIfNewest(match { it.id == "1" }) } throws Exception("DB error")
 
             // When
-            entryRepository.syncEntries()
+            syncRepository.syncEntries()
 
             // Then
             coVerify(exactly = 1) { entryStore.updateEntrySyncState("1", SyncStateEntity.CONFLICT) }
@@ -150,7 +148,7 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryStore.getEntryById("deleted-1") } returns localEntry
 
             // When
-            entryRepository.syncEntries()
+            syncRepository.syncEntries()
 
             // Then
             coVerify(exactly = 1) { entryStore.deleteEntry("deleted-1", SyncStateEntity.SYNCED) }
@@ -167,7 +165,7 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryStore.getEntryById("conflict-id") } returns localPendingEntry
 
             // When
-            entryRepository.syncEntries()
+            syncRepository.syncEntries()
 
             // Then
             coVerify(exactly = 1) { entryStore.updateEntrySyncState("conflict-id", SyncStateEntity.CONFLICT) }
@@ -184,7 +182,7 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryStore.getEntryById("deleted-1") } returns null
 
             // When
-            entryRepository.syncEntries()
+            syncRepository.syncEntries()
 
             // Then
             coVerify(exactly = 1) { entryStore.updateDeletedEntrySyncState("deleted-1", SyncStateEntity.SYNCED) }
@@ -201,7 +199,7 @@ class EntryRepositorySyncEntriesTest {
             every { networkErrorClassifier.classify(any()) } returns ErrorType.TransientError(apiException)
 
             // When
-            val result = entryRepository.syncEntries()
+            val result = syncRepository.syncEntries()
 
             // Then
             assertTrue(result is ResultOperation.Error)
@@ -220,7 +218,7 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryStore.deleteEntry("d1", SyncStateEntity.SYNCED) } throws IOException()
 
             // When
-            entryRepository.syncEntries()
+            syncRepository.syncEntries()
 
             // Then
             coVerify(exactly = 1) { entryStore.deleteEntry("d1", SyncStateEntity.SYNCED) } // attempted
@@ -242,7 +240,7 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryStore.getEntryById("deleted-1") } returns localEntryForDeletion
 
             // When
-            entryRepository.syncEntries()
+            syncRepository.syncEntries()
 
             // Then
             coVerify(exactly = 1) { entryStore.upsertIfNewest(match { it.id == "new-1" }) }
@@ -264,7 +262,7 @@ class EntryRepositorySyncEntriesTest {
             coEvery { entryStore.getEntryById(conflictingId) } returns localEntryForDeletion
 
             // When
-            entryRepository.syncEntries()
+            syncRepository.syncEntries()
 
             // Then
             // It should sync the new entry
@@ -292,7 +290,7 @@ class EntryRepositorySyncEntriesTest {
             }
 
             // When
-            entryRepository.syncEntries()
+            syncRepository.syncEntries()
 
             // Then
             assertTrue(entryLocks.isEmpty(), "Entry locks map should be empty after sync.")
@@ -305,10 +303,9 @@ class EntryRepositorySyncEntriesTest {
             // GIVEN
             val singlePermitSemaphore = Semaphore(1)
             val concurrentRepo =
-                EntryRepositoryImpl(
+                EntrySyncRepositoryImpl(
                     entryStore = entryStore,
                     entryApi = entryApi,
-                    reminderStore = reminderStore,
                     dbSemaphore = singlePermitSemaphore,
                     entryLocks = entryLocks,
                     databaseErrorClassifier,

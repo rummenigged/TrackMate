@@ -56,22 +56,14 @@ object EntryDataModule {
     @Singleton
     fun providesEntryRepository(
         @TrackingEntryStoreDecoratorQualifier entryStore: EntryStore,
-        entryApi: EntryApi,
         reminderStore: ReminderStore,
-        dbSemaphore: Semaphore,
         @DatabaseErrorClassifierQualifier databaseErrorClassifier: ErrorClassifier,
-        @NetworkErrorClassifierQualifier networkErrorClassifier: ErrorClassifier,
-        entryLocks: ConcurrentHashMap<String, Mutex>,
         dispatcherProvider: DispatcherProvider
     ): EntryRepository =
         EntryRepositoryImpl(
             entryStore,
-            entryApi,
             reminderStore,
-            dbSemaphore,
-            entryLocks,
             databaseErrorClassifier,
-            networkErrorClassifier,
             dispatcherProvider,
         )
 
@@ -80,6 +72,8 @@ object EntryDataModule {
     fun provideEntrySyncRepository(
         @EntryStoreQualifier entryStore: EntryStore,
         entryApi: EntryApi,
+        dbSemaphore: Semaphore,
+        entryLocks: ConcurrentHashMap<String, Mutex>,
         @DatabaseErrorClassifierQualifier databaseErrorClassifier: ErrorClassifier,
         @NetworkErrorClassifierQualifier networkErrorClassifier: ErrorClassifier,
         dispatcherProvider: DispatcherProvider
@@ -87,6 +81,8 @@ object EntryDataModule {
         EntrySyncRepositoryImpl(
             entryStore,
             entryApi,
+            dbSemaphore,
+            entryLocks,
             databaseErrorClassifier,
             networkErrorClassifier,
             dispatcherProvider,

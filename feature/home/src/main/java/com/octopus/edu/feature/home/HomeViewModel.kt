@@ -7,6 +7,7 @@ import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.model.common.retryOnResultError
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.domain.repository.EntrySyncRepository
 import com.octopus.edu.core.ui.common.base.BaseViewModel
 import com.octopus.edu.feature.home.HomeUiContract.UiEffect
 import com.octopus.edu.feature.home.HomeUiContract.UiEvent
@@ -27,6 +28,7 @@ internal class HomeViewModel
     @Inject
     constructor(
         private val entryRepository: EntryRepository,
+        private val syncRepository: EntrySyncRepository,
         @param:ApplicationScope private val applicationScope: CoroutineScope
     ) : BaseViewModel<UiState, UiEffect, UiEvent>() {
         private val markAsDoneConfirmationJobs = hashMapOf<String, Job>()
@@ -127,7 +129,7 @@ internal class HomeViewModel
         private fun refreshData() {
             viewModelScope.launch {
                 setState { copy(isRefreshing = true) }
-                when (val result = entryRepository.syncEntries()) {
+                when (val result = syncRepository.syncEntries()) {
                     is ResultOperation.Error -> {
                         setState { copy(isRefreshing = false) }
                         setEffect(
