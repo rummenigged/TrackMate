@@ -1,18 +1,14 @@
 package com.octopus.edu.core.data.entry.entryRepository
 
 import com.octopus.edu.core.common.toEpochMilli
-import com.octopus.edu.core.data.database.entity.DeletedEntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
 import com.octopus.edu.core.data.entry.EntryRepositoryImpl
 import com.octopus.edu.core.data.entry.api.EntryApi
 import com.octopus.edu.core.data.entry.store.EntryStore
 import com.octopus.edu.core.data.entry.store.ReminderStore
-import com.octopus.edu.core.data.entry.utils.EntryNotFoundException
 import com.octopus.edu.core.data.entry.utils.getReminderAsEntity
-import com.octopus.edu.core.data.entry.utils.toDomain
 import com.octopus.edu.core.data.entry.utils.toEntity
-import com.octopus.edu.core.domain.model.DeletedEntry
 import com.octopus.edu.core.domain.model.Habit
 import com.octopus.edu.core.domain.model.Reminder
 import com.octopus.edu.core.domain.model.SyncState
@@ -30,8 +26,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -39,15 +33,12 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.io.IOException
 import java.sql.SQLTimeoutException
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntryRepositoryTest {
@@ -58,8 +49,6 @@ class EntryRepositoryTest {
     private lateinit var repository: EntryRepository
     private lateinit var databaseErrorClassifier: ErrorClassifier
     private lateinit var networkErrorClassifier: ErrorClassifier
-    private val dbSemaphore = Semaphore(Int.MAX_VALUE)
-    private val entryLocks = ConcurrentHashMap<String, Mutex>()
 
     private val testDate = LocalDate.of(2024, 1, 8)
     private val dayBeforeTestDate = testDate.minusDays(1)
@@ -95,12 +84,8 @@ class EntryRepositoryTest {
         repository =
             EntryRepositoryImpl(
                 entryStore,
-                entryApi,
                 reminderStore,
-                dbSemaphore,
-                entryLocks,
                 databaseErrorClassifier,
-                networkErrorClassifier,
                 testDispatchers,
             )
 
@@ -304,273 +289,122 @@ class EntryRepositoryTest {
             assertEquals(storeException, (result as ResultOperation.Error).throwable)
             assertTrue(result.isRetriable)
             coVerify(exactly = 1) { entryStore.saveEntry(expectedEntryEntity) }
-            coVerify(exactly = 0) { reminderStore.saveReminder(any()) } // Using any() as ReminderEntity is not defined in context
+            coVerify(exactly = 0) { reminderStore.saveReminder(any()) }
         }
 
+    // --- Tests for markEntryAsDone ---
     @Test
-    fun `saveEntry returns error when reminderStore fails`() =
+    fun `markEntryAsDone returns Success on successful operation`() =
         runTest {
-            mockkStatic(UUID::class)
-            mockkStatic(LocalDateTime::class)
+            // Given
+            val entryId = "entry-to-mark-done"
+            coJustRun { entryStore.markEntryAsDone(entryId, any(), any()) }
 
-            every { UUID.randomUUID().toString() } returns defaultRandomId
-            every { LocalDateTime.now() } returns defaultDateNow
+            // When
+            val result = repository.markEntryAsDone(entryId, testDate, true)
 
-            val expectedEntryEntity = testTaskDomain.toEntity()
-            val expectedReminderEntity = testTaskDomain.getReminderAsEntity()
-            val reminderException = RuntimeException("ReminderStore failed")
-
-            coJustRun { entryStore.saveEntry(expectedEntryEntity) }
-            coEvery { reminderStore.saveReminder(expectedReminderEntity) } throws reminderException
-            every { databaseErrorClassifier.classify(any()) } returns ErrorType.TransientError(reminderException)
-
-            val result = repository.saveEntry(testTaskDomain)
-
-            assertTrue(result is ResultOperation.Error)
-            assertEquals(reminderException, (result as ResultOperation.Error).throwable)
-            kotlin.test.assertTrue(result.isRetriable)
-            coVerify(exactly = 1) { entryStore.saveEntry(expectedEntryEntity) }
-            coVerify(exactly = 1) { reminderStore.saveReminder(expectedReminderEntity) }
-        }
-
-    // --- Tests for getEntryById ---
-    @Test
-    fun `getEntryById returns entry when found`() =
-        runTest {
-            val expectedEntryEntity = testTaskDomain.toEntity()
-            coEvery { entryStore.getEntryById(expectedEntryEntity.id) } returns expectedEntryEntity
-
-            val result = repository.getEntryById(expectedEntryEntity.id)
-
+            // Then
             assertTrue(result is ResultOperation.Success)
-            assertEquals(expectedEntryEntity.toDomain(), (result as ResultOperation.Success).data)
-            coVerify(exactly = 1) { entryStore.getEntryById(expectedEntryEntity.id) }
+            coVerify(exactly = 1) { entryStore.markEntryAsDone(entryId, testDate.toEpochMilli(), true) }
         }
 
     @Test
-    fun `getEntryById throws EntryNotFoundException when not found`() =
+    fun `markEntryAsDone returns retriable Error on transient db failure`() =
         runTest {
-            val expectedEntryEntity = testTaskDomain.toEntity()
-            every {
-                databaseErrorClassifier.classify(any())
-            } returns ErrorType.TransientError(EntryNotFoundException())
-            coEvery { entryStore.getEntryById(expectedEntryEntity.id) } returns null
+            // Given
+            val entryId = "entry-to-mark-done"
+            val dbException = SQLTimeoutException("DB operation timed out")
+            coEvery { entryStore.markEntryAsDone(entryId, any(), any()) } throws dbException
+            every { databaseErrorClassifier.classify(dbException) } returns ErrorType.TransientError(dbException)
 
-            val result = repository.getEntryById(expectedEntryEntity.id)
+            // When
+            val result = repository.markEntryAsDone(entryId, testDate)
 
+            // Then
             assertTrue(result is ResultOperation.Error)
-            assertTrue((result as ResultOperation.Error).throwable is EntryNotFoundException)
-            coVerify(exactly = 1) { entryStore.getEntryById(expectedEntryEntity.id) }
-        }
-
-    @Test
-    fun `getEntryById returns retriable error when throws a SQLTimeoutException`() =
-        runTest {
-            val expectedEntryEntity = testTaskDomain.toEntity()
-            val expectedException = SQLTimeoutException()
-            coEvery { entryStore.getEntryById(expectedEntryEntity.id) } throws expectedException
-            every {
-                databaseErrorClassifier.classify(expectedException)
-            } returns ErrorType.TransientError(expectedException)
-
-            val result = repository.getEntryById(expectedEntryEntity.id)
-
-            assertTrue(result is ResultOperation.Error)
-            assertTrue((result as ResultOperation.Error).isRetriable)
-            coVerify(exactly = 1) { entryStore.getEntryById(expectedEntryEntity.id) }
-        }
-
-    @Test
-    fun `getEntryById returns non-retriable error when throws a RuntimeException`() =
-        runTest {
-            val expectedEntryEntity = testTaskDomain.toEntity()
-            val expectedException = RuntimeException("Mapping failed")
-            coEvery { entryStore.getEntryById(expectedEntryEntity.id) } throws expectedException
-            every {
-                databaseErrorClassifier.classify(expectedException)
-            } returns ErrorType.PermanentError(expectedException)
-
-            val result = repository.getEntryById(expectedEntryEntity.id)
-
-            assertTrue(result is ResultOperation.Error)
-            assertFalse((result as ResultOperation.Error).isRetriable)
-            coVerify(exactly = 1) { entryStore.getEntryById(expectedEntryEntity.id) }
-        }
-
-    @Test
-    fun `getEntryById returns non-retriable error when throws an exception while mapping to domain`() =
-        runTest {
-            val expectedEntryEntity = testTaskDomain.toEntity()
-            val expectedException = RuntimeException("Mapping failed")
-            every { expectedEntryEntity.toDomain() } throws expectedException
-            every {
-                databaseErrorClassifier.classify(expectedException)
-            } returns ErrorType.PermanentError(expectedException)
-            coEvery { entryStore.getEntryById(expectedEntryEntity.id) } returns expectedEntryEntity
-
-            val result = repository.getEntryById(expectedEntryEntity.id)
-
-            assertTrue(result is ResultOperation.Error)
-            assertFalse((result as ResultOperation.Error).isRetriable)
-            coVerify(exactly = 1) { entryStore.getEntryById(expectedEntryEntity.id) }
-        }
-
-    @Test
-    fun `deleteEntry returns Unit when successful`() =
-        runTest {
-            val entryId = "testId"
-            coJustRun { entryStore.deleteEntry(entryId, SyncStateEntity.PENDING) }
-
-            val result = repository.deleteEntry(entryId)
-
-            assertTrue(result is ResultOperation.Success)
-            coVerify(exactly = 1) { entryStore.deleteEntry(entryId, SyncStateEntity.PENDING) }
-        }
-
-    @Test
-    fun `deleteEntry returns error when deleteEntry fails`() =
-        runTest {
-            val entryId = "testId"
-            val exception = RuntimeException()
-            coEvery {
-                entryStore.deleteEntry(entryId, SyncStateEntity.PENDING)
-            } throws exception
-            every { databaseErrorClassifier.classify(any()) } returns
-                ErrorType.TransientError(exception)
-
-            val result = repository.deleteEntry(entryId)
-
-            assertTrue(result is ResultOperation.Error)
-            assertTrue((result as ResultOperation.Error).isRetriable)
-            coVerify(exactly = 1) { entryStore.deleteEntry(entryId, SyncStateEntity.PENDING) }
-        }
-
-    // --- Tests for updateEntrySyncState ---
-    @Test
-    fun `updateEntrySyncState successfully updates sync state in store`() =
-        runTest {
-            val entryId = "test-entry-id-sync"
-            val syncStateToSet = SyncState.SYNCED
-            val expectedSyncStateEntity = syncStateToSet.toEntity()
-
-            // Mock the store behavior
-            coJustRun { entryStore.updateEntrySyncState(entryId, expectedSyncStateEntity) }
-
-            // Call the repository method
-            val result = repository.updateEntrySyncState(entryId, syncStateToSet)
-
-            // Assert success and verify store interaction
-            assertTrue(result is ResultOperation.Success)
-            assertEquals(Unit, (result as ResultOperation.Success).data)
-            coVerify(exactly = 1) { entryStore.updateEntrySyncState(entryId, expectedSyncStateEntity) }
-        }
-
-    @Test
-    fun `updateEntrySyncState returns error when store update fails`() =
-        runTest {
-            val entryId = "test-entry-id-sync-fail"
-            val syncStateToSet = SyncState.PENDING
-            val expectedSyncStateEntity = syncStateToSet.toEntity()
-            val storeException = RuntimeException("Store failed to update sync state")
-
-            // Mock the store to throw an exception
-            coEvery { entryStore.updateEntrySyncState(entryId, expectedSyncStateEntity) } throws
-                storeException
-            every { databaseErrorClassifier.classify(any()) } returns
-                ErrorType.TransientError(storeException)
-
-            // Call the repository method
-            val result = repository.updateEntrySyncState(entryId, syncStateToSet)
-
-            // Assert error and verify store interaction
-            assertTrue(result is ResultOperation.Error)
-            assertEquals(storeException, (result as ResultOperation.Error).throwable)
+            assertEquals(dbException, (result as ResultOperation.Error).throwable)
             assertTrue(result.isRetriable)
-            coVerify(exactly = 1) { entryStore.updateEntrySyncState(entryId, expectedSyncStateEntity) }
         }
 
     @Test
-    fun `getDeletedEntry returns DeletedEntry on success`() =
+    fun `markEntryAsDone returns permanent Error on non-retriable db failure`() =
         runTest {
             // Given
-            val entryId = "deleted-1"
-            val deletedEntity = DeletedEntryEntity(entryId, System.currentTimeMillis(), SyncStateEntity.PENDING)
-            coEvery { entryStore.getDeletedEntry(entryId) } returns deletedEntity
+            val entryId = "entry-to-mark-done"
+            val dbException = RuntimeException("Permanent DB error")
+            coEvery { entryStore.markEntryAsDone(entryId, any(), any()) } throws dbException
+            every { databaseErrorClassifier.classify(dbException) } returns ErrorType.PermanentError(dbException)
 
             // When
-            val result = repository.getDeletedEntry(entryId)
+            val result = repository.markEntryAsDone(entryId, testDate)
 
             // Then
-            kotlin.test.assertTrue(result is ResultOperation.Success)
-            val deletedEntry = result.data
-            kotlin.test.assertEquals(entryId, deletedEntry.id)
-            kotlin.test.assertEquals(deletedEntity.deletedAt, deletedEntry.deletedAt.toEpochMilli())
+            assertTrue(result is ResultOperation.Error)
+            assertEquals(dbException, (result as ResultOperation.Error).throwable)
+            assertFalse(result.isRetriable)
         }
 
     @Test
-    fun `getDeletedEntry returns error when entry not found`() =
+    fun `unmarkEntryAsDone returns Success on successful operation`() =
         runTest {
             // Given
-            val entryId = "non-existent"
-            every {
-                databaseErrorClassifier.classify(any())
-            } returns ErrorType.TransientError(EntryNotFoundException())
-            coEvery { entryStore.getDeletedEntry(entryId) } returns null
+            val entryId = "entry-to-unmark-done"
+            coJustRun { entryStore.unmarkEntryAsDone(entryId, any()) }
 
             // When
-            val result = repository.getDeletedEntry(entryId)
+            val result = repository.unmarkEntryAsDone(entryId, testDate)
 
             // Then
-            kotlin.test.assertTrue(result is ResultOperation.Error)
-            kotlin.test.assertTrue(result.throwable is EntryNotFoundException)
+            assertTrue(result is ResultOperation.Success)
+            coVerify(exactly = 1) { entryStore.unmarkEntryAsDone(entryId, testDate.toEpochMilli()) }
         }
 
     @Test
-    fun `pushDeletedEntry returns success when api call succeeds`() =
+    fun `unmarkEntryAsDone returns Error when store fails`() =
         runTest {
             // Given
-            val deletedEntry = DeletedEntry("deleted-1", Instant.now())
-            coJustRun { entryApi.pushDeletedEntry(deletedEntry) }
+            val entryId = "entry-to-unmark-done"
+            val dbException = RuntimeException("Permanent DB error")
+            coEvery { entryStore.unmarkEntryAsDone(entryId, any()) } throws dbException
+            every { databaseErrorClassifier.classify(dbException) } returns ErrorType.PermanentError(dbException)
 
             // When
-            val result = repository.pushDeletedEntry(deletedEntry)
+            val result = repository.unmarkEntryAsDone(entryId, testDate)
 
             // Then
-            kotlin.test.assertTrue(result is ResultOperation.Success)
-            coVerify(exactly = 1) { entryApi.pushDeletedEntry(deletedEntry) }
+            assertTrue(result is ResultOperation.Error)
+            assertEquals(dbException, (result as ResultOperation.Error).throwable)
         }
 
     @Test
-    fun `pushDeletedEntry returns error when api call fails`() =
+    fun `confirmEntryAsDone returns Success on successful operation`() =
         runTest {
             // Given
-            val deletedEntry = DeletedEntry("deleted-1", Instant.now())
-            val apiException = IOException("Network failed")
-            coEvery { entryApi.pushDeletedEntry(deletedEntry) } throws apiException
-            every { networkErrorClassifier.classify(apiException) } returns ErrorType.TransientError(apiException)
+            val entryId = "entry-to-confirm-done"
+            coJustRun { entryStore.confirmEntryAsDone(entryId, any()) }
 
             // When
-            val result = repository.pushDeletedEntry(deletedEntry)
+            val result = repository.confirmEntryAsDone(entryId, testDate)
 
             // Then
-            kotlin.test.assertTrue(result is ResultOperation.Error)
-            kotlin.test.assertTrue(result.isRetriable)
-            kotlin.test.assertEquals(apiException, result.throwable)
+            assertTrue(result is ResultOperation.Success)
+            coVerify(exactly = 1) { entryStore.confirmEntryAsDone(entryId, testDate.toEpochMilli()) }
         }
 
     @Test
-    fun `updateDeletedEntrySyncState completes successfully`() =
+    fun `confirmEntryAsDone returns Error when store fails`() =
         runTest {
             // Given
-            val entryId = "deleted-1"
-            val syncState = SyncState.SYNCED
-            coJustRun { entryStore.updateDeletedEntrySyncState(entryId, syncState.toEntity()) }
+            val entryId = "entry-to-confirm-done"
+            val dbException = SQLTimeoutException("DB operation timed out")
+            coEvery { entryStore.confirmEntryAsDone(entryId, any()) } throws dbException
+            every { databaseErrorClassifier.classify(dbException) } returns ErrorType.TransientError(dbException)
 
             // When
-            val result = repository.updateDeletedEntrySyncState(entryId, syncState)
+            val result = repository.confirmEntryAsDone(entryId, testDate)
 
             // Then
-            kotlin.test.assertTrue(result is ResultOperation.Success)
-            coVerify(exactly = 1) { entryStore.updateDeletedEntrySyncState(entryId, syncState.toEntity()) }
+            assertTrue(result is ResultOperation.Error)
+            assertEquals(dbException, (result as ResultOperation.Error).throwable)
         }
 }

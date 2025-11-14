@@ -10,9 +10,9 @@ import javax.inject.Inject
 class SyncErrorClassifier
     @Inject
     constructor(
-        @field:DatabaseErrorClassifierQualifier
+        @param:DatabaseErrorClassifierQualifier
         private val databaseErrorClassifier: ErrorClassifier,
-        @field:NetworkErrorClassifierQualifier
+        @param:NetworkErrorClassifierQualifier
         private val networkErrorClassifier: ErrorClassifier
     ) : BaseErrorClassifier() {
         override fun isTransient(throwable: Throwable): Boolean =

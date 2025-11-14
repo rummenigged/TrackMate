@@ -9,11 +9,14 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.core.domain.scheduler.EntrySyncScheduler
 import com.octopus.edu.trackmate.workManager.sync.SyncDeletedEntryWorker
+import com.octopus.edu.trackmate.workManager.sync.SyncEntryMarkedAsDoneWorker
 import com.octopus.edu.trackmate.workManager.sync.SyncEntryWorker
 import com.octopus.edu.trackmate.workManager.sync.SyncPendingEntriesWorker
 import java.time.Duration
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -79,17 +82,48 @@ class EntrySyncWorkScheduler
             )
         }
 
+        override fun scheduleEntryMarkedAsDoneSync(
+            entryId: String,
+            entryDate: LocalDate
+        ) {
+            val data =
+                workDataOf(
+                    ENTRY_ID_EXTRA to entryId,
+                    ENTRY_DATE_EXTRA to entryDate.toEpochMilli(),
+                )
+            val work =
+                OneTimeWorkRequestBuilder<SyncEntryMarkedAsDoneWorker>()
+                    .setInputData(data)
+                    .setConstraints(
+                        Constraints
+                            .Builder()
+                            .setRequiredNetworkType(NetworkType.CONNECTED)
+                            .build(),
+                    ).setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
+                    .addTag(TAG_ENTRY_MARKED_AS_DONE_PREFIX + entryId)
+                    .build()
+
+            workManager.enqueueUniqueWork(
+                uniqueWorkName = "$UNIQUE_ENTRY_MARKED_AS_DONE_WORK_NAME_PREFIX$entryId-$entryDate",
+                existingWorkPolicy = ExistingWorkPolicy.REPLACE,
+                request = work,
+            )
+        }
+
         override fun cancelEntrySync(entryId: String) {
             workManager.cancelUniqueWork(UNIQUE_ENTRY_WORK_NAME_PREFIX + entryId)
         }
 
         companion object {
             const val ENTRY_ID_EXTRA = "entry_id"
+            const val ENTRY_DATE_EXTRA = "entry_date"
             private const val UNIQUE_ENTRY_WORK_NAME_PREFIX = "sync_entry_"
             private const val UNIQUE_DELETED_ENTRY_WORK_NAME_PREFIX = "sync_deleted_entry_"
+            private const val UNIQUE_ENTRY_MARKED_AS_DONE_WORK_NAME_PREFIX = "sync_entry_marked_as_done_"
             private const val UNIQUE_BATCH_WORK_NAME = "sync_pending_entries"
             private const val TAG_ENTRY_PREFIX = "sync-entry-"
             private const val TAG_DELETED_ENTRY_PREFIX = "sync-deleted-entry-"
+            private const val TAG_ENTRY_MARKED_AS_DONE_PREFIX = "sync-entry-marked-as-done-"
             private const val TAG_BATCH = "sync-pending-entries"
         }
     }

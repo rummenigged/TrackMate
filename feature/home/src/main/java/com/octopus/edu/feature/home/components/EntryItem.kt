@@ -20,7 +20,9 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -101,9 +103,13 @@ internal fun EntryItem(
 
         val entryIcon =
             remember(entry) {
-                when (entry) {
-                    is Habit -> R.drawable.ic_autorenew_habit_16
-                    is Task -> R.drawable.ic_circle_task_16
+                if (entry.isDone) {
+                    R.drawable.ic_check_circle
+                } else {
+                    when (entry) {
+                        is Habit -> R.drawable.ic_autorenew_habit_16
+                        is Task -> R.drawable.ic_circle_task_16
+                    }
                 }
             }
 
@@ -152,10 +158,11 @@ internal fun EntryItem(
                     icon = Icons.Rounded.Check,
                     threshold = 0.4f,
                     disabledIconTint = colorScheme.onSurface,
-                    swipeActionActivatedBackground = colorScheme.errorContainer,
+                    swipeActionActivatedBackground = colorScheme.primaryContainer,
                     swipeActionDeactivatedBackground = colorScheme.surfaceContainer,
                     backgroundShape = shapes.medium,
-                    stayDismissed = true,
+                    stayDismissed = false,
+                    isEnabled = entry.isDone.not(),
                     onSwiped = { onItemSwipedFromStartToEnd(entry) },
                 ),
             endActionsConfig =
@@ -167,31 +174,54 @@ internal fun EntryItem(
                     swipeActionDeactivatedBackground = colorScheme.surfaceContainer,
                     backgroundShape = shapes.medium,
                     stayDismissed = true,
+                    isEnabled = true,
                     onSwiped = { onItemSwipedFromEndToStart(entry) },
                 ),
         ) {
-            EntryCard {
-                Row(
-                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
-                ) {
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = entry.title,
-                        style = typography.titleSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+            Box(
+                modifier = Modifier.clip(shapes.medium),
+            ) {
+                EntryCard {
+                    Row(
+                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = entry.title,
+                            style = typography.titleSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
 
-                    if (entry is Habit) {
-                        entry.recurrence?.let { recurrence ->
-                            Text(
-                                modifier = Modifier.padding(start = 4.dp),
-                                text = stringResource(getRecurrenceAsStringRes(recurrence)),
-                                style = typography.labelSmall,
-                                color = colorScheme.onSurface.copy(alpha = 0.5f),
-                            )
+                        if (entry is Habit) {
+                            entry.recurrence?.let { recurrence ->
+                                Text(
+                                    modifier = Modifier.padding(start = 4.dp),
+                                    text = stringResource(getRecurrenceAsStringRes(recurrence)),
+                                    style = typography.labelSmall,
+                                    color = colorScheme.onSurface.copy(alpha = 0.5f),
+                                )
+                            }
                         }
                     }
+                }
+
+                if (entry.isDone) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .matchParentSize()
+                                .background(colorScheme.surface.copy(alpha = 0.5f)),
+                    )
+
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .align(Alignment.Center)
+                                .background(colorScheme.onSurface.copy(alpha = 0.6f)),
+                    )
                 }
             }
         }
@@ -214,6 +244,26 @@ private fun HabitItemPreview() {
     TrackMateTheme {
         Column(modifier = Modifier.background(color = colorScheme.surface)) {
             EntryItem(Habit.mock("2"))
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun TaskItemDonePreview() {
+    TrackMateTheme {
+        Column(modifier = Modifier.background(color = colorScheme.surface)) {
+            EntryItem(Task.mock("2").copy(isDone = true))
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun HabitItemDonePreview() {
+    TrackMateTheme {
+        Column(modifier = Modifier.background(color = colorScheme.surface)) {
+            EntryItem(Habit.mock("2").copy(isDone = true))
         }
     }
 }
