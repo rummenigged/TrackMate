@@ -89,9 +89,9 @@ internal class HomeViewModel
             entryId: String,
             entryDate: LocalDate,
             delay: Long
-        ) = applicationScope.launch {
-            markAsDoneConfirmationJobs[entryId] =
-                launch {
+        ) {
+            val job =
+                applicationScope.launch {
                     delay(delay)
                     when (val result = entryRepository.confirmEntryAsDone(entryId, entryDate)) {
                         is ResultOperation.Error -> {
@@ -100,16 +100,29 @@ internal class HomeViewModel
                                 throwable = result.throwable,
                             )
                         }
+
                         is ResultOperation.Success -> {}
                     }
                 }
+
+            with(markAsDoneConfirmationJobs) {
+                get(entryId)?.cancel()
+                set(entryId, job)
+                job.invokeOnCompletion { remove(entryId, job) }
+            }
         }
 
         private fun unmarkEntryAsDone(
             entryId: String,
             entryDate: LocalDate
         ) = viewModelScope.launch {
-            markAsDoneConfirmationJobs[entryId]?.cancel()
+            with(markAsDoneConfirmationJobs) {
+                get(entryId)?.let { job ->
+                    job.cancel()
+                    remove(entryId)
+                }
+            }
+
             when (val result = entryRepository.unmarkEntryAsDone(entryId, entryDate)) {
                 is ResultOperation.Error -> {
                     setEffect(
