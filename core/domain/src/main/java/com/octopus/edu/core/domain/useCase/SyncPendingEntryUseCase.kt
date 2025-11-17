@@ -7,12 +7,14 @@ import com.octopus.edu.core.domain.model.common.ErrorType.TransientError
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.model.common.SyncResult
 import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.domain.repository.EntrySyncRepository
 import javax.inject.Inject
 
 class SyncPendingEntryUseCase
     @Inject
     constructor(
-        private val entryRepository: EntryRepository
+        private val entryRepository: EntryRepository,
+        private val syncRepository: EntrySyncRepository
     ) {
         suspend operator fun invoke(entryId: String): SyncResult =
             when (val result = entryRepository.getEntryById(entryId)) {
@@ -30,7 +32,7 @@ class SyncPendingEntryUseCase
             }
 
         private suspend fun pushEntry(entry: Entry): SyncResult =
-            when (val result = entryRepository.pushEntry(entry)) {
+            when (val result = syncRepository.pushEntry(entry)) {
                 is ResultOperation.Success -> {
                     // TODO: Figure out how to log when gets error as it is the domain
                     updateEntrySyncState(entry.id, SyncState.SYNCED)
@@ -52,7 +54,7 @@ class SyncPendingEntryUseCase
             entryId: String,
             state: SyncState
         ): SyncResult =
-            when (val result = entryRepository.updateEntrySyncState(entryId, state)) {
+            when (val result = syncRepository.updateEntrySyncState(entryId, state)) {
                 is ResultOperation.Error -> {
                     if (result.isRetriable) {
                         SyncResult.Error(TransientError(result.throwable))

@@ -9,7 +9,7 @@ import com.octopus.edu.core.domain.model.common.ErrorType.TransientError
 import com.octopus.edu.core.domain.model.common.ResultOperation
 import com.octopus.edu.core.domain.model.common.SyncResult.Error
 import com.octopus.edu.core.domain.model.common.SyncResult.Success
-import com.octopus.edu.core.domain.repository.EntryRepository
+import com.octopus.edu.core.domain.repository.EntrySyncRepository
 import com.octopus.edu.core.domain.useCase.SyncPendingEntryUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -20,13 +20,13 @@ class SyncPendingEntriesWorker
     constructor(
         @Assisted val context: Context,
         @Assisted val params: WorkerParameters,
-        private val entryRepository: EntryRepository,
+        private val syncRepository: EntrySyncRepository,
         private val syncPendingEntryUseCase: SyncPendingEntryUseCase
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
             var sawTransientError = false
             var sawPermanentError = false
-            return when (val result = entryRepository.getPendingEntries()) {
+            return when (val result = syncRepository.getPendingEntries()) {
                 is ResultOperation.Error -> {
                     if (result.isRetriable) {
                         Result.retry()

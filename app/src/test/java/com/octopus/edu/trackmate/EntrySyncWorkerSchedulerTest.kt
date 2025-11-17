@@ -7,8 +7,10 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
+import com.octopus.edu.core.common.toEpochMilli
 import com.octopus.edu.trackmate.sync.EntrySyncWorkScheduler
 import com.octopus.edu.trackmate.workManager.sync.SyncDeletedEntryWorker
+import com.octopus.edu.trackmate.workManager.sync.SyncEntryMarkedAsDoneWorker
 import com.octopus.edu.trackmate.workManager.sync.SyncEntryWorker
 import com.octopus.edu.trackmate.workManager.sync.SyncPendingEntriesWorker
 import io.mockk.mockk
@@ -19,6 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -115,6 +118,39 @@ class EntrySyncWorkerSchedulerTest {
         assertEquals(BackoffPolicy.EXPONENTIAL, workSpec.backoffPolicy)
         assertEquals(10000, workSpec.backoffDelayDuration)
         assertTrue(workRequestSlot.captured.tags.contains("sync-deleted-entry-$entryId"))
+    }
+
+    @Test
+    fun `scheduleEntryMarkedAsDoneSync enqueues unique work with correct parameters`() {
+        // Given
+        val entryId = "done-entry-1"
+        val entryDate = LocalDate.now()
+        val uniqueWorkName = "sync_entry_marked_as_done_$entryId-$entryDate"
+        val workRequestSlot = slot<OneTimeWorkRequest>()
+
+        // When
+        scheduler.scheduleEntryMarkedAsDoneSync(entryId, entryDate)
+
+        // Then
+        verify {
+            workManagerMock.enqueueUniqueWork(
+                uniqueWorkName,
+                ExistingWorkPolicy.REPLACE,
+                capture(workRequestSlot),
+            )
+        }
+
+        val workSpec = workRequestSlot.captured.workSpec
+        assertEquals(SyncEntryMarkedAsDoneWorker::class.java.name, workSpec.workerClassName)
+        assertEquals(entryId, workSpec.input.getString(EntrySyncWorkScheduler.ENTRY_ID_EXTRA))
+        assertEquals(
+            entryDate.toEpochMilli(),
+            workSpec.input.getLong(EntrySyncWorkScheduler.ENTRY_DATE_EXTRA, 0L),
+        )
+        assertEquals(NetworkType.CONNECTED, workSpec.constraints.requiredNetworkType)
+        assertEquals(BackoffPolicy.EXPONENTIAL, workSpec.backoffPolicy)
+        assertEquals(10000, workSpec.backoffDelayDuration)
+        assertTrue(workRequestSlot.captured.tags.contains("sync-entry-marked-as-done-$entryId"))
     }
 
     @Test

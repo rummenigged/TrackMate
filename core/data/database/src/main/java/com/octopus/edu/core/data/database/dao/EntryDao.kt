@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity.PENDING
+import com.octopus.edu.core.data.database.entity.databaseView.DoneEntryView
 import com.octopus.edu.core.data.database.utils.EntrySyncResolver
 import kotlinx.coroutines.flow.Flow
 
@@ -31,8 +32,8 @@ interface EntryDao {
     @Query("SELECT * FROM entries WHERE dueDate = :date OR startDate = :date ORDER BY time IS NOT NULL, time")
     fun getAllEntriesByDateAndOrderedByTimeAsc(date: Long): Flow<List<EntryEntity>>
 
-    @Query("SELECT * FROM entries WHERE dueDate = :date OR startDate <= :date ORDER BY time IS NOT NULL, time")
-    fun getEntriesBeforeOrOn(date: Long): Flow<List<EntryEntity>>
+    @Query("SELECT * FROM done_entry_view WHERE dueDate = :date OR startDate <= :date ORDER BY time IS NOT NULL, time")
+    fun getEntriesBeforeOrOn(date: Long): Flow<List<DoneEntryView>>
 
     @Query("SELECT * FROM entries WHERE syncState = :pending")
     fun streamPendingEntries(pending: SyncStateEntity = PENDING): Flow<List<EntryEntity>>
@@ -47,6 +48,13 @@ interface EntryDao {
     suspend fun updateSyncState(
         entryId: String,
         syncState: SyncStateEntity
+    )
+
+    @Query("UPDATE entries SET syncState = :state, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun updateSyncMetadata(
+        id: String,
+        state: SyncStateEntity,
+        updatedAt: Long
     )
 
     @Transaction

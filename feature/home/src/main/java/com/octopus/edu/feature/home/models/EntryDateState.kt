@@ -6,7 +6,7 @@ import com.octopus.edu.feature.home.R
 import java.time.LocalTime
 
 data class ResolvedEntryDate(
-    @param:StringRes val resId: Int,
+    @field:StringRes val resId: Int,
     val formatArgs: List<Any> = emptyList()
 )
 

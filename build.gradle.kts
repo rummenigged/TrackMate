@@ -39,3 +39,26 @@ allprojects {
         android = true
     }
 }
+
+subprojects {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        if (project.hasProperty("composeMetrics")) {
+            val metricsDir =
+                rootProject.layout.buildDirectory
+                    .dir("compose_metrics/${project.name}")
+
+            compilerOptions {
+                freeCompilerArgs.addAll(
+                    listOf(
+                        "-P",
+                        "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=${metricsDir.get().asFile.absolutePath}",
+                        "-P",
+                        "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=${metricsDir.get().asFile.absolutePath}",
+                        "-P",
+                        "plugin:androidx.compose.compiler.plugins.kotlin:generateFunctionKeyMetaClasses=true",
+                    ),
+                )
+            }
+        }
+    }
+}

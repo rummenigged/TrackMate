@@ -21,15 +21,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
 import java.time.ZoneOffset
-import java.util.concurrent.ConcurrentHashMap
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntryRepositoryGetEntriesVisibleOnTest {
@@ -40,8 +37,6 @@ class EntryRepositoryGetEntriesVisibleOnTest {
     private lateinit var repository: EntryRepository
     private lateinit var databaseErrorClassifier: ErrorClassifier
     private lateinit var networkErrorClassifier: ErrorClassifier
-    private val dbSemaphore = Semaphore(Int.MAX_VALUE)
-    private val entryLocks = ConcurrentHashMap<String, Mutex>()
 
     private val testDate = LocalDate.of(2025, 1, 8) // Monday
     private val testDateMillis = testDate.toEpochMilli()
@@ -148,12 +143,8 @@ class EntryRepositoryGetEntriesVisibleOnTest {
         repository =
             EntryRepositoryImpl(
                 entryStore,
-                entryApi,
                 reminderStore,
-                dbSemaphore,
-                entryLocks,
                 databaseErrorClassifier,
-                networkErrorClassifier,
                 testDispatchers,
             )
     }

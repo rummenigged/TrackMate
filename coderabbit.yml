@@ -1,0 +1,9 @@
+version: 1
+
+trigger:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - feat*        # or "feat/*" if you want exactly one level
+      - release*

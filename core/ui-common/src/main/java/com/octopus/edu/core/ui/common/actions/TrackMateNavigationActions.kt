@@ -29,9 +29,9 @@ sealed interface Screen {
 
 data class TrackMateTopLevelDestination(
     val screen: Screen,
-    @param:DrawableRes val selectedIcon: Int,
-    @param:DrawableRes val unselectedIcon: Int,
-    @param:StringRes val iconTextId: Int,
+    @field:DrawableRes val selectedIcon: Int,
+    @field:DrawableRes val unselectedIcon: Int,
+    @field:StringRes val iconTextId: Int,
 )
 
 class TrackMateNavigationActions(
