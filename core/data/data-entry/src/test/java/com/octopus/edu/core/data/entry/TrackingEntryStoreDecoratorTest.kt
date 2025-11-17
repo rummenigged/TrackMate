@@ -54,7 +54,7 @@ class TrackingEntryStoreDecoratorTest {
             block.invoke()
         }
 
-        every { appClock.nowEpocMillis() } returns testTimestamp
+        every { appClock.nowEpochMillis() } returns testTimestamp
     }
 
     @Test

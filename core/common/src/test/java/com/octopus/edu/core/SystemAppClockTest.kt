@@ -49,7 +49,7 @@ class SystemAppClockTest {
         val appClock = SystemAppClock(delegate = fixedClock)
 
         // When
-        val result = appClock.nowEpocMillis()
+        val result = appClock.nowEpochMillis()
 
         // Then
         assertEquals(fixedInstant.toEpochMilli(), result)

@@ -8,7 +8,7 @@ import java.time.ZoneId
 interface AppClock {
     fun nowInstant(): Instant
 
-    fun nowEpocMillis(): Long = nowInstant().toEpochMilli()
+    fun nowEpochMillis(): Long = nowInstant().toEpochMilli()
 
     fun nowLocalDate(): LocalDate = nowInstant().atZone(ZoneId.systemDefault()).toLocalDate()
 

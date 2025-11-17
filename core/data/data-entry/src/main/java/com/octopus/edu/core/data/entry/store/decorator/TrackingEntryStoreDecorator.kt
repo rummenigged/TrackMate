@@ -26,7 +26,7 @@ class TrackingEntryStoreDecorator
                     entryDao.updateSyncMetadata(
                         entryId,
                         PENDING,
-                        appClock.nowEpocMillis(),
+                        appClock.nowEpochMillis(),
                     )
                 }
             }.onFailure {
