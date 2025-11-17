@@ -19,8 +19,10 @@ object DoneEntrySyncResolver {
         currentEntry: DoneEntryEntity,
         newEntry: DoneEntryEntity
     ): Boolean {
-        val currentEntryUpdatedAt = currentEntry.doneAt
-        val newEntryUpdatedAt = newEntry.doneAt
-        return newEntryUpdatedAt < currentEntryUpdatedAt
+        // For done entries, we preserve the earliest (oldest) doneAt timestamp
+        // This differs from EntrySyncResolver which keeps the newest timestamp
+        val currentEntryDoneAt = currentEntry.doneAt
+        val newEntryDoneAt = newEntry.doneAt
+        return newEntryDoneAt < currentEntryDoneAt
     }
 }

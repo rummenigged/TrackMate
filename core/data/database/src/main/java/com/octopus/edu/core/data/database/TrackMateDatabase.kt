@@ -81,7 +81,8 @@ abstract class TrackMateDatabase : RoomDatabase() {
                 override fun migrate(db: SupportSQLiteDatabase) {
                     db.execSQL(
                         "CREATE TABLE IF NOT EXISTS done_entries " +
-                            "(entryId TEXT NOT NULL, entryDate INTEGER NOT NULL" +
+                            "(entryId TEXT NOT NULL, " +
+                            "entryDate INTEGER NOT NULL," +
                             "doneAt INTEGER NOT NULL," +
                             "syncState TEXT NOT NULL," +
                             "PRIMARY KEY(entryId, doneAt)," +
