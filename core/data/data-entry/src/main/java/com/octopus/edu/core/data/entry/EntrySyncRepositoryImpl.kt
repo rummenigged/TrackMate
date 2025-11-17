@@ -90,38 +90,24 @@ class EntrySyncRepositoryImpl
                     val deletedEntriesDeferred = async { entryApi.fetchDeletedEntries() }
                     val doneEntriesDeferred = async { entryApi.fetchDoneEntries() }
 
-                    val entries = entriesDeferred.await()
-                    val deletedEntries = deletedEntriesDeferred.await()
-                    val doneEntries = doneEntriesDeferred.await()
+                    val entries = entriesDeferred.await().getOrThrow()
+                    val deletedEntries = deletedEntriesDeferred.await().getOrThrow()
+                    val doneEntries = doneEntriesDeferred.await().getOrThrow()
+                    val deletedIds = deletedEntries.map { it.id }.toSet()
 
-                    when {
-                        entries !is NetworkResponse.Success ->
-                            throw Exception("Error fetching entries")
+                    entries
+                        .filterNot { it.id in deletedIds }
+                        .map { entry -> async { syncEntrySafely(entry) } }
+                        .awaitAll()
 
-                        deletedEntries !is NetworkResponse.Success ->
-                            throw Exception("Error fetching deleted entries")
+                    doneEntries
+                        .filterNot { it.id in deletedIds }
+                        .map { entry -> async { syncDoneEntriesSafely(entry) } }
+                        .awaitAll()
 
-                        doneEntries !is NetworkResponse.Success ->
-                            throw Exception("Error fetching done entries")
-
-                        else -> {
-                            val deletedIds = deletedEntries.data.map { it.id }.toSet()
-
-                            entries.data
-                                .filterNot { it.id in deletedIds }
-                                .map { entry -> async { syncEntrySafely(entry) } }
-                                .awaitAll()
-
-                            doneEntries.data
-                                .filterNot { it.id in deletedIds }
-                                .map { entry -> async { syncDoneEntriesSafely(entry) } }
-                                .awaitAll()
-
-                            deletedEntries.data
-                                .map { entry -> async { syncDeletedEntrySafely(entry) } }
-                                .awaitAll()
-                        }
-                    }
+                    deletedEntries
+                        .map { entry -> async { syncDeletedEntrySafely(entry) } }
+                        .awaitAll()
                 }
             }
 

@@ -19,4 +19,10 @@ sealed class NetworkResponse<out T : Any> {
         if (this is Success) block(data)
         return this
     }
+
+    fun getOrThrow(): T =
+        when (this) {
+            is Success -> data
+            is Error -> throw exception
+        }
 }

@@ -1,7 +1,6 @@
 package com.octopus.edu.core.data.entry.entryRepository
 
 import com.google.firebase.Timestamp
-import com.octopus.edu.core.common.toInstant
 import com.octopus.edu.core.data.database.entity.EntryEntity
 import com.octopus.edu.core.data.database.entity.EntryEntity.SyncStateEntity
 import com.octopus.edu.core.data.entry.EntrySyncRepositoryImpl
@@ -362,16 +361,14 @@ class EntryRepositorySyncEntriesTest {
     private fun createEntryDto(
         id: String,
         updatedAt: Timestamp = Timestamp.now()
-    ): EntryDto {
-        return EntryDto(id = id, title = "Title $id", updatedAt = updatedAt)
-    }
+    ): EntryDto = EntryDto(id = id, title = "Title $id", updatedAt = updatedAt)
 
     private fun createEntryEntity(
         id: String,
         updatedAt: Long? = 0,
         syncState: SyncStateEntity = SyncStateEntity.SYNCED
-    ): EntryEntity {
-        return EntryEntity(
+    ): EntryEntity =
+        EntryEntity(
             id = id,
             title = "Title $id",
             description = "",
@@ -388,20 +385,15 @@ class EntryRepositorySyncEntriesTest {
             streakCount = null,
             time = null,
         )
-    }
 
     private fun createDeletedEntryDto(
         id: String,
         deletedAt: Timestamp = Timestamp.now()
-    ): DeletedEntryDto {
-        return DeletedEntryDto(id = id, deletedAt = deletedAt)
-    }
+    ): DeletedEntryDto = DeletedEntryDto(id = id, deletedAt = deletedAt)
 
     private fun createDoneEntryDto(
         id: String,
         date: Timestamp = Timestamp.now(),
         doneAt: Timestamp = Timestamp.now()
-    ): DoneEntryDto {
-        return DoneEntryDto(id = id, date = date, doneAt = doneAt)
-    }
+    ): DoneEntryDto = DoneEntryDto(id = id, date = date, doneAt = doneAt)
 }
