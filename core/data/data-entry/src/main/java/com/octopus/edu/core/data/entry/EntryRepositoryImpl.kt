@@ -133,6 +133,9 @@ internal class EntryRepositoryImpl
         ): ResultOperation<Unit> =
             safeCall(
                 dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    databaseErrorClassifier.classify(exception) is TransientError
+                },
             ) {
                 entryStore.confirmEntryAsDone(entryId, entryDate.toEpochMilli())
             }
@@ -143,6 +146,9 @@ internal class EntryRepositoryImpl
         ): ResultOperation<Unit> =
             safeCall(
                 dispatcher = dispatcherProvider.io,
+                isRetriableWhen = { exception ->
+                    databaseErrorClassifier.classify(exception) is TransientError
+                },
             ) {
                 entryStore.unmarkEntryAsDone(entryId, entryDate.toEpochMilli())
             }

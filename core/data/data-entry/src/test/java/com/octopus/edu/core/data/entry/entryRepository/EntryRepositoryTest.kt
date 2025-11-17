@@ -360,7 +360,25 @@ class EntryRepositoryTest {
         }
 
     @Test
-    fun `unmarkEntryAsDone returns Error when store fails`() =
+    fun `unmarkEntryAsDone returns retriable Error on transient db failure`() =
+        runTest {
+            // Given
+            val entryId = "entry-to-unmark-done"
+            val dbException = SQLTimeoutException("DB operation timed out")
+            coEvery { entryStore.unmarkEntryAsDone(entryId, any()) } throws dbException
+            every { databaseErrorClassifier.classify(dbException) } returns ErrorType.TransientError(dbException)
+
+            // When
+            val result = repository.unmarkEntryAsDone(entryId, testDate)
+
+            // Then
+            assertTrue(result is ResultOperation.Error)
+            assertEquals(dbException, (result as ResultOperation.Error).throwable)
+            assertTrue(result.isRetriable)
+        }
+
+    @Test
+    fun `unmarkEntryAsDone returns permanent Error on non-retriable db failure`() =
         runTest {
             // Given
             val entryId = "entry-to-unmark-done"
@@ -374,6 +392,7 @@ class EntryRepositoryTest {
             // Then
             assertTrue(result is ResultOperation.Error)
             assertEquals(dbException, (result as ResultOperation.Error).throwable)
+            assertFalse(result.isRetriable)
         }
 
     @Test
@@ -392,7 +411,7 @@ class EntryRepositoryTest {
         }
 
     @Test
-    fun `confirmEntryAsDone returns Error when store fails`() =
+    fun `confirmEntryAsDone returns retriable Error on transient db failure`() =
         runTest {
             // Given
             val entryId = "entry-to-confirm-done"
@@ -406,5 +425,24 @@ class EntryRepositoryTest {
             // Then
             assertTrue(result is ResultOperation.Error)
             assertEquals(dbException, (result as ResultOperation.Error).throwable)
+            assertTrue(result.isRetriable)
+        }
+
+    @Test
+    fun `confirmEntryAsDone returns permanent Error on non-retriable db failure`() =
+        runTest {
+            // Given
+            val entryId = "entry-to-confirm-done"
+            val dbException = RuntimeException("Permanent DB error")
+            coEvery { entryStore.confirmEntryAsDone(entryId, any()) } throws dbException
+            every { databaseErrorClassifier.classify(dbException) } returns ErrorType.PermanentError(dbException)
+
+            // When
+            val result = repository.confirmEntryAsDone(entryId, testDate)
+
+            // Then
+            assertTrue(result is ResultOperation.Error)
+            assertEquals(dbException, (result as ResultOperation.Error).throwable)
+            assertFalse(result.isRetriable)
         }
 }
