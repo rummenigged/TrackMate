@@ -69,17 +69,17 @@ ISSUE - #<issue-number>
 
 7. Create the PR using `gh pr create` with HEREDOC for proper formatting:
    ```bash
-   gh pr create --title "type(scope): Description" --body "$(cat <<'EOF'
-   ## Ticket
-   ISSUE - #<issue-number>
+   gh pr create --base develop --title "type(scope): Description" --body "$(cat <<'EOF'
+## Ticket
+ISSUE - #<issue-number>
 
-   ## Rationale
-   <Brief explanation based on commit analysis>
+## Rationale
+<Brief explanation based on commit analysis>
 
-   ## Screenshots (UI PRs only)
-   N/A
-   EOF
-   )"
+## Screenshots (UI PRs only)
+N/A
+EOF
+)"
    ```
 
 8. Return the PR URL to the user
@@ -93,7 +93,7 @@ Commits:
 
 Output:
 ```bash
-gh pr create --title "docs(project): Add project documentation for Claude Code" --body "$(cat <<'EOF'
+gh pr create --base develop --title "docs(project): Add project documentation for Claude Code" --body "$(cat <<'EOF'
 ## Ticket
 ISSUE - #121
 

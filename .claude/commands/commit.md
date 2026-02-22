@@ -39,7 +39,7 @@ Co-Authored-By: Claude <assistant_id>@anthropic.com
 ## Instructions
 
 1. Run `git status` to see changed files (never use -uall flag)
-2. Run `git diff` to see staged and unstaged changes
+2. Run `git diff` to see unstaged changes and `git diff --staged` to see staged changes
 3. Run `git log --oneline -5` to check recent commit style
 4. Analyze changes to determine:
    - **Type**: What kind of change is this?
@@ -50,13 +50,13 @@ Co-Authored-By: Claude <assistant_id>@anthropic.com
 6. Create the commit using a HEREDOC for proper formatting:
    ```bash
    git commit -m "$(cat <<'EOF'
-   type(scope): Subject line here
+type(scope): Subject line here
 
-   Body explaining the change.
+Body explaining the change.
 
-   Co-Authored-By: Claude <assistant_id>@anthropic.com
-   EOF
-   )"
+Co-Authored-By: Claude <assistant_id>@anthropic.com
+EOF
+)"
    ```
 7. Run `git status` to verify the commit succeeded
 

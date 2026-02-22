@@ -38,7 +38,7 @@ Create a well-structured git commit and push to remote in one step.
 
    ### Steps
    1. Run `git status` to see changed files
-   2. Run `git diff` to see changes
+   2. Run `git diff` to see unstaged changes and `git diff --staged` to see staged changes
    3. Run `git log --oneline -5` to check commit style
    4. Analyze and determine type, scope, subject, body
    5. Stage relevant files
