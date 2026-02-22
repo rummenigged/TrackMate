@@ -85,9 +85,15 @@ runs:
 
         # Validate JSON syntax
         echo "Validating JSON syntax..."
-        if ! jq empty "$OUTPUT_PATH" 2>/dev/null; then
+        JQ_ERROR=$(jq empty "$OUTPUT_PATH" 2>&1) || JQ_EXIT_CODE=$?
+        if [[ ${JQ_EXIT_CODE:-0} -ne 0 ]]; then
+          if [[ ${JQ_EXIT_CODE:-0} -eq 127 ]]; then
+            echo "::error::jq is not installed - required for JSON validation"
+            rm -f "$OUTPUT_PATH"
+            exit 127
+          fi
           echo "::error::Invalid JSON syntax in google-services.json"
-          echo "::error::The decoded content is not valid JSON"
+          echo "::error::${JQ_ERROR}"
           rm -f "$OUTPUT_PATH"
           exit 1
         fi
