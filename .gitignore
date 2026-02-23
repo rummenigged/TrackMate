@@ -51,6 +51,8 @@ gradle.properties.localhost
 .idea/workspace.xml
 .idea/navEditor.xml
 .idea/assetWizardSettings.xml
+.idea/dbnavigator.xml
+.idea/misc.xml
 
 # VS Code
 .vscode/
