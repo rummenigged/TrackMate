@@ -1,0 +1,122 @@
+name: 'Decode Google Services'
+description: 'Decodes and validates google-services.json from base64 secret'
+
+inputs:
+  encoded-content:
+    description: 'Base64 encoded google-services.json content'
+    required: true
+  output-path:
+    description: 'Path where google-services.json should be written'
+    required: false
+    default: 'app/google-services.json'
+  allow-stub:
+    description: 'Allow empty stub for dependabot (set to "true" for debug builds)'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Decode and validate google-services.json
+      shell: bash
+      env:
+        ENCODED_CONTENT: ${{ inputs.encoded-content }}
+        OUTPUT_PATH: ${{ inputs.output-path }}
+        ALLOW_STUB: ${{ inputs.allow-stub }}
+        IS_DEPENDABOT: ${{ github.actor == 'dependabot[bot]' }}
+      run: |
+        set -euo pipefail
+
+        # Handle dependabot
+        if [[ "$IS_DEPENDABOT" == "true" ]]; then
+          if [[ "$ALLOW_STUB" == "true" ]]; then
+            echo "::notice::Dependabot detected - using minimal stub google-services.json"
+            mkdir -p "$(dirname "$OUTPUT_PATH")"
+            cat > "$OUTPUT_PATH" << 'STUB'
+        {
+          "project_info": {
+            "project_id": "stub-project",
+            "project_number": "000000000000"
+          },
+          "client": [{
+            "client_info": {
+              "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+              "android_client_info": {
+                "package_name": "com.octopus.edu.trackmate"
+              }
+            },
+            "api_key": [{"current_key": "stub-api-key"}]
+          }],
+          "configuration_version": "1"
+        }
+        STUB
+            echo "::notice::Created stub at $OUTPUT_PATH"
+            exit 0
+          else
+            echo "::error::Dependabot PRs require secrets which are not available for release builds"
+            exit 1
+          fi
+        fi
+
+        # Check if secret is provided
+        if [[ -z "$ENCODED_CONTENT" ]]; then
+          echo "::error::google-services.json secret is empty or not provided"
+          echo "::error::Ensure the repository secret is configured correctly"
+          exit 1
+        fi
+
+        # Create output directory
+        mkdir -p "$(dirname "$OUTPUT_PATH")"
+
+        # Decode base64
+        echo "Decoding google-services.json..."
+        if ! echo "$ENCODED_CONTENT" | base64 --decode > "$OUTPUT_PATH" 2>/dev/null; then
+          echo "::error::Failed to decode base64 content - check that the secret is properly base64 encoded"
+          rm -f "$OUTPUT_PATH"
+          exit 1
+        fi
+
+        # Check file was created and is not empty
+        if [[ ! -s "$OUTPUT_PATH" ]]; then
+          echo "::error::Decoded file is empty - check that the secret contains valid content"
+          rm -f "$OUTPUT_PATH"
+          exit 1
+        fi
+
+        # Validate JSON syntax
+        echo "Validating JSON syntax..."
+        JQ_ERROR=$(jq empty "$OUTPUT_PATH" 2>&1) || JQ_EXIT_CODE=$?
+        if [[ ${JQ_EXIT_CODE:-0} -ne 0 ]]; then
+          if [[ ${JQ_EXIT_CODE:-0} -eq 127 ]]; then
+            echo "::error::jq is not installed - required for JSON validation"
+            rm -f "$OUTPUT_PATH"
+            exit 127
+          fi
+          echo "::error::Invalid JSON syntax in google-services.json"
+          echo "::error::${JQ_ERROR}"
+          rm -f "$OUTPUT_PATH"
+          exit 1
+        fi
+
+        # Validate required Firebase fields
+        echo "Validating Firebase configuration..."
+
+        PROJECT_ID=$(jq -r '.project_info.project_id // empty' "$OUTPUT_PATH")
+        if [[ -z "$PROJECT_ID" ]]; then
+          echo "::error::Missing required field: project_info.project_id"
+          rm -f "$OUTPUT_PATH"
+          exit 1
+        fi
+
+        APP_ID=$(jq -r '.client[0].client_info.mobilesdk_app_id // empty' "$OUTPUT_PATH")
+        if [[ -z "$APP_ID" ]]; then
+          echo "::error::Missing required field: client[0].client_info.mobilesdk_app_id"
+          rm -f "$OUTPUT_PATH"
+          exit 1
+        fi
+
+        # Success - log sanitized info (don't expose actual values)
+        echo "::notice::Successfully validated google-services.json"
+        echo "  - Output: $OUTPUT_PATH"
+        echo "  - Project ID: [REDACTED - ${#PROJECT_ID} chars]"
+        echo "  - App ID: [REDACTED - ${#APP_ID} chars]"
