@@ -18,8 +18,11 @@ jobs:
           ktlint_version: '0.40.0'
 
       - name: Decode google-services.json
-        run: |
-          echo "${{ secrets.DEBUG_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
+        uses: ./.github/actions/decode-google-services
+        with:
+          encoded-content: ${{ secrets.DEBUG_GOOGLE_SERVICES_JSON_BASE64 }}
+          output-path: app/google-services.json
+          allow-stub: 'true'
 
       - name: "Run Ktlint"
         run: ./gradlew ktlintCheck
@@ -28,7 +31,7 @@ jobs:
         run: ./gradlew lintDebug
 
       - name: "Upload Ktlint report"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Ktlint Report
           path: app/build/reports/ktlint
