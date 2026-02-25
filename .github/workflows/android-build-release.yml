@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Decode google-services.json
         uses: ./.github/actions/decode-google-services
@@ -19,7 +19,7 @@ jobs:
           allow-stub: 'false'
 
       - name: Setup Java JDK
-        uses: actions/setup-java@v5.0.0
+        uses: actions/setup-java@v5.1.0
         with:
           java-version: '17'
           distribution: 'adopt'
