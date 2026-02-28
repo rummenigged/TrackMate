@@ -73,3 +73,17 @@ Test utilities in `:core:testing`: `MainDispatcherRule`, `TestDispatcherProvider
 - ADRs in `docs/decisions/` (modular architecture, MVI, offline-first sync, error handling, reminder strategies)
 - Patterns in `docs/patterns/` (BaseViewModel, error handling)
 - Guides in `docs/guides/` (getting started, testing, adding features)
+- PM artifacts in `docs/pm/` (sprints, use-cases, project status)
+
+## Project Manager Agent
+
+Use `/pm` to invoke the Project Manager agent (runs on Sonnet).
+
+**Capabilities**:
+- Define requirements and create use cases
+- Break work into epics, tasks, subtasks
+- Plan weekly sprints with priorities and dependencies
+- Manage GitHub Issues with proper labels and milestones
+- Document sprints and maintain project status
+
+**PM Documentation**: `docs/pm/README.md`
