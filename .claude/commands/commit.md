@@ -18,13 +18,15 @@ Create a well-structured git commit following Conventional Commits and best prac
 ## Commit Message Format
 
 ```
-type(scope): Subject line in imperative mood
+type(scope)[issue-ID]: Subject line in imperative mood
 
 Body explaining what changed and why (not how).
 The code explains the how; the message explains the context.
 
 Co-Authored-By: Claude <assistant_id>@anthropic.com
 ```
+
+Extract the issue ID from the branch name (e.g., `docs/issue-128-...` → `128`).
 
 ## Conventional Commit Types
 
@@ -41,16 +43,22 @@ Co-Authored-By: Claude <assistant_id>@anthropic.com
 1. Run `git status` to see changed files (never use -uall flag)
 2. Run `git diff` to see unstaged changes and `git diff --staged` to see staged changes
 3. Run `git log --oneline -5` to check recent commit style
-4. Analyze changes to determine:
+4. Get the current branch name and extract issue ID:
+   ```bash
+   git branch --show-current
+   ```
+   Extract ID from branch (e.g., `docs/issue-128-...` → `128`)
+5. Analyze changes to determine:
    - **Type**: What kind of change is this?
    - **Scope**: Which module/feature is affected?
+   - **Issue ID**: From branch name
    - **Subject**: Concise imperative description (max 50 chars)
    - **Body**: Why was this change made? What problem does it solve?
-5. Stage relevant files (prefer specific files over `git add -A`)
-6. Create the commit using a HEREDOC for proper formatting:
+6. Stage relevant files (prefer specific files over `git add -A`)
+7. Create the commit using a HEREDOC for proper formatting:
    ```bash
    git commit -m "$(cat <<'EOF'
-type(scope): Subject line here
+type(scope)[issue-ID]: Subject line here
 
 Body explaining the change.
 
@@ -58,7 +66,7 @@ Co-Authored-By: Claude <assistant_id>@anthropic.com
 EOF
 )"
    ```
-7. Run `git status` to verify the commit succeeded
+8. Run `git status` to verify the commit succeeded
 
 ## Subject Line Test
 
@@ -71,16 +79,15 @@ Examples:
 
 ## Example
 
+Branch: `feature/issue-45-add-task-filtering`
 Changed files: `feature/home/src/.../HomeViewModel.kt`, `core/domain/src/.../GetTasksUseCase.kt`
 
 ```
-feat(home): Add task filtering by priority
+feat(home)[issue-45]: Add task filtering by priority
 
 Implement priority-based filtering in the home screen to help users
 focus on high-priority tasks. The filter persists across sessions
 using DataStore preferences.
-
-Closes #45
 
 Co-Authored-By: Claude <assistant_id>@anthropic.com
 ```
