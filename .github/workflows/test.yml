@@ -28,5 +28,8 @@ jobs:
           output-path: app/google-services.json
           allow-stub: 'true'
 
+      - name: Architecture Guard Test
+        run: ./gradlew -p build-logic test
+
       - name: Unit Test
         run: ./gradlew testDebugUnitTest

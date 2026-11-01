@@ -44,6 +44,11 @@ gradle.properties.localhost
 !.idea/gradle.xml
 !.idea/vcs.xml
 
+# Per-developer IDE state (selected device, IDE-managed Kotlin version, Firebase App Insights)
+.idea/deploymentTargetSelector.xml
+.idea/kotlinc.xml
+.idea/appInsightsSettings.xml
+
 # Exclude auto-generated caches
 .idea/caches/
 .idea/libraries/

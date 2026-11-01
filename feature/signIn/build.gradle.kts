@@ -53,7 +53,6 @@ dependencies {
 
     implementation(project(":core:domain"))
     implementation(project(":core:design"))
-    implementation(project(":core:data:data-auth"))
     implementation(project(":core:ui-common"))
     implementation(project(":core:common"))
 

@@ -113,6 +113,7 @@ dependencies {
 
     implementation(project(":core:design"))
     implementation(project(":core:data:data-entry"))
+    implementation(project(":core:data:data-auth"))
     implementation(project(":core:data:database"))
     implementation(project(":core:ui-common"))
     implementation(project(":core:domain"))
