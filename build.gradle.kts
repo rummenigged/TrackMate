@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.ktlint)
+    id("trackmate.architecture-guard") apply false
     alias(libs.plugins.google.firebase.appdistribution) apply false
     alias(libs.plugins.google.gms.google.services) apply false
     alias(libs.plugins.android.test) apply false
@@ -33,6 +34,7 @@ buildscript {
 
 allprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    apply(plugin = "trackmate.architecture-guard")
 
     ktlint {
         verbose = true
